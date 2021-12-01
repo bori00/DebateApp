@@ -1,9 +1,16 @@
 package com.se.DebateApp.Model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "links_to_resources")
+@Getter
+@Setter
+@NoArgsConstructor
 public class LinkToResource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
