@@ -3,6 +3,7 @@ package com.se.DebateApp.Model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -11,6 +12,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class LinkToResource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +23,8 @@ public class LinkToResource {
 
     @Column(nullable = false, length = 1000)
     private String link;
+
+    @ManyToOne
+    @ToString.Exclude
+    private DebateTemplate debateTemplate;
 }
