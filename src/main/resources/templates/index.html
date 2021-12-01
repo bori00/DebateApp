@@ -1,10 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>DebateApp | Home</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
 </head>
 <body>
+    <div class="container text-center">
+        <h1>Welcome to the Debate App</h1>
 
+        <blockquote class="blockquote text-right">
+            <p class="mb-0">“It is better to debate a question without settling it than to settle a
+                question without debating it.”</p>
+            <footer class="blockquote-footer">
+                <cite title="Source Title">Joseph Joubert</cite>
+            </footer>
+        </blockquote>
+
+        <div>
+            <h3><a th:href="@{/register}">Register</a></h3>
+        </div>
+    </div>
 </body>
 </html>
