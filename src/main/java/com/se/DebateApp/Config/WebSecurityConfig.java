@@ -29,7 +29,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/","/signup_form", "/webjars/**")
+                .antMatchers("/", "/register", "/register_success", "/process_register",
+                        "/webjars/**")
                     .permitAll()
                 .anyRequest()
                     .authenticated();
@@ -39,7 +40,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll();
         http.logout()
                 .logoutSuccessUrl("/")
-                .invalidateHttpSession(true);
+                .invalidateHttpSession(true)
+                .permitAll();
     }
 
     @Bean

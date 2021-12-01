@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
-public class LoginRegisterController {
-
-    @Autowired
-    private UserRepository userRepository;
+public class HomePageController {
 
     @GetMapping("")
     public String viewHomePage() {
@@ -24,15 +21,6 @@ public class LoginRegisterController {
     public String showSignUpForm(Model model) {
         model.addAttribute("user", new User());
         return "register";
-    }
-
-    @PostMapping("/process_register")
-    public String processRegistration(User user) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String encodedPassword = encoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-        userRepository.save(user);
-        return "register_success";
     }
 
     @GetMapping("/join_debate")
