@@ -18,9 +18,14 @@
         </blockquote>
 
         <div>
-            <h3><a th:href="@{/list_users}">List all users</a></h3>
+            <h3><a th:href="@{/configure_debates}">Setup a Debate</a></h3>
+            <h3><a th:href="@{/join_debate}">Join a Debate</a></h3>
             <h3><a th:href="@{/register}">Register</a></h3>
-            <h3><a th:href="@{/login}">Login</a></h3>
+            <div>
+                <form th:action="@{/logout}" method="post">
+                    <input type="submit" value = "Sign Out">
+                </form>
+            </div>
         </div>
     </div>
 </body>
