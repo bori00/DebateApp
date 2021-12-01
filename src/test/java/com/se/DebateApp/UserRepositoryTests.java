@@ -34,4 +34,26 @@ public class UserRepositoryTests {
 
         assertThat(existUser.getUserName()).isEqualTo(user.getUserName());
     }
+
+    @Test
+    public void findUserByUserName_ExistingUser() {
+        User user = new User();
+        String userName = "usernametest";
+        user.setUserName(userName);
+        user.setPassword("passtest");
+
+        repository.save(user);
+
+        User foundUser = repository.findByUserName(userName);
+
+        assertThat(foundUser).isNotNull();
+    }
+
+    @Test
+    public void findUserByUserName_NonExistingUser() {
+
+        User foundUser = repository.findByUserName("missingname");
+
+        assertThat(foundUser).isNull();
+    }
 }
