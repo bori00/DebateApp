@@ -1,6 +1,7 @@
 package com.se.DebateApp.Model;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -14,6 +15,9 @@ public class User {
 
     @Column(nullable = false, length = 100)
     private String password;
+
+    @OneToMany
+    private Set<DebateTemplate> debateTemplates;
 
     public Long getId() {
         return id;
