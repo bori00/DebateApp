@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DebateApp | Register</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+</head>
+<body>
+<div class="container text-center">
+    <div>
+        <h1>User Registration - Sign Up</h1>
+    </div>
+
+    <form th:action="@{/process_register}" method="post"
+          th:object="${user}"
+          style="max-width: 600px; margin: 0 auto;">
+        <div class="m-3">
+            <div class="form-group row">
+                <label class="col-form-label col-4">Username</label>
+                <div class="col-8">
+                    <input type="text" class="form-control" th:field="*{userName}" required
+                           maxlength="30" minlength="3"/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-form-label col-4">Password</label>
+                <div class="col-8">
+                    <input type="password" class="form-control" th:field="*{password}" required
+                           maxlength="30" minlength="3"/>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </div>
+    </form>
+
+</div>
+</body>
+</html>
