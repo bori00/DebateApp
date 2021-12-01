@@ -11,6 +11,14 @@
         <h1>User Registration - Sign Up</h1>
     </div>
 
+    <div th:if="${errorMessage!=null}">
+        <p style="color: red">
+            <b>Registration Failed.</b>
+        </p>
+        <p style="color: red" th:utext="${errorMessage}">
+        </p>
+    </div>
+
     <form th:action="@{/process_register}" method="post"
           th:object="${user}"
           style="max-width: 600px; margin: 0 auto;">
