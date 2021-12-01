@@ -12,7 +12,7 @@ public class User {
     @Column(nullable = false, unique = true, length = 30)
     private String userName;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 100)
     private String password;
 
     public Long getId() {
