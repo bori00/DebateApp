@@ -29,15 +29,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/list_users")
-                .authenticated()
+                .antMatchers("/","/signup_form", "/webjars/**")
+                    .permitAll()
                 .anyRequest()
-                .permitAll()
-                .and()
-                .formLogin()
-                    .usernameParameter("userName")
-                    .defaultSuccessUrl("/list_users")
-                    .permitAll();
+                    .authenticated();
+        http.formLogin()
+                .usernameParameter("userName")
+                .defaultSuccessUrl("/")
+                .permitAll();
         http.logout()
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true);
