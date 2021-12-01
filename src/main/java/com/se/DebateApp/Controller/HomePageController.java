@@ -1,8 +1,12 @@
 package com.se.DebateApp.Controller;
 
+import com.se.DebateApp.Model.CustomUserDetails;
 import com.se.DebateApp.Model.User;
+import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +15,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class HomePageController {
+
+    @Autowired
+    private DebateTemplateRepository debateTemplateRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @GetMapping("")
     public String viewHomePage() {
@@ -29,7 +39,14 @@ public class HomePageController {
     }
 
     @GetMapping("/configure_debates")
-    public String goToConfigureDebatesPage() {
+    public String goToConfigureDebatesPage(Model model) {
+        model.addAttribute("myDebateTemplates",
+                debateTemplateRepository.findAllDebateTemplatesOfUser(getCurrentUser()));
         return "configure_debates";
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
     }
 }

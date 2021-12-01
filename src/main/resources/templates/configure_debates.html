@@ -11,7 +11,17 @@
 
     <div>
         <h5><a th:href="@{/}">Home</a></h5>
-        <h5><a th:href="@{/create_debate_template}">Create new Debate Template</h5>
+        <h5><a th:href="@{/create_debate_template}">Create new Debate Template</a></h5>
+    </div>
+
+    <div class="list-group" th:each="debateTemplate : ${myDebateTemplates}">
+        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1" th:text="${debateTemplate.title}">Title</h5>
+                <small th:text="${debateTemplate.topic}">Topic</small>
+            </div>
+            <p class="mb-1 float-left" th:text="${debateTemplate.statement}">Statement</p>
+        </a>
     </div>
 </div>
 </body>
