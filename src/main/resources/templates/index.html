@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DebateApp | Home</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+</head>
+<body>
+    <div class="container text-center">
+        <h1>Welcome to the Debate App</h1>
+
+        <blockquote class="blockquote text-center">
+            <p class="mb-0">“It is better to debate a question without settling it than to settle a
+                question without debating it.”</p>
+            <footer class="blockquote-footer">
+                <cite title="Source Title">Joseph Joubert</cite>
+            </footer>
+        </blockquote>
+
+        <div>
+            <h3><a th:href="@{/configure_debates}">Setup a Debate</a></h3>
+            <h3><a th:href="@{/join_debate}">Join a Debate</a></h3>
+            <h3><a th:href="@{/register}">Register</a></h3>
+            <div>
+                <form th:action="@{/logout}" method="post">
+                    <input type="submit" value = "Sign Out">
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
