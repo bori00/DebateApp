@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class RegistrationController {
+
+    private static final String errorMessageName = "errorMessage";
+    private static final String usernameTakenErrorMessage = "This username is already taken. " +
+            "Please choose another one!";
 
     @Autowired
     private UserRepository userRepository;
@@ -27,8 +29,7 @@ public class RegistrationController {
             return "register_success";
         } else {
             // invalid username: username is taken.
-            model.addAttribute("errorMessage", "This username is already taken. Please choose " +
-                    "another one!");
+            model.addAttribute(errorMessageName, usernameTakenErrorMessage);
             return "register";
         }
     }
