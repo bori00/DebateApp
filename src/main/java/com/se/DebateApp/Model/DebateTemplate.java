@@ -1,9 +1,6 @@
 package com.se.DebateApp.Model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -74,11 +71,22 @@ public class DebateTemplate {
     @Transient
     private Integer crossExaminationSecs;
 
-    public void computeSeconds() {
+    public void computeSecondsBasedOnMinsAndSecs() {
         prepTimeSeconds = prepTimeMins * 60 + prepTimeSecs;
         constSpeechSeconds = constSpeechMins * 60 + constSpeechSecs;
         rebuttalSpeechSeconds = rebuttalSpeechMins * 60 + rebuttalSpeechSecs;
         crossExaminationSeconds = crossExaminationMins * 60 + crossExaminationSecs;
+    }
+
+    public void computeMinsAndSecsBasedOnSeconds() {
+        prepTimeMins = prepTimeSeconds / 60;
+        prepTimeSecs = prepTimeSeconds% 60;
+        constSpeechMins = prepTimeSeconds / 60;
+        constSpeechSecs = prepTimeSeconds % 60;
+        rebuttalSpeechMins = rebuttalSpeechSeconds / 60;
+        rebuttalSpeechSecs = rebuttalSpeechSeconds % 60;
+        crossExaminationMins = crossExaminationSeconds / 60;
+        crossExaminationSecs = crossExaminationSeconds % 60;
     }
 
     public void addNewDLinkToResource(LinkToResource linkToResource) {
