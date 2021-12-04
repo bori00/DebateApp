@@ -6,6 +6,10 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
           type="text/css"/>
+    <script th:src="@{/configure_debates.js}"></script>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 <div class="container text-center">
@@ -24,8 +28,10 @@
             </div>
             <p class="mb-1 float-left" th:text="${debateTemplate.statement}">Statement</p>
             <div class="container text-right">
-                <button type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
-                                                                      aria-hidden="true"></i></button>
+                <button th:onclick="'onDeleteDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                        type="button"
+                        class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
+                                                                  aria-hidden="true"></i></button>
                 <button type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-eye"
                                                                       aria-hidden="true"></i></button>
                 <button type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-edit"
