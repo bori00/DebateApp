@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>DebateApp | Configure Debateds</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
+          type="text/css"/>
 </head>
 <body>
 <div class="container text-center">
@@ -21,6 +23,12 @@
                 <small th:text="${debateTemplate.topic}">Topic</small>
             </div>
             <p class="mb-1 float-left" th:text="${debateTemplate.statement}">Statement</p>
+            <div class="container text-right">
+                <button type="button" class="btn btn-primary px-3"><i class="fa fa-trash"
+                                                                      aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-primary px-3"><i class="fa fa-edit"
+                                                                      aria-hidden="true"></i></button>
+            </div>
         </a>
     </div>
 </div>
