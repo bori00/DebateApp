@@ -71,6 +71,15 @@
                    required min="0" max="59" value="0"/>
             <div class="input-group-text mb-5">Seconds</div>
         </div>
+
+        <h5>Resources</h5>
+        <ul class="list-group" th:each="resourceLink : *{resourceLinks}">
+            <li class="list-group-item">
+                <a th:href="${resourceLink.link}" th:text="${resourceLink.title}">
+                    Link
+                </a>
+            </li>
+        </ul>
     </form>
 
 </div>
