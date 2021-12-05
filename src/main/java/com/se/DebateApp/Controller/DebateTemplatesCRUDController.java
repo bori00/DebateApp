@@ -2,8 +2,10 @@ package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Model.CustomUserDetails;
 import com.se.DebateApp.Model.DebateTemplate;
+import com.se.DebateApp.Model.LinkToResource;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
+import com.se.DebateApp.Repository.LinkToResourceRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -18,10 +20,13 @@ import java.util.Optional;
 public class DebateTemplatesCRUDController {
 
     @Autowired
-    DebateTemplateRepository debateTemplateRepository;
+    private DebateTemplateRepository debateTemplateRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private LinkToResourceRepository linkToResourceRepository;
 
     @GetMapping("/create_debate_template")
     public String goToCreateDebateTemplatePage(Model model) {
@@ -79,6 +84,20 @@ public class DebateTemplatesCRUDController {
         debateTemplate.setOwner(currentUser);
         debateTemplateRepository.save(debateTemplate);
         return "redirect:/configure_debates";
+    }
+
+    @GetMapping("/process_debate_template_resource_link_deletion")
+    public String processDebateTemplateResourceLinkDeletion(@RequestParam Long resourceLinkId,
+                                                            Model model) {
+        Optional<LinkToResource> optLinkToResource =
+                linkToResourceRepository.findById(resourceLinkId);
+        if (optLinkToResource.isEmpty()) {
+            throw new IllegalArgumentException("Inexistent link to resource");
+        }
+        LinkToResource linkToResource = optLinkToResource.get();
+        linkToResourceRepository.delete(linkToResource);
+        model.addAttribute("debate_template", linkToResource.getDebateTemplate());
+        return "edit_debate_template";
     }
 
     private User getCurrentUser() {

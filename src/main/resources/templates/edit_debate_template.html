@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>DebateApp | Create Debate Template</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
+          type="text/css"/>
+    <script th:src="@{/configure_debates.js}"></script>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
 </head>
 <body>
 <div class="container text-center">
@@ -75,6 +79,24 @@
         <div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
+
+        <br>
+
+        <h5 class="mb-2">Edit the Resources</h5>
+        <ul class="list-group" th:each="resourceLink : *{resourceLinks}">
+            <li class="list-group-item">
+                <a th:href="${resourceLink.link}" th:text="${resourceLink.title}">
+                    Link
+                </a>
+                <div class="container text-right">
+                    <button
+                            th:onclick="'onDeleteDebateTemplateResourceLinkButtonPushed(' + ${resourceLink.getId()} + ');'"
+                            type="button"
+                            class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
+                                                                      aria-hidden="true"></i></button>
+                </div>
+            </li>
+        </ul>
     </form>
 
 </div>
