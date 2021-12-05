@@ -36,7 +36,9 @@
                         type="button" class="btn btn-outline-secondary px-3"><i
                         class="fa fa-eye"
                                                                       aria-hidden="true"></i></button>
-                <button type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-edit"
+                <button
+                        th:onclick="'onEditDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                        type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-edit"
                                                                       aria-hidden="true"></i></button>
                 <button type="button" class="btn btn-outline-primary px-3"><i class="fa fa-play"
                                                                       aria-hidden="true"></i></button>

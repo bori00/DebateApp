@@ -48,28 +48,28 @@ public class DebateTemplate {
 
     // Fields used to simplify form submission.
     @Transient
-    private Integer prepTimeMins;
+    private Integer prepTimeMins = 30;
 
     @Transient
-    private Integer prepTimeSecs;
+    private Integer prepTimeSecs = 0;
 
     @Transient
-    private Integer constSpeechMins;
+    private Integer constSpeechMins = 5;
 
     @Transient
-    private Integer constSpeechSecs;
+    private Integer constSpeechSecs = 0;
 
     @Transient
-    private Integer rebuttalSpeechMins;
+    private Integer rebuttalSpeechMins = 3;
 
     @Transient
-    private Integer rebuttalSpeechSecs;
+    private Integer rebuttalSpeechSecs = 0;
 
     @Transient
-    private Integer crossExaminationMins;
+    private Integer crossExaminationMins = 2;
 
     @Transient
-    private Integer crossExaminationSecs;
+    private Integer crossExaminationSecs = 0;
 
     public void computeSecondsBasedOnMinsAndSecs() {
         prepTimeSeconds = prepTimeMins * 60 + prepTimeSecs;

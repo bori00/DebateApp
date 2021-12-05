@@ -12,3 +12,7 @@ function deleteDebateTemplate(debateTemplateId) {
 function onViewDebateTemplateButtonPushed(debateTemplateId) {
     window.location.href = "/process_debate_template_viewing_request?debateTemplateId=" + debateTemplateId
 }
+
+function onEditDebateTemplateButtonPushed(debateTemplateId) {
+    window.location.href = "/process_debate_template_editing_request?debateTemplateId=" + debateTemplateId
+}

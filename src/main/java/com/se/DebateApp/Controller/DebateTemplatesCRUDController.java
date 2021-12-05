@@ -41,7 +41,7 @@ public class DebateTemplatesCRUDController {
     @GetMapping(value="/process_debate_template_deletion")
     public String processDebateTemplateDeletion(@RequestParam Long debateTemplateId) {
         debateTemplateRepository.deleteById(debateTemplateId);
-        return "configure_debates";
+        return "redirect:/configure_debates";
     }
 
     @GetMapping("/process_debate_template_viewing_request")
@@ -56,6 +56,29 @@ public class DebateTemplatesCRUDController {
         debateTemplate.computeMinsAndSecsBasedOnSeconds();
         model.addAttribute("debate_template", debateTemplate);
         return "view_debate_template";
+    }
+
+    @GetMapping(value="/process_debate_template_editing_request")
+    public String processDebateTemplateEditingRequest(@RequestParam Long debateTemplateId,
+                                                      Model model) {
+        Optional<DebateTemplate> optDebateTemplate =
+                debateTemplateRepository.findById(debateTemplateId);
+        if (optDebateTemplate.isEmpty()) {
+            throw new IllegalArgumentException("Inexistent debate template");
+        }
+        DebateTemplate debateTemplate = optDebateTemplate.get();
+        debateTemplate.computeMinsAndSecsBasedOnSeconds();
+        model.addAttribute("debate_template", debateTemplate);
+        return "edit_debate_template";
+    }
+
+    @PostMapping("/process_debate_template_editing")
+    public String processDebateTemplateEditing(DebateTemplate debateTemplate) {
+        debateTemplate.computeSecondsBasedOnMinsAndSecs();
+        User currentUser = getCurrentUser();
+        debateTemplate.setOwner(currentUser);
+        debateTemplateRepository.save(debateTemplate);
+        return "redirect:/configure_debates";
     }
 
     private User getCurrentUser() {
