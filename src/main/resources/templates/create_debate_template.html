@@ -9,6 +9,10 @@
 <div class="container text-center">
     <h1>Create a new Debate Template</h1>
 
+    <div>
+        <h5><a th:href="@{/}">Home</a></h5>
+    </div>
+
     <form th:action="@{/process_debate_template_creation}"
           method="post"
           th:object="${debate_template}"

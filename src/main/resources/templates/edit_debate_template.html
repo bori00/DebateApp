@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
           type="text/css"/>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
     <script th:src="@{/configure_debates.js}"></script>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
 </head>
@@ -13,7 +14,11 @@
 <div class="container text-center">
     <h1>Edit Debate Template</h1>
 
-    <form th:action="@{/process_debate_template_editing?debateTemplateId=}"
+    <div>
+        <h5><a th:href="@{/}">Home</a></h5>
+    </div>
+
+    <form th:action="@{/process_debate_template_editing}"
           method="post"
           th:object="${debate_template}"
           class="card p-3 bg-light"
@@ -81,9 +86,37 @@
         </div>
 
         <br>
+    </form>
 
+    <form th:action="@{/process_debate_template_resource_link_addition}"
+          method="post"
+          th:object="${new_resource_link}"
+          class="card p-3 bg-light"
+          style="max-width: 600px; margin: 0 auto;">
         <h5 class="mb-2">Edit the Resources</h5>
-        <ul class="list-group" th:each="resourceLink : *{resourceLinks}">
+
+        <input style="display: none" type="number" class="form-control"
+               th:field="*{debateTemplate.id}" required/>
+
+        <h6 class="mb-3">New Resource:</h6>
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input id="resourceTitleInput" type="text" class="form-control" th:field="*{title}"
+                   maxlength="100" minlength="1" placeholder="title"/>
+        </div>
+        <div class="mb-3">
+            <label for="statementInput" class="form-label">Link</label>
+            <textarea id="resourceLinkInput" class="form-control" th:field="*{link}"
+                      required
+                      maxlength="1000" minlength="1" placeholder="www.?.com"></textarea>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary mb-2">Save New Resource</button>
+        </div>
+
+        <h6 class="mb-4">Existing Resources</h6>
+        <ul class="list-group" th:each="resourceLink : *{debateTemplate.resourceLinks}">
             <li class="list-group-item">
                 <a th:href="${resourceLink.link}" th:text="${resourceLink.title}">
                     Link

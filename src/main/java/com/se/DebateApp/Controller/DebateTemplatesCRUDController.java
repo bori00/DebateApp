@@ -14,10 +14,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.desktop.SystemEventListener;
 import java.util.Optional;
 
 @Controller
 public class DebateTemplatesCRUDController {
+
+    // TODO: handle illegal arguments
 
     @Autowired
     private DebateTemplateRepository debateTemplateRepository;
@@ -74,6 +77,11 @@ public class DebateTemplatesCRUDController {
         DebateTemplate debateTemplate = optDebateTemplate.get();
         debateTemplate.computeMinsAndSecsBasedOnSeconds();
         model.addAttribute("debate_template", debateTemplate);
+
+        LinkToResource newLinkToResource = new LinkToResource();
+        newLinkToResource.setDebateTemplate(debateTemplate);
+        model.addAttribute("new_resource_link", newLinkToResource);
+
         return "edit_debate_template";
     }
 
@@ -83,7 +91,8 @@ public class DebateTemplatesCRUDController {
         User currentUser = getCurrentUser();
         debateTemplate.setOwner(currentUser);
         debateTemplateRepository.save(debateTemplate);
-        return "redirect:/configure_debates";
+        return "redirect:/process_debate_template_editing_request?debateTemplateId=" +
+                debateTemplate.getId();
     }
 
     @GetMapping("/process_debate_template_resource_link_deletion")
@@ -96,8 +105,18 @@ public class DebateTemplatesCRUDController {
         }
         LinkToResource linkToResource = optLinkToResource.get();
         linkToResourceRepository.delete(linkToResource);
-        model.addAttribute("debate_template", linkToResource.getDebateTemplate());
-        return "edit_debate_template";
+
+        return "redirect:/process_debate_template_editing_request?debateTemplateId=" +
+                linkToResource.getDebateTemplate().getId();
+    }
+
+    @PostMapping("/process_debate_template_resource_link_addition")
+    public String processDebateTemplateResourceLinkAddition(LinkToResource linkToResource,
+                                                            Model model) {
+        linkToResource.getDebateTemplate().addNewDLinkToResource(linkToResource);
+        linkToResourceRepository.save(linkToResource);
+        return "redirect:/process_debate_template_editing_request?debateTemplateId=" +
+                linkToResource.getDebateTemplate().getId();
     }
 
     private User getCurrentUser() {

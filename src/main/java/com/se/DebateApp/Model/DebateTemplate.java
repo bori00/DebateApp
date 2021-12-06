@@ -31,7 +31,7 @@ public class DebateTemplate {
     @Column(nullable = false, length = 1000)
     private String statement;
 
-    @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy="debateTemplate")
+    @OneToMany(cascade = {CascadeType.REMOVE}, mappedBy="debateTemplate")
     private Set<LinkToResource> resourceLinks = new HashSet<>();
 
     @Column(nullable = false)
@@ -81,8 +81,8 @@ public class DebateTemplate {
     public void computeMinsAndSecsBasedOnSeconds() {
         prepTimeMins = prepTimeSeconds / 60;
         prepTimeSecs = prepTimeSeconds% 60;
-        constSpeechMins = prepTimeSeconds / 60;
-        constSpeechSecs = prepTimeSeconds % 60;
+        constSpeechMins = constSpeechSeconds / 60;
+        constSpeechSecs = constSpeechSeconds % 60;
         rebuttalSpeechMins = rebuttalSpeechSeconds / 60;
         rebuttalSpeechSecs = rebuttalSpeechSeconds % 60;
         crossExaminationMins = crossExaminationSeconds / 60;
