@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DebateApp | Create Debate Template</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+</head>
+<body>
+<div class="container text-center">
+    <h1>My Debate Template</h1>
+
+    <div>
+        <h5><a th:href="@{/}">Home</a></h5>
+    </div>
+
+    <form th:object="${debate_template}"
+          class="card p-3 bg-light"
+          style="max-width: 600px; margin: 0 auto;">
+        <div class="mb-3">
+            <label for="titleInput" class="form-label">Title</label>
+            <input disabled id="titleInput" type="text" class="form-control" th:field="*{title}"
+                   required
+                   maxlength="100" minlength="1" placeholder="title"/>
+        </div>
+        <div class="mb-3">
+            <label for="topicInput" class="form-label">Topic</label>
+            <input disabled id="topicInput" type="text" class="form-control" th:field="*{topic}"
+                   maxlength="100" minlength="1" placeholder="topic"/>
+        </div>
+        <div class="mb-3">
+            <label for="statementInput" class="form-label">Statement</label>
+            <textarea disabled id="statementInput" type="text" class="form-control"
+                      th:field="*{statement}"
+                      required
+                      maxlength="1000" minlength="1" placeholder="This statement is true."></textarea>
+        </div>
+        <div class="input-group mb-3">
+            <label class="form-label mb-5">Preparation time:</label>
+            <input disabled type="number" class="form-control mb-5" th:field="*{prepTimeMins}"
+                   required min="0" max="120" value="15"/>
+            <div class="input-group-text mb-5">Minutes</div>
+            <input disabled type="number" class="form-control mb-5" th:field="*{prepTimeSecs}"
+                   required min="0" max="59" value="0"/>
+            <div class="input-group-text mb-5">Seconds</div>
+        </div>
+
+        <div class="input-group mb-3">
+            <label class="form-label mb-5">Constructive speech length:</label>
+            <input disabled type="number" class="form-control mb-5" th:field="*{constSpeechMins}"
+                   required min="0" max="120" value="15"/>
+            <div class="input-group-text mb-5">Minutes</div>
+            <input disabled type="number" class="form-control mb-5" th:field="*{constSpeechSecs}"
+                   required min="0" max="59" value="0"/>
+            <div class="input-group-text mb-5">Seconds</div>
+        </div>
+
+        <div class="input-group mb-3">
+            <label class="form-label mb-5">Rebuttal speech length:</label>
+            <input disabled type="number" class="form-control mb-5" th:field="*{rebuttalSpeechMins}"
+                   required min="0" max="120" value="15"/>
+            <div class="input-group-text mb-5">Minutes</div>
+            <input disabled type="number" class="form-control mb-5" th:field="*{rebuttalSpeechSecs}"
+                   required min="0" max="59" value="0"/>
+            <div class="input-group-text mb-5">Seconds</div>
+        </div>
+
+        <div class="input-group mb-3">
+            <label class="form-label mb-5">Cross Examination time:</label>
+            <input disabled type="number" class="form-control mb-5"
+                   th:field="*{crossExaminationMins}"
+                   required min="0" max="120" value="15"/>
+            <div class="input-group-text mb-5">Minutes</div>
+            <input disabled type="number" class="form-control mb-5"
+                   th:field="*{crossExaminationSecs}"
+                   required min="0" max="59" value="0"/>
+            <div class="input-group-text mb-5">Seconds</div>
+        </div>
+
+        <h5>Resources</h5>
+        <ul class="list-group" th:each="resourceLink : *{resourceLinks}">
+            <li class="list-group-item">
+                <a th:href="${resourceLink.link}" th:text="${resourceLink.title}">
+                    Link
+                </a>
+            </li>
+        </ul>
+    </form>
+
+</div>
+</body>
+</html>

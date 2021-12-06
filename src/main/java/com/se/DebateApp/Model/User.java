@@ -1,9 +1,20 @@
 package com.se.DebateApp.Model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,27 +26,11 @@ public class User {
     @Column(nullable = false, length = 100)
     private String password;
 
-    public Long getId() {
-        return id;
-    }
+    @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy="owner")
+    private Set<DebateTemplate> debateTemplates = new HashSet<>();
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void addNewDebateTemplate(DebateTemplate debateTemplate) {
+        debateTemplate.setOwner(this);
+        debateTemplates.add(debateTemplate);
     }
 }

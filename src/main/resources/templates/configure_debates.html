@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>DebateApp | Configure Debateds</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
+          type="text/css"/>
+    <script th:src="@{/configure_debates.js}"></script>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
 </head>
 <body>
 <div class="container text-center">
@@ -11,6 +15,33 @@
 
     <div>
         <h5><a th:href="@{/}">Home</a></h5>
+        <h5><a th:href="@{/create_debate_template}">Create new Debate Template</a></h5>
+    </div>
+
+    <div class="list-group" th:each="debateTemplate : ${myDebateTemplates}">
+        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1" th:text="${debateTemplate.title}">Title</h5>
+                <small th:text="${debateTemplate.topic}">Topic</small>
+            </div>
+            <p class="mb-1 float-left" th:text="${debateTemplate.statement}">Statement</p>
+            <div class="container text-right">
+                <button th:onclick="'onDeleteDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                        type="button"
+                        class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
+                                                                  aria-hidden="true"></i></button>
+                <button th:onclick="'onViewDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                        type="button" class="btn btn-outline-secondary px-3"><i
+                        class="fa fa-eye"
+                                                                      aria-hidden="true"></i></button>
+                <button
+                        th:onclick="'onEditDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                        type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-edit"
+                                                                      aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-outline-primary px-3"><i class="fa fa-play"
+                                                                      aria-hidden="true"></i></button>
+            </div>
+        </a>
     </div>
 </div>
 </body>
