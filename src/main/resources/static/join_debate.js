@@ -33,16 +33,14 @@ async function createCallFrame() {
     });
 }
 
-async function joinDebate(userId) {
+async function joinDebate() {
     const url = document.getElementById('url-input').value;
 
     try {
         await callFrame.join({
             url: url,
-            user_id: userId,
             showLeaveButton: true,
             showParticipantsBar: true,
-            showFullScreenButton: true,
         });
     } catch (e) {
         toggleUrlInputPrompt();
