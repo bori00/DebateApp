@@ -33,12 +33,13 @@ async function createCallFrame() {
     });
 }
 
-async function joinDebate() {
+async function joinDebate(userId) {
     const url = document.getElementById('url-input').value;
 
     try {
         await callFrame.join({
             url: url,
+            user_id: userId,
             showLeaveButton: true,
             showParticipantsBar: true,
             showFullScreenButton: true,
@@ -67,5 +68,5 @@ function handleJoinedMeeting() {
 function handleLeftMeeting() {
     toggleUrlInputPrompt();
     const callURL = document.getElementById('url-input');
-    callURL.setAttribute('placeholder','Enter room URL...')
+    callURL.setAttribute('placeholder', 'Enter room URL...')
 }

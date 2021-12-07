@@ -12,9 +12,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.awt.desktop.SystemEventListener;
 import java.util.Optional;
 
 @Controller
@@ -46,7 +47,7 @@ public class DebateTemplatesCRUDController {
         return "redirect:/configure_debates";
     }
 
-    @GetMapping(value="/process_debate_template_deletion")
+    @GetMapping(value = "/process_debate_template_deletion")
     public String processDebateTemplateDeletion(@RequestParam Long debateTemplateId) {
         debateTemplateRepository.deleteById(debateTemplateId);
         return "redirect:/configure_debates";
@@ -66,7 +67,7 @@ public class DebateTemplatesCRUDController {
         return "view_debate_template";
     }
 
-    @GetMapping(value="/process_debate_template_editing_request")
+    @GetMapping(value = "/process_debate_template_editing_request")
     public String processDebateTemplateEditingRequest(@RequestParam Long debateTemplateId,
                                                       Model model) {
         Optional<DebateTemplate> optDebateTemplate =
@@ -117,6 +118,12 @@ public class DebateTemplatesCRUDController {
         linkToResourceRepository.save(linkToResource);
         return "redirect:/process_debate_template_editing_request?debateTemplateId=" +
                 linkToResource.getDebateTemplate().getId();
+    }
+
+    @GetMapping("/process_start_debate")
+    public String processStartDebate(DebateTemplate debateTemplate, Model model) {
+        model.addAttribute("debate_template", debateTemplate);
+        return "redirect:/start_debate";
     }
 
     private User getCurrentUser() {
