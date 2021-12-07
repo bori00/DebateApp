@@ -4,14 +4,43 @@
     <meta charset="UTF-8">
     <title>DebateApp | Join New Debate</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+    <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+    <script type="text/javascript" th:src="@{/join_debate.js}"></script>
+    <style>
+        .hide {
+            display: none;
+        }
+    </style>
 </head>
-<body>
-<div class="container text-center">
-    <h1>Join Debate</h1>
+<body onload="createCallFrame()">
 
-    <div>
+    <div id="container" class="container text-center">
+
         <h5><a th:href="@{/}">Home</a></h5>
+
+        <div id="wrapper" class="wrapper">
+            <form id="url-input-form">
+                <h1>Join debate</h1>
+                <div class="form-group">
+                    <label for="url-input">Debate url</label>
+                    <input
+                            type="text"
+                            class="form-control"
+                            id="url-input"
+                            placeholder="Enter room URL..."
+                            pattern="^(https:\/\/)?[\w.-]+(\.(daily\.(co)))+[\/\/]+[\w.-]+$"
+                    />
+                </div>
+                <button
+                        type="button"
+                        id="join-call"
+                        class="btn btn-primary"
+                        onclick="joinDebate()"
+                >
+                    Join debate
+                </button>
+            </form>
+        </div>
     </div>
-</div>
 </body>
 </html>
