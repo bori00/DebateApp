@@ -7,11 +7,9 @@ import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class HomePageController {
@@ -36,6 +34,12 @@ public class HomePageController {
     @GetMapping("/join_debate")
     public String goToJoinDebatePage() {
         return "join_debate";
+    }
+
+    @GetMapping("/start_debate")
+    public String goToStartDebatePage(Model model) {
+        model.addAttribute("user", getCurrentUser());
+        return "start_debate";
     }
 
     @GetMapping("/configure_debates")

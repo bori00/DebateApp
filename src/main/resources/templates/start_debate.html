@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DebateApp | Start Debate</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+    <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+    <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/local.config.js}"></script>
+    <script type="text/javascript" th:src="@{/start_debate.js}"></script>
+    <style>
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body th:onload="'createCallFrame('+${user.getId()}+');'">
+
+<div id="container" class="container text-center">
+
+    <h5><a th:href="@{/}">Home</a></h5>
+
+    <div id="wrapper" class="wrapper">
+
+        <div id="controls-copy-url" class="text-center hide">
+            <h3>Invite participants</h3>
+            <p>Share URL below to invite others</p>
+            <form>
+                <div class="form-group">
+                    <label for="copy-url">Call url</label>
+                    <input
+                            type="text"
+                            class="form-control"
+                            id="copy-url"
+                            placeholder="Copy this room URL"
+                            contenteditable="false"
+                    />
+                </div>
+                <button
+                        type="button"
+                        id="copy-url-button"
+                        class="btn btn-primary"
+                        onclick="copyUrl()"
+                >
+                    Copy URL
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

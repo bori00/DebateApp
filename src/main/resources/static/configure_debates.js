@@ -23,3 +23,7 @@ function onDeleteDebateTemplateResourceLinkButtonPushed(resourceLinkId) {
         window.location.href = "/process_debate_template_resource_link_deletion?resourceLinkId=" + resourceLinkId
     }
 }
+
+function onStartDebateButtonPushed(debateTemplateId) {
+    window.location.href = "/process_start_debate?debateTemplateId=" + debateTemplateId
+}
