@@ -2,18 +2,7 @@ let callFrame;
 
 async function createCallFrame(userId) {
     const callWrapper = document.getElementById('wrapper');
-
-    callFrame = await window.DailyIframe.createFrame(callWrapper, {
-        iframeStyle: {
-            height: '100%',
-            width: '100%',
-            aspectRatio: 16 / 9,
-            minWidth: '500px',
-            maxWidth: '920px',
-            border: '0',
-            borderRadius: '12px',
-        },
-    });
+    callFrame = await createDebateCallFrame(callWrapper);
 
     callFrame
         .on('joined-meeting', handleJoinedMeeting)
@@ -51,7 +40,6 @@ async function startDebate(userId) {
             showParticipantsBar: true,
         });
     } catch (e) {
-        toggleStartPrompt();
         console.error(e);
     }
 
