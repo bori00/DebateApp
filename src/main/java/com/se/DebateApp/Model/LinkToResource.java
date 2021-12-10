@@ -24,7 +24,7 @@ public class LinkToResource {
     @Column(nullable = false, length = 1000)
     private String link;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @ToString.Exclude
     private DebateTemplate debateTemplate;
 }

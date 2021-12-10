@@ -18,7 +18,7 @@ public class DebateTemplate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @ToString.Exclude
     private User owner;
 
@@ -45,6 +45,9 @@ public class DebateTemplate {
 
     @Column(nullable = false)
     private Integer crossExaminationSeconds;
+
+    @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy="debateTemplate")
+    private Set<DebateSession> sessions = new HashSet<>();
 
     // Fields used to simplify form submission.
     @Transient
