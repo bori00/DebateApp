@@ -45,6 +45,6 @@ public class StartDebateController {
         debateTemplate.addNewSession(debateSession);
         DebateSession savedSession = debateSessionRepository.save(debateSession);
         model.addAttribute("debateCode", savedSession.getId());
-        return "redirect:/start_debate";
+        return "start_debate";
     }
 }
