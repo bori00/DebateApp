@@ -2,6 +2,7 @@ package com.se.DebateApp.Model;
 
 import com.se.DebateApp.Model.Constants.PlayerRole;
 import com.se.DebateApp.Model.Constants.PlayerState;
+import com.se.DebateApp.Model.Constants.TeamType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,4 +34,7 @@ public class DebateSessionPlayer {
 
     @Column(nullable = false)
     private PlayerRole playerRole = PlayerRole.NONE;
+
+    @Column(nullable = true)
+    private TeamType team = null;
 }
