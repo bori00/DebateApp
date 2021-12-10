@@ -98,4 +98,9 @@ public class DebateTemplate {
         linkToResource.setDebateTemplate(this);
         this.resourceLinks.add(linkToResource);
     }
+
+    public void addNewSession(DebateSession debateSession) {
+        debateSession.setDebateTemplate(this);
+        this.sessions.add(debateSession);
+    }
 }
