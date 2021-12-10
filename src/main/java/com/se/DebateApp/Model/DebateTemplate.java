@@ -31,7 +31,7 @@ public class DebateTemplate {
     @Column(nullable = false, length = 1000)
     private String statement;
 
-    @OneToMany(cascade = {CascadeType.REMOVE}, mappedBy="debateTemplate")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateTemplate")
     private Set<LinkToResource> resourceLinks = new HashSet<>();
 
     @Column(nullable = false)
@@ -46,7 +46,7 @@ public class DebateTemplate {
     @Column(nullable = false)
     private Integer crossExaminationSeconds;
 
-    @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy="debateTemplate")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateTemplate")
     private Set<DebateSession> sessions = new HashSet<>();
 
     // Fields used to simplify form submission.

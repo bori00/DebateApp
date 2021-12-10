@@ -26,7 +26,7 @@ public class User {
     @Column(nullable = false, length = 100)
     private String password;
 
-    @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy="owner")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="owner")
     private Set<DebateTemplate> debateTemplates = new HashSet<>();
 
     public void addNewDebateTemplate(DebateTemplate debateTemplate) {

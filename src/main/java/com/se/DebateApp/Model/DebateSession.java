@@ -34,6 +34,6 @@ public class DebateSession {
     @Column(nullable = false)
     private java.util.Date currentPhaseStartingTime;
 
-    @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy="debateSession")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession")
     private Set<DebateSessionPlayer> players = new HashSet<>();
 }
