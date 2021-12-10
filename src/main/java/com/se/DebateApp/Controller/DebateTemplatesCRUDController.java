@@ -40,7 +40,6 @@ public class DebateTemplatesCRUDController {
 
     @PostMapping("/process_debate_template_creation")
     public String processDebateTemplateCreation(DebateTemplate debateTemplate) {
-        debateTemplate.computeSecondsBasedOnMinsAndSecs();
         User currentUser = getCurrentUser();
         currentUser.addNewDebateTemplate(debateTemplate);
         debateTemplateRepository.save(debateTemplate);
@@ -62,7 +61,6 @@ public class DebateTemplatesCRUDController {
             throw new IllegalArgumentException("Inexistent debate template");
         }
         DebateTemplate debateTemplate = optDebateTemplate.get();
-        debateTemplate.computeMinsAndSecsBasedOnSeconds();
         model.addAttribute("debate_template", debateTemplate);
         return "view_debate_template";
     }
@@ -76,7 +74,6 @@ public class DebateTemplatesCRUDController {
             throw new IllegalArgumentException("Inexistent debate template");
         }
         DebateTemplate debateTemplate = optDebateTemplate.get();
-        debateTemplate.computeMinsAndSecsBasedOnSeconds();
         model.addAttribute("debate_template", debateTemplate);
 
         LinkToResource newLinkToResource = new LinkToResource();
@@ -89,6 +86,7 @@ public class DebateTemplatesCRUDController {
     @PostMapping("/process_debate_template_editing")
     public String processDebateTemplateEditing(DebateTemplate debateTemplate) {
         debateTemplate.computeSecondsBasedOnMinsAndSecs();
+        System.out.println(debateTemplate);
         User currentUser = getCurrentUser();
         debateTemplate.setOwner(currentUser);
         debateTemplateRepository.save(debateTemplate);
