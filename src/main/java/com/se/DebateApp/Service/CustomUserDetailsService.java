@@ -1,6 +1,6 @@
 package com.se.DebateApp.Service;
 
-import com.se.DebateApp.Model.CustomUserDetails;
+import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

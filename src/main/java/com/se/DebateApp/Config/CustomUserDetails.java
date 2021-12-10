@@ -1,5 +1,6 @@
-package com.se.DebateApp.Model;
+package com.se.DebateApp.Config;
 
+import com.se.DebateApp.Model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

@@ -1,6 +1,6 @@
 package com.se.DebateApp.Controller;
 
-import com.se.DebateApp.Model.CustomUserDetails;
+import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;

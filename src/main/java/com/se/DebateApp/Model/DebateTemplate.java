@@ -18,7 +18,7 @@ public class DebateTemplate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @ToString.Exclude
     private User owner;
 
@@ -31,7 +31,7 @@ public class DebateTemplate {
     @Column(nullable = false, length = 1000)
     private String statement;
 
-    @OneToMany(cascade = {CascadeType.REMOVE}, mappedBy="debateTemplate")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateTemplate")
     private Set<LinkToResource> resourceLinks = new HashSet<>();
 
     @Column(nullable = false)
@@ -45,6 +45,9 @@ public class DebateTemplate {
 
     @Column(nullable = false)
     private Integer crossExaminationSeconds;
+
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateTemplate")
+    private Set<DebateSession> sessions = new HashSet<>();
 
     // Fields used to simplify form submission.
     @Transient
@@ -71,6 +74,7 @@ public class DebateTemplate {
     @Transient
     private Integer crossExaminationSecs = 0;
 
+    @PrePersist
     public void computeSecondsBasedOnMinsAndSecs() {
         prepTimeSeconds = prepTimeMins * 60 + prepTimeSecs;
         constSpeechSeconds = constSpeechMins * 60 + constSpeechSecs;
@@ -78,6 +82,7 @@ public class DebateTemplate {
         crossExaminationSeconds = crossExaminationMins * 60 + crossExaminationSecs;
     }
 
+    @PostLoad
     public void computeMinsAndSecsBasedOnSeconds() {
         prepTimeMins = prepTimeSeconds / 60;
         prepTimeSecs = prepTimeSeconds% 60;
