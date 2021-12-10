@@ -86,7 +86,6 @@ public class DebateTemplatesCRUDController {
     @PostMapping("/process_debate_template_editing")
     public String processDebateTemplateEditing(DebateTemplate debateTemplate) {
         debateTemplate.computeSecondsBasedOnMinsAndSecs();
-        System.out.println(debateTemplate);
         User currentUser = getCurrentUser();
         debateTemplate.setOwner(currentUser);
         debateTemplateRepository.save(debateTemplate);

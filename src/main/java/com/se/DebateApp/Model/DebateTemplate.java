@@ -73,12 +73,10 @@ public class DebateTemplate {
 
     @PrePersist
     public void computeSecondsBasedOnMinsAndSecs() {
-        System.out.println("Update1: " + this);
         prepTimeSeconds = prepTimeMins * 60 + prepTimeSecs;
         constSpeechSeconds = constSpeechMins * 60 + constSpeechSecs;
         rebuttalSpeechSeconds = rebuttalSpeechMins * 60 + rebuttalSpeechSecs;
         crossExaminationSeconds = crossExaminationMins * 60 + crossExaminationSecs;
-        System.out.println("Update2: " + this);
     }
 
     @PostLoad
