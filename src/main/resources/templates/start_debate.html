@@ -17,37 +17,48 @@
 <body>
 <!--th:onload="'createCallFrame('+${user.getId()}+');'">-->
 
-<div id="container" class="container text-center">
+<div class="container text-center">
+    <div th:if="${errorMessage!=null}">
+        <p style="color: red">
+            <b>Debate couldn't be started.</b>
+        </p>
+        <p style="color: red" th:utext="${errorMessage}">
+        </p>
+    </div>
 
     <h5><a th:href="@{/}">Home</a></h5>
 
-    <div id="wrapper" class="wrapper">
+    <div th:if="${debateCode!=null}" id="container">
 
-        <div class="text-center">
-            <h3>Invite participants</h3>
-            <p>Share the code below to invite others</p>
-            <form>
-                <div class="form-group">
-                    <label for="copy-code">Debate Code</label>
-                    <input
-                            type="text"
-                            class="form-control"
-                            id="copy-code"
-                            placeholder="Copy this debate code"
-                            contenteditable="false"
-                            th:value="${debateCode}"
-                    />
-                </div>
-                <button
-                        type="button"
-                        id="copy-code-button"
-                        class="btn btn-primary"
-                        onclick="copyDebateCode()">
-                    Copy Code
-                </button>
-            </form>
+        <div id="wrapper" class="wrapper">
+
+            <div class="text-center">
+                <h3>Invite participants</h3>
+                <p>Share the code below to invite others</p>
+                <form>
+                    <div class="form-group">
+                        <label for="copy-code">Debate Code</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="copy-code"
+                                placeholder="Copy this debate code"
+                                contenteditable="false"
+                                th:value="${debateCode}"
+                        />
+                    </div>
+                    <button
+                            type="button"
+                            id="copy-code-button"
+                            class="btn btn-primary"
+                            onclick="copyDebateCode()">
+                        Copy Code
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
 </body>
 </html>
