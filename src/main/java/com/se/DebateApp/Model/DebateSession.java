@@ -36,4 +36,9 @@ public class DebateSession {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession")
     private Set<DebateSessionPlayer> players = new HashSet<>();
+
+    public void addNewPlayer(DebateSessionPlayer debateSessionPlayer) {
+        debateSessionPlayer.setDebateSession(this);
+        this.players.add(debateSessionPlayer);
+    }
 }
