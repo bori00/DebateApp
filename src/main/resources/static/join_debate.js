@@ -26,16 +26,15 @@ async function createCallFrame() {
 async function joinDebate() {
     const url = document.getElementById('url-input').value;
 
-    try {
-        await callFrame.join({
+    callFrame.join({
             url: url,
             showLeaveButton: true,
             showParticipantsBar: true,
+        })
+        .catch(error => {
+            console.log('failed to join debate: '+ error);
+            toggleUrlInputPrompt();
         });
-    } catch (e) {
-        toggleUrlInputPrompt();
-        console.error(e);
-    }
 }
 
 /* Event listener callbacks and helpers */
