@@ -80,7 +80,7 @@ public class StartDebateController {
         DebateSession debateSession = optDebateSession.get();
         if (debateSession.getDebateSessionPhase() != DebateSessionPhase.WAITING_FOR_PLAYERS) {
             return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.DEBATE_NOT_FOUND_ERROR_MSG);
+                    JoinDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
         }
         DebateSessionPlayer debateSessionPlayer = new DebateSessionPlayer();
         debateSessionPlayer.setUser(currentUser);
@@ -89,13 +89,13 @@ public class StartDebateController {
         return new JoinDebateRequestResponse(true, null);
     }
 
-    @GetMapping
-    public String processGoToChooseTeamPageRequest(Model model) {
-        User currentUser = getCurrentUser();
-        List<DebateSession> usersSessions =
-                debateSessionRepository.findActiveDebateSessionsOfPlayer(currentUser);
-        return "/"; // TODO: complete
-    }
+//    @GetMapping
+//    public String processGoToChooseTeamPageRequest(Model model) {
+//        User currentUser = getCurrentUser();
+//        List<DebateSession> usersSessions =
+//                debateSessionRepository.findActiveDebateSessionsOfPlayer(currentUser);
+//        return "/"; // TODO: complete
+//    }
 
     boolean hasOngoingDebate(User user) {
         List<DebateSession> ongoingSessionsAsJudge =
