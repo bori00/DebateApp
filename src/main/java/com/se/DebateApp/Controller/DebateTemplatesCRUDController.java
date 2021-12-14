@@ -118,8 +118,8 @@ public class DebateTemplatesCRUDController {
     }
 
     @GetMapping("/process_start_debate")
-    public String processStartDebate(@RequestParam(name="debateTemplateId") Long debateTemplateId) {
-        return "redirect:/start_debate?debateTemplateId="+debateTemplateId;
+    public String processStartDebate(@RequestParam(name = "debateTemplateId") Long debateTemplateId) {
+        return "redirect:/start_debate?debateTemplateId=" + debateTemplateId;
     }
 
     private User getCurrentUser() {

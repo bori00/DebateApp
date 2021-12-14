@@ -84,14 +84,16 @@ async function startPreparationPhase(debateSessionId) {
         "preparationPhaseUrlContraTeam": preparationRoomContraTeam.url,
     };
 
-    await updateDebateSession(debateSessionId, requestBody);
+    let debateSession = await updateDebateSession(debateSessionId, requestBody);
+
+    console.log(debateSession);
 
     toggleStartPreparation();
     toggleSwitchTeams();
 }
 
-function updateDebateSession(debateSessionId,requestBody) {
-    const destEndpoint = "/process_start_preparation?debateSessionId="+debateSessionId;
+function updateDebateSession(debateSessionId, requestBody) {
+    const destEndpoint = "/process_start_preparation?debateSessionId=" + debateSessionId;
 
     let token = $("meta[name='_csrf']").attr("content");
     let header = $("meta[name='_csrf_header']").attr("content");
@@ -106,7 +108,7 @@ function updateDebateSession(debateSessionId,requestBody) {
         },
         body: JSON.stringify(requestBody),
     })
-        .catch(error => console.log('failed to create debate session: '+ error))
+        .catch(error => console.log('failed to update debate session: ' + error))
         .then(response => response.json())
         .catch(error => console.log('failed to parse response to json: ' + error));
 }
@@ -120,13 +122,21 @@ function copyUrl() {
 }
 
 async function joinPreparationPhaseOfProTeam(userId) {
-    await joinCallAsOwner(userId, preparationRoomProTeam);
     toggleSwitchTeams();
+    leaveMeating();
+    await joinCallAsOwner(userId, preparationRoomProTeam);
 }
 
 async function joinPreparationPhaseOfContraTeam(userId) {
-    await joinCallAsOwner(userId, preparationRoomContraTeam);
     toggleSwitchTeams();
+    leaveMeating();
+    await joinCallAsOwner(userId, preparationRoomContraTeam);
+}
+
+
+function leaveMeating() {
+    callFrame.leave();
+    hideStartPreparationOnLeavingCall();
 }
 
 /* Event listener callbacks and helpers */
@@ -138,9 +148,17 @@ function toggleCopyUrl() {
 }
 
 function toggleStartPreparation() {
-    const copyUrl = document.getElementById('control-prep-phase');
+    const startPreparation = document.getElementById('control-prep-phase');
 
-    copyUrl.classList.toggle('hide');
+    startPreparation.classList.toggle('hide');
+}
+
+function hideStartPreparationOnLeavingCall() {
+    const startPreparation = document.getElementById('control-prep-phase');
+
+    if(!startPreparation.classList.contains('hide')) {
+        toggleStartPreparation();
+    }
 }
 
 function toggleSwitchTeams() {
@@ -156,5 +174,6 @@ function handleJoinedMeeting() {
 
 function handleLeftMeeting() {
     toggleCopyUrl();
-    toggleStartPreparation();
+    toggleSwitchTeams();
+    hideStartPreparationOnLeavingCall();
 }

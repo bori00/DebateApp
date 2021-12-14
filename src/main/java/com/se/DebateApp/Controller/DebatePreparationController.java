@@ -1,7 +1,5 @@
 package com.se.DebateApp.Controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.PreparationPhaseAttributes;
@@ -21,17 +19,11 @@ public class DebatePreparationController {
     private DebateSessionRepository debateSessionRepository;
 
     @PostMapping("/process_start_preparation")
-    public DebateSession processStartPreparation(@RequestParam(name = "debateSessionId") Long debateSessionId, @RequestBody String attributes) {
+    public DebateSession processStartPreparation(@RequestParam(name = "debateSessionId") Long debateSessionId, @RequestBody PreparationPhaseAttributes preparationPhaseAttributes) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
 
-        try {
-            PreparationPhaseAttributes preparationPhaseAttributes = (new ObjectMapper()).readValue(attributes, PreparationPhaseAttributes.class);
-            debateSession.setPreparationPhaseUrlProTeam(preparationPhaseAttributes.getPreparationPhaseUrlProTeam());
-            debateSession.setPreparationPhaseUrlContraTeam(preparationPhaseAttributes.getPreparationPhaseUrlContraTeam());
-        }catch(JsonProcessingException e) {
-            System.out.println(e.getMessage());
-        }
-
+        debateSession.setPreparationPhaseUrlProTeam(preparationPhaseAttributes.getPreparationPhaseUrlProTeam());
+        debateSession.setPreparationPhaseUrlContraTeam(preparationPhaseAttributes.getPreparationPhaseUrlContraTeam());
         debateSession.setDebateSessionPhase(DebateSessionPhase.PREP_TIME);
         debateSession.setCurrentPhaseStartingTime(new Date());
 
