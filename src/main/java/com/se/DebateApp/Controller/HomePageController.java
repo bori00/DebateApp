@@ -1,7 +1,10 @@
 package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Model.Constants.DebateSessionPhase;
+import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.User;
+import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +13,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Date;
 
 @Controller
 public class HomePageController {
+
+    @Autowired
+    private DebateSessionRepository debateSessionRepository;
 
     @Autowired
     private DebateTemplateRepository debateTemplateRepository;
@@ -37,8 +46,20 @@ public class HomePageController {
     }
 
     @GetMapping("/start_debate")
-    public String goToStartDebatePage(Model model) {
+    public String goToStartDebatePage(@RequestParam(name = "debateTemplateId") Long debateTemplateId, Model model) {
+        DebateSession debateSession = new DebateSession();
+
+        debateSession.setDebateSessionPhase(DebateSessionPhase.WAITING_FOR_PLAYERS);
+        debateSession.setCurrentPhaseStartingTime(new Date());
+
+        debateSession.setDebateTemplate(debateTemplateRepository.getById(debateTemplateId));
+
+        // save the debate session in the DB and retrieve the saved session with its generated id
+        DebateSession savedDebateSession = debateSessionRepository.save(debateSession);
+
+        model.addAttribute("debate_session", savedDebateSession);
         model.addAttribute("user", getCurrentUser());
+
         return "start_debate";
     }
 
