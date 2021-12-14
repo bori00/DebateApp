@@ -24,16 +24,7 @@ async function createCallFrameAndStartCall(userId) {
 async function startDebate(userId) {
     let room = await createRoom();
 
-
-    callFrame.join({
-            url: room.url,
-            token: ownerToken,
-            showLeaveButton: true,
-            showFullscreenButton: true,
-            showParticipantsBar: true,
-        })
-        .catch(console.log('failed to join meeting'));
-
+    await joinCallAsOwner(userId, room);
 }
 
 /**
@@ -146,10 +137,24 @@ function toggleCopyUrl() {
     copyUrl.classList.toggle('hide');
 }
 
+function toggleStartPreparation() {
+    const copyUrl = document.getElementById('control-prep-phase');
+
+    copyUrl.classList.toggle('hide');
+}
+
+function toggleSwitchTeams() {
+    const switchTeams = document.getElementById('control-switch-teams');
+
+    switchTeams.classList.toggle('hide');
+}
+
 function handleJoinedMeeting() {
     toggleCopyUrl();
+    toggleStartPreparation();
 }
 
 function handleLeftMeeting() {
     toggleCopyUrl();
+    toggleStartPreparation();
 }

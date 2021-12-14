@@ -30,6 +30,15 @@ public class DebateSession {
     @Column(nullable = false)
     private DebateSessionPhase debateSessionPhase = DebateSessionPhase.WAITING_FOR_PLAYERS;
 
+    @Column(nullable = true)
+    private String debateUrl;
+
+    @Column(nullable = true)
+    private String preparationPhaseUrlProTeam;
+
+    @Column(nullable = true)
+    private String preparationPhaseUrlContraTeam;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private java.util.Date currentPhaseStartingTime;

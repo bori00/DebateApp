@@ -17,7 +17,7 @@
         }
     </style>
 </head>
-<body th:onload="'createCallFrame('+${user.getId()}+');'">
+<body th:onload="'createCallFrameAndStartCall(' + ${user.getId()} + ');'">
 
 <div id="container" class="container text-center">
 
@@ -49,6 +49,36 @@
                 </button>
             </form>
         </div>
+    </div>
+
+    <div id="control-prep-phase" class="text-center hide">
+        <button
+                type="button"
+                id="start-prep-phase-button"
+                class="btn btn-primary"
+                th:onclick="'startPreparationPhase(' + ${debate_session.getId()} +');'"
+        >
+            Start preparation phase
+        </button>
+    </div>
+
+    <div id="control-switch-teams" class="text-center hide">
+        <button
+                type="button"
+                id="prep-team-pro-button"
+                class="btn btn-primary"
+                th:onclick="'joinPreparationPhaseOfProTeam(' + ${user.getId()} + ');'"
+        >
+            Join preparation meeting of the Pro team
+        </button>
+        <button
+                type="button"
+                id="prep-team-contra-button"
+                class="btn btn-primary"
+                th:onclick="'joinPreparationPhaseOfContraTeam(' + ${user.getId()} + ');'"
+        >
+            Join preparation meeting of the Contra team
+        </button>
     </div>
 </div>
 </body>
