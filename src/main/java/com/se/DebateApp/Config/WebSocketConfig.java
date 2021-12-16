@@ -1,4 +1,4 @@
-package com.se.DebateApp.Sockets;
+package com.se.DebateApp.Config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
