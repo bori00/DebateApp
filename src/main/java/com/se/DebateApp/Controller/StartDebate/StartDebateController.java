@@ -1,6 +1,8 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.StartDebate.DTOs.DebateParticipantsStatus;
+import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
@@ -12,6 +14,7 @@ import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -36,6 +39,9 @@ public class StartDebateController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     private static final String errorMessageName = "errorMessage";
     private static final String hasOtherOngoingDebateErrorMsg = "You can't start a new debate, " +
@@ -80,12 +86,13 @@ public class StartDebateController {
         DebateSession debateSession = optDebateSession.get();
         if (debateSession.getDebateSessionPhase() != DebateSessionPhase.WAITING_FOR_PLAYERS) {
             return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
+                    JoinDebateRequestResponse.DEBATE_NO_LONGER_ACCEPTING_PLAYERS_ERROR_MSG);
         }
         DebateSessionPlayer debateSessionPlayer = new DebateSessionPlayer();
         debateSessionPlayer.setUser(currentUser);
         debateSession.addNewPlayer(debateSessionPlayer);
         debateSessionPlayerRepository.save(debateSessionPlayer);
+        announceJudgeAboutDebateSessionParticipantsState(debateSession.getDebateTemplate().getOwner());
         return new JoinDebateRequestResponse(true, null);
     }
 
@@ -97,14 +104,28 @@ public class StartDebateController {
 //        return "/"; // TODO: complete
 //    }
 
-    boolean hasOngoingDebate(User user) {
+
+    public void announceJudgeAboutDebateSessionParticipantsState(User judge) {
+        DebateParticipantsStatus debateParticipantsStatus = new DebateParticipantsStatus(1, 2, 3,
+                false);
+        simpMessagingTemplate.convertAndSendToUser(
+                judge.getUserName(),
+                "/queue/debate-session-participants-status",
+                debateParticipantsStatus);
+        System.out.println("Announced judge: " + judge);
+
+    }
+
+    private boolean hasOngoingDebate(User user) {
         List<DebateSession> ongoingSessionsAsJudge =
-                debateSessionRepository.findActiveDebateSessionsOfJudge(user);
+                debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED);
         if (!ongoingSessionsAsJudge.isEmpty()) {
             return true;
         }
         List<DebateSession> ongoingDebatesAsPlayer =
-                debateSessionRepository.findActiveDebateSessionsOfPlayer(user);
+                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED);
         return !ongoingDebatesAsPlayer.isEmpty();
     }
 

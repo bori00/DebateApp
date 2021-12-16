@@ -8,14 +8,15 @@
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
     <script type="text/javascript" th:src="@{/start_debate.js}"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <style>
         .hide {
             display: none;
         }
     </style>
 </head>
-<body>
-<!--th:onload="'createCallFrame('+${user.getId()}+');'">-->
+<body th:onload="subscribeToParticipantAnnouncementSocket()">
 
 <div class="container text-center">
     <div th:if="${errorMessage!=null}">
