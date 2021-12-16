@@ -26,6 +26,12 @@ public interface DebateSessionRepository extends JpaRepository<DebateSession, Lo
     @Query("Select s FROM DebateSession s, IN(s.players) p WHERE " +
             " p.user = ?1 and s" +
             ".debateSessionPhase = ?2")
-    List<DebateSession> findDebateSessionOfPlayerWithGivenstate(User user,
-                                                                         DebateSessionPhase phase);
+    List<DebateSession> findDebateSessionOfPlayerWithGivenState(User user,
+                                                                DebateSessionPhase phase);
+
+    @Query("Select s FROM DebateSession s WHERE " +
+            "s.debateTemplate.owner = ?1 and s" +
+            ".debateSessionPhase = ?2")
+    List<DebateSession> findDebateSessionOfJudgeWithGivenState(User user,
+                                                                DebateSessionPhase phase);
 }

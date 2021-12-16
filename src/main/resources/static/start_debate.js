@@ -35,5 +35,5 @@ function updateUIWithNewParticipantsStatus(participantsStatus) {
 }
 
 function activateDebateSession() {
-    console.log("Activate...");
+    window.location.href="/process_activate_debate_session";
 }

@@ -7,11 +7,13 @@
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
           type="text/css"/>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
-    <script th:src="@{/choose_team.js}"></script>
+    <script th:src="@{/debate_lobby.js}"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
-<body>
+<body onload="subscribeToDebateActivationSocket()">
 <div class="container text-center">
     <div class="card p-3 bg-light m-5">
         <div class="card-body" th:object="${debateInformation}">

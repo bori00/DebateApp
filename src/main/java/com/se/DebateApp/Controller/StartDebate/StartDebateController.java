@@ -26,6 +26,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -106,7 +107,7 @@ public class StartDebateController {
     public String processGoToChooseTeamPageRequest(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToJoinDebates =
-                debateSessionRepository.findDebateSessionOfPlayerWithGivenstate(
+                debateSessionRepository.findDebateSessionOfPlayerWithGivenState(
                         user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToJoinDebates.isEmpty()) {
@@ -124,7 +125,7 @@ public class StartDebateController {
     public JoinTeamRequestResponse processJoinDebateSession(@RequestBody Boolean joinsProTeam) {
         User user = getCurrentUser();
         List<DebateSession> waitingToJoinDebates =
-                debateSessionRepository.findDebateSessionOfPlayerWithGivenstate(
+                debateSessionRepository.findDebateSessionOfPlayerWithGivenState(
                         user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToJoinDebates.isEmpty()) {
@@ -160,6 +161,7 @@ public class StartDebateController {
         } else {
             usersPlayer.setTeam(TeamType.CON);
         }
+        debateSessionPlayerRepository.save(usersPlayer);
         announceJudgeAboutDebateSessionParticipantsState(
                 session.getDebateTemplate().getOwner(),
                 session.computeParticipantsStatus());
@@ -170,7 +172,7 @@ public class StartDebateController {
     public String processGoToDebateLobbyPage(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToActivateDebates =
-                debateSessionRepository.findDebateSessionOfPlayerWithGivenstate(
+                debateSessionRepository.findDebateSessionOfPlayerWithGivenState(
                         user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToActivateDebates.size() != 1) {
@@ -182,6 +184,29 @@ public class StartDebateController {
         return "debate_lobby";
     }
 
+    @GetMapping("/process_activate_debate_session")
+    public String activateDebateSession() {
+        User user = getCurrentUser();
+        List<DebateSession> waitingToActivateDebates =
+                debateSessionRepository.findDebateSessionOfJudgeWithGivenState(user,
+                        DebateSessionPhase.WAITING_FOR_PLAYERS);
+        if (waitingToActivateDebates.size() != 1) {
+            return "error";
+        }
+        DebateSession session = waitingToActivateDebates.get(0);
+        // TODO: update when timing solutions are clarified
+        session.setDebateSessionPhase(DebateSessionPhase.PREP_TIME);
+        session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
+        debateSessionRepository.save(session);
+        announceAllDebatePlayersAboutDebateActivation(session);
+        return "active_debate";
+    }
+
+    @GetMapping("/go_to_active_debate")
+    public String goToActiveDebatePage(Model model) {
+        return "active_debate";
+    }
+
     private void announceJudgeAboutDebateSessionParticipantsState(
             User judge,
             DebateParticipantsStatus debateParticipantsStatus) {
@@ -190,6 +215,15 @@ public class StartDebateController {
                 "/queue/debate-session-participants-status",
                 debateParticipantsStatus);
 
+    }
+
+    private void announceAllDebatePlayersAboutDebateActivation(DebateSession debateSession) {
+        for (DebateSessionPlayer player : debateSession.getPlayers()) {
+            simpMessagingTemplate.convertAndSendToUser(
+                    player.getUser().getUserName(),
+                    "/queue/debate-session-activated",
+                    "activated");
+        }
     }
 
     private boolean hasOngoingDebate(User user) {
