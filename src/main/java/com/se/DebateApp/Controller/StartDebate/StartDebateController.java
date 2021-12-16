@@ -1,9 +1,9 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Controller.StartDebate.DTOs.DebateParticipantsStatus;
 import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
+import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.DebateTemplate;
@@ -92,7 +92,7 @@ public class StartDebateController {
         debateSessionPlayer.setUser(currentUser);
         debateSession.addNewPlayer(debateSessionPlayer);
         debateSessionPlayerRepository.save(debateSessionPlayer);
-        announceJudgeAboutDebateSessionParticipantsState(debateSession.getDebateTemplate().getOwner());
+        announceJudgeAboutDebateSessionParticipantsState(debateSession.getDebateTemplate().getOwner(), debateSession.computeParticipantsStatus());
         return new JoinDebateRequestResponse(true, null);
     }
 
@@ -105,14 +105,12 @@ public class StartDebateController {
 //    }
 
 
-    public void announceJudgeAboutDebateSessionParticipantsState(User judge) {
-        DebateParticipantsStatus debateParticipantsStatus = new DebateParticipantsStatus(1, 2, 3,
-                false);
+    public void announceJudgeAboutDebateSessionParticipantsState(User judge,
+                                                                 DebateParticipantsStatus debateParticipantsStatus) {
         simpMessagingTemplate.convertAndSendToUser(
                 judge.getUserName(),
                 "/queue/debate-session-participants-status",
                 debateParticipantsStatus);
-        System.out.println("Announced judge: " + judge);
 
     }
 

@@ -3,6 +3,8 @@ package com.se.DebateApp.Model;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
 import com.se.DebateApp.Model.Constants.PlayerState;
+import com.se.DebateApp.Model.Constants.TeamType;
+import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,5 +42,27 @@ public class DebateSession {
     public void addNewPlayer(DebateSessionPlayer debateSessionPlayer) {
         debateSessionPlayer.setDebateSession(this);
         this.players.add(debateSessionPlayer);
+    }
+
+    public DebateParticipantsStatus computeParticipantsStatus() {
+        int noWaitingToJoinPlayers =
+                (int) players.stream()
+                        .filter(player -> player.getPlayerState().equals(PlayerState.WAITING_TO_JOIN_TEAM))
+                        .count();
+
+        int noProTeamPlayers =
+                (int) players.stream()
+                        .filter(player -> player.getPlayerState().equals(PlayerState.JOINED_A_TEAM))
+                        .filter(player -> player.getTeam().equals(TeamType.PRO))
+                        .count();
+
+        int noConTeamPlayers =
+                (int) players.stream()
+                        .filter(player -> player.getPlayerState().equals(PlayerState.JOINED_A_TEAM))
+                        .filter(player -> player.getTeam().equals(TeamType.CON))
+                        .count();
+
+        return new DebateParticipantsStatus(noWaitingToJoinPlayers,
+                noProTeamPlayers, noConTeamPlayers);
     }
 }
