@@ -24,7 +24,7 @@ function joinDebate() {
 
 function handleJoinDebateStatus(joinDebateStatus) {
     if (joinDebateStatus.success) {
-        console.log("Success");
+        window.location.href = "/choose_team"
     } else {
         showErrorAlert(joinDebateStatus.errorMessage)
     }

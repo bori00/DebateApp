@@ -3,7 +3,10 @@ package com.se.DebateApp.Controller.StartDebate;
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateSessionTeamChoiceInformation;
 import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
+import com.se.DebateApp.Controller.StartDebate.DTOs.JoinTeamRequestResponse;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
+import com.se.DebateApp.Model.Constants.PlayerState;
+import com.se.DebateApp.Model.Constants.TeamType;
 import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class StartDebateController {
@@ -107,14 +111,64 @@ public class StartDebateController {
         if (waitingToJoinDebates.isEmpty()) {
             return "error";
         }
-        if (waitingToJoinDebates.size() > 1) {
-            return "error";
-        }
         DebateSessionTeamChoiceInformation teamChoiceInformation =
                 new DebateSessionTeamChoiceInformation(
                         waitingToJoinDebates.get(0).getDebateTemplate());
         model.addAttribute("team_choice_information", teamChoiceInformation);
         return "choose_team";
+    }
+
+    @PostMapping(value = "/process_join_team", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public JoinTeamRequestResponse processJoinDebateSession(@RequestBody Boolean joinsProTeam) {
+        User user = getCurrentUser();
+        List<DebateSession> waitingToJoinDebates =
+                debateSessionRepository.findDebateSessionOfPlayerWithGivenstate(
+                        user,
+                        DebateSessionPhase.WAITING_FOR_PLAYERS);
+        if (waitingToJoinDebates.isEmpty()) {
+            List<DebateSession> nonFinishedDebates =
+                    debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user
+                            , DebateSessionPhase.FINISHED);
+            if (nonFinishedDebates.isEmpty()) {
+                return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+            } else {
+                return new JoinTeamRequestResponse(false,
+                        JoinTeamRequestResponse.TOO_LATE_TO_JOIN_TEAM);
+            }
+        }
+        if (waitingToJoinDebates.size() > 1) {
+            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+        }
+        DebateSession session = waitingToJoinDebates.get(0);
+        List<DebateSessionPlayer> usersPlayers =
+                session.getPlayers()
+                        .stream()
+                        .filter(player -> player.getUser().getId().equals(user.getId()))
+                        .collect(Collectors.toList());
+        if (usersPlayers.size() != 1) {
+            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+        }
+        DebateSessionPlayer usersPlayer = usersPlayers.get(0);
+        if (usersPlayer.getPlayerState().equals(PlayerState.JOINED_A_TEAM)) {
+            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.ALREADY_JOINED_TEAM);
+        }
+        usersPlayer.setPlayerState(PlayerState.JOINED_A_TEAM);
+        if (joinsProTeam) {
+            usersPlayer.setTeam(TeamType.PRO);
+        } else {
+            usersPlayer.setTeam(TeamType.CON);
+        }
+        announceJudgeAboutDebateSessionParticipantsState(
+                session.getDebateTemplate().getOwner(),
+                session.computeParticipantsStatus());
+        return new JoinTeamRequestResponse(true, "");
+    }
+
+    @GetMapping("/go_to_debate_lobby")
+    public String processGoToDebateLobbyPage() {
+       // User user = getCurrentUser();
+        return "debate_lobby";
     }
 
     private void announceJudgeAboutDebateSessionParticipantsState(

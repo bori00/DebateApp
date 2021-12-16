@@ -8,6 +8,8 @@
           type="text/css"/>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script th:src="@{/choose_team.js}"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 <div class="container text-center">
@@ -30,7 +32,8 @@
                             <h5 class="card-title">Affirmative Team</h5>
                             <p class="card-text">Join the Affirmative Team if you <b>agree</b>
                                 with the above statement.</p>
-                            <button class="btn btn-success">Join Team!</button>
+                            <button onClick="joinAffirmativeTeam()" class="btn btn-success">Join
+                            Team!</button>
                         </div>
                     </div>
                 </div>
@@ -40,7 +43,8 @@
                             <h5 class="card-title">Negative Team</h5>
                             <p class="card-text">Join the Negative Team if you <b>disagree</b>
                                 with the above statement.</p>
-                            <button class="btn btn-danger">Join Team!</button>
+                            <button onClick="joinNegativeTeam()" class="btn btn-danger">Join
+                                Team!</button>
                         </div>
                     </div>
                 </div>
