@@ -1,5 +1,12 @@
 let callFrame, preparationRoomProTeam, preparationRoomContraTeam;
 
+const startPrepPhaseButton = 'start-prep-phase-button';
+const joinTeamProButton = 'join-team-pro-button';
+const joinTeamContraButton = 'join-team-contra-button';
+
+const Rooms = {INIT: 1, PREP: 2, PRO_TEAM: 3, CONTRA_TEAM: 4};
+let currentRoom;
+
 /**
  * Create a container for the video call frame and start the call.
  * @param userId = id of the currently logged in user, who starts the call
@@ -23,6 +30,7 @@ async function createCallFrameAndStartCall(userId) {
  */
 async function startDebate(userId) {
     let room = await createRoom();
+    currentRoom = Rooms.INIT;
 
     await joinCallAsOwner(userId, room);
 }
@@ -85,11 +93,11 @@ async function startPreparationPhase(debateSessionId) {
     };
 
     let debateSession = await updateDebateSession(debateSessionId, requestBody);
-
     console.log(debateSession);
 
-    toggleStartPreparation();
-    toggleSwitchTeams();
+    currentRoom = Rooms.PREP;
+
+    toggleButtonsVisibility();
 }
 
 function updateDebateSession(debateSessionId, requestBody) {
@@ -122,58 +130,76 @@ function copyUrl() {
 }
 
 async function joinPreparationPhaseOfProTeam(userId) {
-    toggleSwitchTeams();
-    leaveMeating();
+    leaveMeeting();
+    currentRoom = Rooms.PRO_TEAM;
     await joinCallAsOwner(userId, preparationRoomProTeam);
 }
 
 async function joinPreparationPhaseOfContraTeam(userId) {
-    toggleSwitchTeams();
-    leaveMeating();
+    leaveMeeting();
+    currentRoom = Rooms.CONTRA_TEAM;
     await joinCallAsOwner(userId, preparationRoomContraTeam);
 }
 
-
-function leaveMeating() {
+function leaveMeeting() {
     callFrame.leave();
-    hideStartPreparationOnLeavingCall();
 }
 
 /* Event listener callbacks and helpers */
 
-function toggleCopyUrl() {
-    const copyUrl = document.getElementById('controls-copy-url');
-
-    copyUrl.classList.toggle('hide');
-}
-
-function toggleStartPreparation() {
-    const startPreparation = document.getElementById('control-prep-phase');
-
-    startPreparation.classList.toggle('hide');
-}
-
-function hideStartPreparationOnLeavingCall() {
-    const startPreparation = document.getElementById('control-prep-phase');
-
-    if(!startPreparation.classList.contains('hide')) {
-        toggleStartPreparation();
-    }
-}
-
-function toggleSwitchTeams() {
-    const switchTeams = document.getElementById('control-switch-teams');
-
-    switchTeams.classList.toggle('hide');
-}
-
 function handleJoinedMeeting() {
     toggleCopyUrl();
-    toggleStartPreparation();
+    toggleButtonsVisibility();
 }
 
 function handleLeftMeeting() {
     toggleCopyUrl();
-    toggleSwitchTeams();
-    hideStartPreparationOnLeavingCall();
+    showElement(startPrepPhaseButton, false);
+    showElement(joinTeamProButton, false);
+    showElement(joinTeamContraButton, false);
+}
+
+function toggleCopyUrl() {
+    const copyUrl = document.getElementById('controls-copy-url');
+
+    return copyUrl.classList.toggle('hide');
+}
+
+function toggleButtonsVisibility() {
+    switch(currentRoom) {
+        case Rooms.INIT :  {
+            showElement(startPrepPhaseButton, true);
+            showElement(joinTeamProButton, false);
+            showElement(joinTeamContraButton, false);
+            break;
+        }
+        case Rooms.PREP :  {
+            showElement(startPrepPhaseButton, false);
+            showElement(joinTeamProButton, true);
+            showElement(joinTeamContraButton, true);
+            break;
+        }
+        case Rooms.PRO_TEAM : {
+            showElement(startPrepPhaseButton, false);
+            showElement(joinTeamProButton, false);
+            showElement(joinTeamContraButton, true);
+            break;
+        }
+        case Rooms.CONTRA_TEAM : {
+            showElement(startPrepPhaseButton, false);
+            showElement(joinTeamProButton, true);
+            showElement(joinTeamContraButton, false);
+            break;
+        }
+    }
+}
+
+function showElement(id, show) {
+    const element = document.getElementById(id);
+
+    if(show) {
+        element.classList.remove('hide');
+    }else{
+        element.classList.add('hide');
+    }
 }

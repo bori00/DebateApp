@@ -51,30 +51,30 @@
         </div>
     </div>
 
-    <div id="control-prep-phase" class="text-center hide">
+    <div id="control-prep-phase" class="text-center">
         <button
                 type="button"
                 id="start-prep-phase-button"
-                class="btn btn-primary"
+                class="btn btn-primary hide"
                 th:onclick="'startPreparationPhase(' + ${debate_session.getId()} +');'"
         >
             Start preparation phase
         </button>
     </div>
 
-    <div id="control-switch-teams" class="text-center hide">
+    <div id="control-switch-teams" class="text-center">
         <button
                 type="button"
-                id="prep-team-pro-button"
-                class="btn btn-primary"
+                id="join-team-pro-button"
+                class="btn btn-primary hide"
                 th:onclick="'joinPreparationPhaseOfProTeam(' + ${user.getId()} + ');'"
         >
             Join preparation meeting of the Pro team
         </button>
         <button
                 type="button"
-                id="prep-team-contra-button"
-                class="btn btn-primary"
+                id="join-team-contra-button"
+                class="btn btn-primary hide"
                 th:onclick="'joinPreparationPhaseOfContraTeam(' + ${user.getId()} + ');'"
         >
             Join preparation meeting of the Contra team
