@@ -5,6 +5,7 @@
     <title>DebateApp | Start Debate</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
     <script type="text/javascript" th:src="@{/start_debate.js}"></script>
@@ -29,35 +30,64 @@
 
     <h5><a th:href="@{/}">Home</a></h5>
 
-    <div th:if="${debateCode!=null}" id="container">
+    <div class="card p-3 bg-light m-5">
+        <div th:if="${debateCode!=null}" id="container">
 
-        <div id="wrapper" class="wrapper">
+            <div id="wrapper" class="wrapper">
 
-            <div class="text-center">
-                <h3>Invite participants</h3>
-                <p>Share the code below to invite others</p>
-                <form>
-                    <div class="form-group">
-                        <label for="copy-code">Debate Code</label>
-                        <input
-                                type="text"
-                                class="form-control"
-                                id="copy-code"
-                                placeholder="Copy this debate code"
-                                contenteditable="false"
-                                th:value="${debateCode}"
-                        />
-                    </div>
-                    <button
-                            type="button"
-                            id="copy-code-button"
-                            class="btn btn-primary"
-                            onclick="copyDebateCode()">
-                        Copy Code
-                    </button>
-                </form>
+                <div class="text-center">
+                    <h3>Invite participants</h3>
+                    <p>Share the code below to invite others</p>
+                    <form>
+                        <div class="form-group">
+                            <label for="copy-code">Debate Code</label>
+                            <input
+                                    type="text"
+                                    class="form-control"
+                                    id="copy-code"
+                                    placeholder="Copy this debate code"
+                                    contenteditable="false"
+                                    th:value="${debateCode}"
+                            />
+                        </div>
+                        <button
+                                type="button"
+                                id="copy-code-button"
+                                class="btn btn-primary"
+                                onclick="copyDebateCode()">
+                            Copy Code
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
+    </div>
+
+    <div class="card p-3 bg-light m-5">
+        <h3>Participants' Status</h3>
+        <p>You can activate the debate once each team has at least 2 participants</p>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th scope="col">Participants, who haven't joined a team yet</th>
+                <th scope="col">Participants in the Affirmative Team</th>
+                <th scope="col">Participants in the Negative Team</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td id="noWaitingToJoinParticipantsTd">0</td>
+                <td id="noProParticipantsTd">0</td>
+                <td id="noConParticipantsTd">0</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <button id="activate-debate-session-button"
+                class="btn btn-primary"
+                onclick="activateDebateSession()">
+            Activate Debate
+        </button>
     </div>
 </div>
 
