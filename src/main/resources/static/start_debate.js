@@ -27,7 +27,11 @@ function updateUIWithNewParticipantsStatus(participantsStatus) {
     $('#noWaitingToJoinParticipantsTd')[0].innerText=participantsStatus.noWaitingToJoinParticipants;
     $('#noProParticipantsTd')[0].innerText=participantsStatus.noProParticipants;
     $('#noConParticipantsTd')[0].innerText=participantsStatus.noConParticipants;
-    $('#activate-debate-session-button')[0].disabled = participantsStatus.canActivateSession;
+    if (participantsStatus.canActivateSession) {
+        $('#activate-debate-session-button')[0].removeAttr('disabled');
+    } else {
+        $('#activate-debate-session-button')[0].setAttribute('disabled', '');
+    }
 }
 
 function activateDebateSession() {
