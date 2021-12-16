@@ -1,6 +1,7 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.StartDebate.DTOs.DebateLobbyInformation;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateSessionTeamChoiceInformation;
 import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
 import com.se.DebateApp.Controller.StartDebate.DTOs.JoinTeamRequestResponse;
@@ -166,8 +167,18 @@ public class StartDebateController {
     }
 
     @GetMapping("/go_to_debate_lobby")
-    public String processGoToDebateLobbyPage() {
-       // User user = getCurrentUser();
+    public String processGoToDebateLobbyPage(Model model) {
+        User user = getCurrentUser();
+        List<DebateSession> waitingToActivateDebates =
+                debateSessionRepository.findDebateSessionOfPlayerWithGivenstate(
+                        user,
+                        DebateSessionPhase.WAITING_FOR_PLAYERS);
+        if (waitingToActivateDebates.size() != 1) {
+            return "error";
+        }
+        DebateSession session = waitingToActivateDebates.get(0);
+        model.addAttribute("debateInformation",
+                new DebateLobbyInformation(session.getDebateTemplate()));
         return "debate_lobby";
     }
 
