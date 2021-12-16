@@ -22,4 +22,10 @@ public interface DebateSessionRepository extends JpaRepository<DebateSession, Lo
             ".debateSessionPhase <> ?2")
     List<DebateSession> findDebateSessionsOfPlayerWithStateDifferentFrom(User user,
                                                                          DebateSessionPhase phase);
+
+    @Query("Select s FROM DebateSession s, IN(s.players) p WHERE " +
+            " p.user = ?1 and s" +
+            ".debateSessionPhase = ?2")
+    List<DebateSession> findDebateSessionOfPlayerWithGivenstate(User user,
+                                                                         DebateSessionPhase phase);
 }

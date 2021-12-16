@@ -1,6 +1,7 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.StartDebate.DTOs.DebateSessionTeamChoiceInformation;
 import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
@@ -69,7 +70,7 @@ public class StartDebateController {
         return "start_debate";
     }
 
-    @PostMapping(value="/process_join_debate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/process_join_debate", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public JoinDebateRequestResponse processJoinDebateSession(@RequestBody Long debateCode) {
         User currentUser = getCurrentUser();
@@ -96,17 +97,29 @@ public class StartDebateController {
         return new JoinDebateRequestResponse(true, null);
     }
 
-//    @GetMapping
-//    public String processGoToChooseTeamPageRequest(Model model) {
-//        User currentUser = getCurrentUser();
-//        List<DebateSession> usersSessions =
-//                debateSessionRepository.findActiveDebateSessionsOfPlayer(currentUser);
-//        return "/"; // TODO: complete
-//    }
+    @GetMapping("/choose_team")
+    public String processGoToChooseTeamPageRequest(Model model) {
+        User user = getCurrentUser();
+        List<DebateSession> waitingToJoinDebates =
+                debateSessionRepository.findDebateSessionOfPlayerWithGivenstate(
+                        user,
+                        DebateSessionPhase.WAITING_FOR_PLAYERS);
+        if (waitingToJoinDebates.isEmpty()) {
+            return "error";
+        }
+        if (waitingToJoinDebates.size() > 1) {
+            return "error";
+        }
+        DebateSessionTeamChoiceInformation teamChoiceInformation =
+                new DebateSessionTeamChoiceInformation(
+                        waitingToJoinDebates.get(0).getDebateTemplate());
+        model.addAttribute("team_choice_information", teamChoiceInformation);
+        return "choose_team";
+    }
 
-
-    public void announceJudgeAboutDebateSessionParticipantsState(User judge,
-                                                                 DebateParticipantsStatus debateParticipantsStatus) {
+    private void announceJudgeAboutDebateSessionParticipantsState(
+            User judge,
+            DebateParticipantsStatus debateParticipantsStatus) {
         simpMessagingTemplate.convertAndSendToUser(
                 judge.getUserName(),
                 "/queue/debate-session-participants-status",
