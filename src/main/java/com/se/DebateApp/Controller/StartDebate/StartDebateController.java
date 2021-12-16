@@ -27,9 +27,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -197,8 +195,10 @@ public class StartDebateController {
         // TODO: update when timing solutions are clarified
         session.setDebateSessionPhase(DebateSessionPhase.PREP_TIME);
         session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
+        Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(session.getPlayers());
+        session.removePlayersWhoDidntJoinATeam();
         debateSessionRepository.save(session);
-        announceAllDebatePlayersAboutDebateActivation(session);
+        announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
         return "active_debate";
     }
 
@@ -217,8 +217,8 @@ public class StartDebateController {
 
     }
 
-    private void announceAllDebatePlayersAboutDebateActivation(DebateSession debateSession) {
-        for (DebateSessionPlayer player : debateSession.getPlayers()) {
+    private void announceAllDebatePlayersAboutDebateActivation(Set<DebateSessionPlayer> joinedPlayers) {
+        for (DebateSessionPlayer player : joinedPlayers) {
             simpMessagingTemplate.convertAndSendToUser(
                     player.getUser().getUserName(),
                     "/queue/debate-session-activated",

@@ -10,8 +10,10 @@
     <script th:src="@{/choose_team.js}"></script>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
 </head>
-<body>
+<body onload="subscribeToDebateActivationSocket()">
 <div class="container text-center">
     <div class="card p-3 bg-light m-5" th:object="${team_choice_information}">
         <div class="card-body">

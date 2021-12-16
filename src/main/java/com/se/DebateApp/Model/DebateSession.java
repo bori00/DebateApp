@@ -36,7 +36,7 @@ public class DebateSession {
     @Column(nullable = false)
     private java.util.Date currentPhaseStartingTime;
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession")
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession", orphanRemoval=true)
     private Set<DebateSessionPlayer> players = new HashSet<>();
 
     public void addNewPlayer(DebateSessionPlayer debateSessionPlayer) {
@@ -64,5 +64,9 @@ public class DebateSession {
 
         return new DebateParticipantsStatus(noWaitingToJoinPlayers,
                 noProTeamPlayers, noConTeamPlayers);
+    }
+
+    public void removePlayersWhoDidntJoinATeam() {
+        getPlayers().removeIf(player -> player.getPlayerState().equals(PlayerState.WAITING_TO_JOIN_TEAM));
     }
 }
