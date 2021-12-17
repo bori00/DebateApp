@@ -7,13 +7,16 @@
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/join_debate.js}"></script>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
         .hide {
             display: none;
         }
     </style>
 </head>
-<body onload="createCallFrame()">
+<body>
 
     <div id="container" class="container text-center">
 
@@ -23,18 +26,17 @@
             <form id="url-input-form">
                 <h1>Join debate</h1>
                 <div class="form-group">
-                    <label for="url-input">Debate url</label>
+                    <label for="code-input">Debate Code</label>
                     <input
                             type="text"
                             class="form-control"
-                            id="url-input"
-                            placeholder="Enter room URL..."
-                            pattern="^(https:\/\/)?[\w.-]+(\.(daily\.(co)))+[\/\/]+[\w.-]+$"
+                            id="code-input"
+                            placeholder="Enter Debate Code..."
                     />
                 </div>
                 <button
                         type="button"
-                        id="join-call"
+                        id="join-debate"
                         class="btn btn-primary"
                         onclick="joinDebate()"
                 >

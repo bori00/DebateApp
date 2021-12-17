@@ -1,136 +1,39 @@
-let callFrame;
-
-async function createCallFrame(userId) {
-    const callWrapper = document.getElementById('wrapper');
-    callFrame = await createDebateCallFrame(callWrapper);
-
-    callFrame
-        .on('joined-meeting', handleJoinedMeeting)
-        .on('left-meeting', handleLeftMeeting);
-
-    await startDebate(userId);
-}
-
-async function startDebate(userId) {
-
-    let room = await createRoom();
-    if (!room) {
-        console.error('room could not be created');
-    }
-
-    console.log(room);
-
-    // generate a unique meeting token for the owner of the meeting with special privileges
-    let requestTokenForOwner = await createOwnerMeetingToken(room.name, userId);
-    let ownerToken = requestTokenForOwner.token;
-
-    if (!ownerToken) {
-        console.error('meeting token could not be generated');
-    }
-
-    const copyUrl = document.getElementById('copy-url');
-    copyUrl.value = room.url;
-
-    try {
-        await callFrame.join({
-            url: room.url,
-            token: ownerToken,
-            showLeaveButton: true,
-            showFullscreenButton: true,
-            showParticipantsBar: true,
-        });
-    } catch (e) {
-        console.error(e);
-    }
-
-}
-
-async function createRoom() {
-
-    const newRoomEndpoint = DAILY_REST_DOMAIN + "/rooms";
-    // room expires in 24 hours
-    const exp = Math.round(Date.now() / 1000) + 60 * 60 * 24;
-
-    const options = {
-        properties: {
-            enable_prejoin_ui: true,
-            enable_video_processing_ui: true,
-            enable_chat: true,
-            start_video_off: true,
-            start_audio_off: true,
-            exp: exp,
-            eject_at_room_exp: true,
-        },
-    };
-
-    try {
-        let response = await fetch(newRoomEndpoint, {
-                method: 'POST',
-                body: JSON.stringify(options),
-                mode: 'cors',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${DAILY_API_KEY}`,
-                }
-            }),
-            room = await response.json();
-        return room;
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-async function createOwnerMeetingToken(roomName, userId) {
-    const newMeetingTokenEndpoint = DAILY_REST_DOMAIN + "/meeting-tokens";
-
-    const options = {
-        properties: {
-            room_name: roomName,
-            is_owner: true,
-            user_id: userId,
-            enable_screenshare: true,
-        }
-    };
-
-    try {
-        let response = await fetch(newMeetingTokenEndpoint, {
-                method: 'POST',
-                body: JSON.stringify(options),
-                mode: 'cors',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${DAILY_API_KEY}`,
-                }
-            }),
-            token = await response.json();
-        return token;
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-function copyUrl() {
-    const url = document.getElementById('copy-url');
-    const copyButton = document.getElementById('copy-url-button');
-    url.select();
+function copyDebateCode() {
+    const code = document.getElementById('copy-code');
+    const copyButton = document.getElementById('copy-code-button');
+    code.select();
     document.execCommand('copy');
     copyButton.innerHTML = 'Copied!';
 }
 
-/* Event listener callbacks and helpers */
+async function subscribeToParticipantAnnouncementSocket() {
+    var socket = new SockJS('/secured/debates');
+    var stompClient = Stomp.over(socket);
+    var sessionId = "";
 
-function toggleCopyUrl() {
-    const copyUrl = document.getElementById('controls-copy-url');
+    console.log("Socket initialized");
 
-    copyUrl.classList.toggle('hide');
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe("/user/queue/debate-session-participants-status",
+            function (participantsStatusResponse) {
+                const participantsStatus = JSON.parse(participantsStatusResponse.body);
+                console.log("New participants status: " + participantsStatus);
+                updateUIWithNewParticipantsStatus(participantsStatus);
+            });
+    });
 }
 
-function handleJoinedMeeting() {
-    toggleCopyUrl();
+function updateUIWithNewParticipantsStatus(participantsStatus) {
+    $('#noWaitingToJoinParticipantsTd')[0].innerText=participantsStatus.noWaitingToJoinParticipants;
+    $('#noProParticipantsTd')[0].innerText=participantsStatus.noProParticipants;
+    $('#noConParticipantsTd')[0].innerText=participantsStatus.noConParticipants;
+    if (participantsStatus.canActivateSession) {
+        $('#activate-debate-session-button')[0].removeAttribute('disabled');
+    } else {
+        $('#activate-debate-session-button')[0].setAttribute('disabled', '');
+    }
 }
 
-function handleLeftMeeting() {
-    toggleCopyUrl();
+function activateDebateSession() {
+    window.location.href="/process_activate_debate_session";
 }

@@ -1,60 +1,35 @@
-/*
- * Main functionalities:
- * - setting up the call frame for the meeting room
- * - joining a call (room)
- */
-
-let callFrame;
-
-async function createCallFrame() {
-    const callWrapper = document.getElementById('wrapper');
-    callFrame = await createDebateCallFrame(callWrapper);
-
-    callFrame.on('joined-meeting', handleJoinedMeeting)
-        .on('left-meeting', handleLeftMeeting);
-
-    const callURL = document.getElementById('url-input');
-    const joinButton = document.getElementById('join-call');
-    callURL.addEventListener('input', () => {
-        joinButton.toggleAttribute('disabled');
-        if (callURL.checkValidity()) {
-            joinButton.toggleAttribute('disabled');
-        }
-    });
+function joinDebate() {
+    let url = new URL("/process_join_debate", document.URL);
+    let debateCode = document.getElementById("code-input").value;
+    let token = $("meta[name='_csrf']").attr("content");
+    let header = $("meta[name='_csrf_header']").attr("content");
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            [header]: token,
+            "charset": "UTF-8",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(debateCode)
+    })
+        .catch(error => console.log('failed to send request to server '+ error))
+        .then(response => {
+            return response.json();
+        })
+        .catch(error => console.log('failed to parse response: ' + error))
+        .then (joinDebateStatus => {
+            handleJoinDebateStatus(joinDebateStatus)
+        });
 }
 
-async function joinDebate() {
-    const url = document.getElementById('url-input').value;
-
-    try {
-        await callFrame.join({
-            url: url,
-            showLeaveButton: true,
-            showParticipantsBar: true,
-        });
-    } catch (e) {
-        toggleUrlInputPrompt();
-        console.error(e);
+function handleJoinDebateStatus(joinDebateStatus) {
+    if (joinDebateStatus.success) {
+        window.location.href = "/choose_team"
+    } else {
+        showErrorAlert(joinDebateStatus.errorMessage)
     }
 }
 
-/* Event listener callbacks and helpers */
-
-/**
- * Hide the url input form after joining the meeting, and show it again after leaving the call.
- */
-function toggleUrlInputPrompt() {
-    const inputForm = document.getElementById('url-input-form');
-
-    inputForm.classList.toggle('hide');
-}
-
-function handleJoinedMeeting() {
-    toggleUrlInputPrompt();
-}
-
-function handleLeftMeeting() {
-    toggleUrlInputPrompt();
-    const callURL = document.getElementById('url-input');
-    callURL.setAttribute('placeholder', 'Enter room URL...')
+function showErrorAlert(message) {
+    window.alert(message)
 }
