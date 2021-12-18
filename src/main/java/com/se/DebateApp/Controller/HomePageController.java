@@ -1,10 +1,7 @@
 package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Model.Constants.DebateSessionPhase;
-import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.User;
-import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Date;
 
 @Controller
 public class HomePageController {
-
-    @Autowired
-    private DebateSessionRepository debateSessionRepository;
 
     @Autowired
     private DebateTemplateRepository debateTemplateRepository;
