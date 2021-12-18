@@ -1,4 +1,3 @@
-
 async function createDebateCallFrame(callWrapper) {
     return window.DailyIframe.createFrame(callWrapper, {
         iframeStyle: {
@@ -32,16 +31,16 @@ async function createMeetingRoom() {
     };
 
     return fetch(newRoomEndpoint, {
-                method: 'POST',
-                body: JSON.stringify(options),
-                mode: 'cors',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${DAILY_API_KEY}`,
-                }
-            })
-        .catch(error => console.log('failed to create room: '+ error))
+        method: 'POST',
+        body: JSON.stringify(options),
+        mode: 'cors',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${DAILY_API_KEY}`,
+        }
+    })
+        .catch(error => console.log('failed to create room: ' + error))
         .then(response => response.json())
         .catch(error => console.log('failed to parse response to json: ' + error));
 }
@@ -50,16 +49,16 @@ async function createMeetingToken(options) {
     const newMeetingTokenEndpoint = DAILY_REST_DOMAIN + "/meeting-tokens";
 
     return fetch(newMeetingTokenEndpoint, {
-            method: 'POST',
-            body: JSON.stringify(options),
-            mode: 'cors',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${DAILY_API_KEY}`,
-            }
-        })
-        .catch(error => console.log('failed to create meeting token: '+ error))
+        method: 'POST',
+        body: JSON.stringify(options),
+        mode: 'cors',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${DAILY_API_KEY}`,
+        }
+    })
+        .catch(error => console.log('failed to create meeting token: ' + error))
         .then(response => response.json())
         .catch(error => console.log('failed to parse response to json: ' + error));
 }

@@ -8,6 +8,7 @@
           type="text/css"/>
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
     <script type="text/javascript" th:src="@{/active_debate.js}"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
@@ -15,12 +16,51 @@
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        .hide {
+            display: none;
+        }
+        .pro-team{
+            border-width: 15px;
+            border-style: solid;
+            border-radius: 10px;
+            color:green;
+        }
+        .contra-team {
+            border-width: 15px;
+            border-style: solid;
+            border-radius: 10px;
+            color: #c62424;
+        }
+    </style>
 </head>
 <body th:onload="'joinDebateMeeting('+ ${userId} +  ',' + ${isJudge} + ',' + ${debateSessionId} +');'">
 <div class="container text-center">
     <div class="card p-3 bg-light m-5">
-        <div class="card-body">
+        <div class="card-body" id="card-body">
             <p>My Active Debate</p>
+        </div>
+    </div>
+    <div>
+        <button
+                type="button"
+                id="join-preparation-team-pro"
+                class="btn btn-success hide"
+                th:onclick="joinPreparationMeetingOfTeamPro()"
+        >
+            Join preparation of team Pro
+        </button>
+        <button
+                type="button"
+                id="join-preparation-team-contra"
+                class="btn btn-danger hide"
+                th:onclick="joinPreparationMeetingOfTeamContra()"
+        >
+            Join preparation of team Contra
+        </button>
+        <div id="notification-panel" class="hide">
+            <p id="notification-message">
+            </p>
         </div>
     </div>
     <div id="wrapper">

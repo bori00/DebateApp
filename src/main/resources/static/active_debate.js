@@ -1,50 +1,116 @@
 let callFrame;
+let preparationMeetingTeamPro, preparationMeetingTeamContra, activeDebateMeeting;
+let isJudge;
+let userId;
+let debateSessionId;
+let endOfPreparationPhase = false;
 
-async function joinDebateMeeting(userId, isJudge, debateSessionId) {
+async function joinDebateMeeting(currentUserId, isParticipantJudge, currentDebateSessionId) {
+    isJudge = isParticipantJudge;
+    userId = currentUserId;
+    debateSessionId = currentDebateSessionId;
     const callWrapper = document.getElementById('wrapper');
     callFrame = await createDebateCallFrame(callWrapper);
 
     callFrame
-        .on('joined-meeting', handleJoinedMeeting)
         .on('left-meeting', handleLeftMeeting);
 
-    console.log("id="+debateSessionId);
-    let meeting = await getDebateMeeting(debateSessionId, "ACTIVE");
-    console.log("meeting name="+meeting.meetingName);
-    console.log("meeting url="+meeting.meetingUrl);
+    activeDebateMeeting = await getMeeting(debateSessionId, "ACTIVE");
+    preparationMeetingTeamPro = await getMeeting(debateSessionId, "PREPARATION_PRO");
+    preparationMeetingTeamContra = await getMeeting(debateSessionId, "PREPARATION_CONTRA");
 
-    let requestToken;
+    let meetingToken;
 
-    if(isJudge) {
-        requestToken = await createMeetingToken(getJudgePrivileges(meeting.meetingName, userId));
-    }else{
-        requestToken = await createMeetingToken(getPlayerPrivileges(meeting.meetingName, userId));
+    if (isJudge) {
+        setElementVisibility("join-preparation-team-pro", true);
+        setElementVisibility("join-preparation-team-contra", true);
+
+        let seconds = await getTimeIntervalForNextPhaseOfDebateSession();
+        window.setTimeout(handleEndOfPreparationPhaseForJudge, seconds * 1000); // convert to millis
+
+    } else {
+        await subscribeToPreparationTimerNotificationSocket();
+
+        let debateSessionPlayerDestination = "/process_get_debate_session_player?userId=" + userId;
+        let debateSessionPlayer = await getDataFromServer(debateSessionPlayerDestination);
+
+        let teamPreparationMeeting;
+
+        if(debateSessionPlayer.team === "P") {
+            callWrapper.classList.add('pro-team');
+            teamPreparationMeeting = preparationMeetingTeamPro;
+        }else {
+            callWrapper.classList.add('contra-team');
+            teamPreparationMeeting = preparationMeetingTeamContra;
+        }
+        meetingToken = await createMeetingToken(getPlayerPrivileges(teamPreparationMeeting.meetingName, userId));
+        await joinMeetingWithToken(teamPreparationMeeting.meetingUrl, meetingToken.token);
     }
-    await joinMeetingWithToken(meeting, requestToken.token);
 }
 
-async function getDebateMeeting(debateSessionId, meetingType) {
-    const destEndpoint = "/process_get_meeting?debateSessionId="+debateSessionId+"&meetingType="+meetingType;
-    const token = $("meta[name='_csrf']").attr("content");
-    const header = $("meta[name='_csrf_header']").attr("content");
-
-    return fetch(destEndpoint, {
-        method: 'GET',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            "charset": "UTF-8",
-            [header]: token,
-        },
-    })
-        .catch(error => console.log('failed to fetch meeting: ' + error))
-        .then(response => response.json())
-        .catch(error => console.log('failed to parse json: ' + error))
+async function getTimeIntervalForNextPhaseOfDebateSession() {
+    let destinationEndpoint = "/process_get_time_interval?debateSessionId="+debateSessionId;
+    return await getDataFromServer(destinationEndpoint);
 }
 
-async function joinMeetingWithToken(meeting, meetingToken) {
+async function subscribeToPreparationTimerNotificationSocket() {
+    const socket = new SockJS('/secured/debates');
+    const stompClient = Stomp.over(socket);
+
+    console.log("Socket initialized");
+
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe("/user/queue/debate-preparation-times-up",
+            function (timesUp) {
+               onPreparationTimesUp();
+            });
+    });
+}
+
+async function onPreparationTimesUp() {
+    window.alert("Times up! The preparation for the debate has ended!");
+    endOfPreparationPhase = true;
+    await leaveMeeting();
+}
+
+async function handleEndOfPreparationPhaseForJudge() {
+    let timerEndNotificationDestination = "/process_end_of_preparation_phase";
+    await sendDataToServer(timerEndNotificationDestination, userId);
+    await onPreparationTimesUp();
+}
+
+async function joinPreparationMeetingOfTeamPro() {
+    await leaveMeeting();
+
+    setElementVisibility("join-preparation-team-pro", false);
+    const callWrapper = document.getElementById('wrapper');
+    callWrapper.classList.add('pro-team');
+
+    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName, userId));
+    await joinMeetingWithToken(preparationMeetingTeamPro.meetingUrl, meetingToken.token);
+
+}
+
+async function joinPreparationMeetingOfTeamContra() {
+    await leaveMeeting();
+
+    setElementVisibility("join-preparation-team-contra", false);
+    const callWrapper = document.getElementById('wrapper');
+    callWrapper.classList.add('contra-team');
+
+    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName, userId));
+    await joinMeetingWithToken(preparationMeetingTeamContra.meetingUrl, meetingToken.token);
+}
+
+async function getMeeting(debateSessionId, meetingType) {
+    const debateMeetingDestEndpoint = "/process_get_meeting?debateSessionId=" + debateSessionId + "&meetingType=" + meetingType;
+
+    return await getDataFromServer(debateMeetingDestEndpoint);
+}
+
+async function joinMeetingWithToken(meetingUrl, meetingToken) {
     callFrame.join({
-        url: meeting.meetingUrl,
+        url: meetingUrl,
         token: meetingToken,
         showLeaveButton: true,
         showFullscreenButton: true,
@@ -65,7 +131,7 @@ function getJudgePrivileges(roomName, userId) {
 }
 
 function getPlayerPrivileges(roomName, userId) {
-     return {
+    return {
         properties: {
             room_name: roomName,
             is_owner: false,
@@ -75,10 +141,32 @@ function getPlayerPrivileges(roomName, userId) {
     };
 }
 
-function handleJoinedMeeting() {
-    //todo
+async function leaveMeeting() {
+    callFrame.leave();
+
+    if(endOfPreparationPhase) {
+        let privileges = (isJudge) ? getJudgePrivileges(activeDebateMeeting.meetingName): getPlayerPrivileges(activeDebateMeeting.meetingName);
+        let meetingToken = await createMeetingToken(privileges, userId);
+
+        await joinMeetingWithToken(activeDebateMeeting.meetingUrl, meetingToken.token);
+    }
 }
 
 function handleLeftMeeting() {
-    //todo
+    setElementVisibility("join-preparation-team-pro", isJudge && !endOfPreparationPhase);
+    setElementVisibility("join-preparation-team-contra", isJudge && !endOfPreparationPhase);
+    const callWrapper = document.getElementById('wrapper');
+    callWrapper.classList.remove('pro-team');
+    callWrapper.classList.remove('contra-team');
 }
+
+function setElementVisibility(id, visible) {
+    const element = document.getElementById(id);
+    if (visible) {
+        element.classList.remove('hide');
+    } else {
+        element.classList.add('hide');
+    }
+}
+
+
