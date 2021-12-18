@@ -14,7 +14,7 @@ async function createDebateCallFrame(callWrapper) {
 }
 
 
-async function createRoom() {
+async function createMeetingRoom() {
     const newRoomEndpoint = DAILY_REST_DOMAIN + "/rooms";
     // room expires in 24 hours
     const exp = Math.round(Date.now() / 1000) + 60 * 60 * 24;

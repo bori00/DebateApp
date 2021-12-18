@@ -1,6 +1,7 @@
 package com.se.DebateApp.Controller.StartDebate.DTOs;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.se.DebateApp.Model.Constants.MeetingType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,4 +16,5 @@ public class MeetingAttributes {
     private Long debateSessionId;
     private String meetingName;
     private String meetingUrl;
+    private MeetingType meetingType;
 }

@@ -7,7 +7,7 @@ function copyDebateCode() {
 }
 
 async function initDebate(debateSessionId) {
-    await createDebateMeeting(debateSessionId);
+    await createDebateMeetings(debateSessionId);
     await subscribeToParticipantAnnouncementSocket();
 }
 
@@ -43,10 +43,16 @@ function activateDebateSession() {
     window.location.href="/process_activate_debate_session";
 }
 
-async function createDebateMeeting(debateSessionId) {
-    let room = await createRoom();
+async function createDebateMeetings(debateSessionId) {
+    await createDebateMeetingRoom(debateSessionId, "ACTIVE");
+    await createDebateMeetingRoom(debateSessionId, "PREPARATION_PRO");
+    await createDebateMeetingRoom(debateSessionId, "PREPARATION_CONTRA");
+}
 
-    const destEndpoint = "/process_create_active_meeting";
+async function createDebateMeetingRoom(debateSessionId, meetingType) {
+    let room = await createMeetingRoom();
+
+    const destEndpoint = "/process_create_meeting";
     const token = $("meta[name='_csrf']").attr("content");
     const header = $("meta[name='_csrf_header']").attr("content");
 
@@ -54,6 +60,7 @@ async function createDebateMeeting(debateSessionId) {
             "debateSessionId": debateSessionId,
             "meetingName": room.name,
             "meetingUrl": room.url,
+            "meetingType": meetingType,
     }
 
     fetch(destEndpoint, {

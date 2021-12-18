@@ -5,9 +5,9 @@ import javax.persistence.Converter;
 import java.util.stream.Stream;
 
 public enum MeetingType {
-    ACTIVE("A"),
-    PREPARATION_PRO_TEAM("PRO"),
-    PREPARATION_CONTRA_TEAM("CONTRA");
+    ACTIVE("ACTIVE"),
+    PREPARATION_PRO_TEAM("PREPARATION_PRO"),
+    PREPARATION_CONTRA_TEAM("PREPARATION_CONTRA");
 
     private final String code;
 
@@ -20,7 +20,7 @@ public enum MeetingType {
     }
 
     @Converter(autoApply = true)
-    public static class MeetingRoomConverter implements AttributeConverter<MeetingType, String> {
+    public static class MeetingTypeConverter implements AttributeConverter<MeetingType, String> {
 
         @Override
         public String convertToDatabaseColumn(MeetingType meetingType) {

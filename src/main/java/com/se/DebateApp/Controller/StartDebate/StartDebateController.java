@@ -176,7 +176,7 @@ public class StartDebateController {
     }
 
     @GetMapping("/process_activate_debate_session")
-    public String activateDebateSession() {
+    public String activateDebateSession(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToActivateDebates =
                 debateSessionRepository.findDebateSessionOfJudgeWithGivenState(user,
@@ -192,11 +192,35 @@ public class StartDebateController {
         session.removePlayersWhoDidntJoinATeam();
         debateSessionRepository.save(session);
         announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
-        return "active_debate";
+        return goToActiveDebatePage(model);
     }
 
     @GetMapping("/go_to_active_debate")
     public String goToActiveDebatePage(Model model) {
+        User currentUser = getCurrentUser();
+        DebateSession debateSession = null;
+        boolean isJudge = false;
+
+        Optional<DebateSessionPlayer> debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUser(currentUser);
+
+        if(debateSessionPlayer.isPresent()) {
+            debateSession = debateSessionPlayer.get().getDebateSession();
+        }else{
+            isJudge = true;
+            List<DebateSession> preparationPhaseDebatesOfJudge =
+                    debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser,
+                            DebateSessionPhase.PREP_TIME);
+            if (preparationPhaseDebatesOfJudge.size() == 1) {
+                debateSession = preparationPhaseDebatesOfJudge.get(0);
+            }
+        }
+        if(debateSession == null) {
+            return "error";
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("isJudge", isJudge);
+        model.addAttribute("debateSessionId", debateSession.getId());
         return "active_debate";
     }
 
