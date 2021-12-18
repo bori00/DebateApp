@@ -46,20 +46,7 @@ public class HomePageController {
     }
 
     @GetMapping("/start_debate")
-    public String goToStartDebatePage(@RequestParam(name = "debateTemplateId") Long debateTemplateId, Model model) {
-        DebateSession debateSession = new DebateSession();
-
-        debateSession.setDebateSessionPhase(DebateSessionPhase.WAITING_FOR_PLAYERS);
-        debateSession.setCurrentPhaseStartingTime(new Date());
-
-        debateSession.setDebateTemplate(debateTemplateRepository.getById(debateTemplateId));
-
-        // save the debate session in the DB and retrieve the saved session with its generated id
-        DebateSession savedDebateSession = debateSessionRepository.save(debateSession);
-
-        model.addAttribute("debate_session", savedDebateSession);
-        model.addAttribute("user", getCurrentUser());
-
+    public String goToStartDebatePage(Model model) {
         return "start_debate";
     }
 
