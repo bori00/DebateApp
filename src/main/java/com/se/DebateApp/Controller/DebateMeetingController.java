@@ -100,11 +100,23 @@ public class DebateMeetingController {
         DebateTemplate debateTemplate = debateSession.getDebateTemplate();
 
         switch (debateSession.getDebateSessionPhase()) {
-            case PREP_TIME -> {
+            case PREP_TIME: {
                 return debateTemplate.getPrepTimeSeconds();
             }
-            default -> {
-                return 0;
+            case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1:
+            case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2:
+            case NEGATIVE_CONSTRUCTIVE_SPEECH_1:
+            case NEGATIVE_CONSTRUCTIVE_SPEECH_2: {
+                return debateTemplate.getConstSpeechSeconds();
+            }
+            case CROSS_EXAMINATION_1:
+            case CROSS_EXAMINATION_2:
+            case CROSS_EXAMINATION_3:
+            case CROSS_EXAMINATION_4: {
+                return debateTemplate.getCrossExaminationSeconds();
+            }
+            default: {
+                return 24*60*60; // 24 hours
             }
         }
     }
@@ -118,7 +130,7 @@ public class DebateMeetingController {
         debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(debateSession.getPlayers());
         debateSessionRepository.save(debateSession);
-        announceAllDebatePlayersAboutEndOfTimeInterval(joinedPlayers, "preparation");
+        announceAllDebatePlayersAboutEndOfTimeInterval(joinedPlayers, debateSession.getDebateSessionPhase().name().toLowerCase());
     }
 
     private void announceAllDebatePlayersAboutEndOfTimeInterval(Set<DebateSessionPlayer> joinedPlayers, String phase) {

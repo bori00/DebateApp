@@ -60,7 +60,7 @@ async function subscribeToPreparationTimerNotificationSocket() {
     console.log("Socket initialized");
 
     stompClient.connect({}, function (frame) {
-        stompClient.subscribe("/user/queue/debate-preparation-times-up",
+        stompClient.subscribe("/user/queue/debate-prep_time-times-up",
             function (timesUp) {
                onPreparationTimesUp();
             });
