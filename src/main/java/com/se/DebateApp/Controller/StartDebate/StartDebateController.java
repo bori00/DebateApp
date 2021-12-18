@@ -1,18 +1,12 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Controller.StartDebate.DTOs.DebateLobbyInformation;
-import com.se.DebateApp.Controller.StartDebate.DTOs.DebateSessionTeamChoiceInformation;
-import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
-import com.se.DebateApp.Controller.StartDebate.DTOs.JoinTeamRequestResponse;
+import com.se.DebateApp.Controller.StartDebate.DTOs.*;
+import com.se.DebateApp.Model.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerState;
 import com.se.DebateApp.Model.Constants.TeamType;
 import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
-import com.se.DebateApp.Model.DebateSession;
-import com.se.DebateApp.Model.DebateSessionPlayer;
-import com.se.DebateApp.Model.DebateTemplate;
-import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
@@ -26,7 +20,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 

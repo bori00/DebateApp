@@ -11,13 +11,15 @@
     <script type="text/javascript" th:src="@{/start_debate.js}"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
         .hide {
             display: none;
         }
     </style>
 </head>
-<body th:onload="subscribeToParticipantAnnouncementSocket()">
+<body th:onload="'initDebate(' + ${debateCode} + ')'">
 
 <div class="container text-center">
     <div th:if="${errorMessage!=null}">

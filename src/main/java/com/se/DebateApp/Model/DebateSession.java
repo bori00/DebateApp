@@ -32,15 +32,6 @@ public class DebateSession {
     @Column(nullable = false)
     private DebateSessionPhase debateSessionPhase = DebateSessionPhase.WAITING_FOR_PLAYERS;
 
-    @Column(nullable = true)
-    private String debateUrl;
-
-    @Column(nullable = true)
-    private String preparationPhaseUrlProTeam;
-
-    @Column(nullable = true)
-    private String preparationPhaseUrlContraTeam;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     private java.util.Date currentPhaseStartingTime;
@@ -48,9 +39,17 @@ public class DebateSession {
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession", orphanRemoval=true)
     private Set<DebateSessionPlayer> players = new HashSet<>();
 
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession", orphanRemoval=true)
+    private Set<DebateMeeting> meetings = new HashSet<>();
+
     public void addNewPlayer(DebateSessionPlayer debateSessionPlayer) {
         debateSessionPlayer.setDebateSession(this);
         this.players.add(debateSessionPlayer);
+    }
+
+    public void addNewMeeting(DebateMeeting debateMeeting) {
+        debateMeeting.setDebateSession(this);
+        this.meetings.add(debateMeeting);
     }
 
     public DebateParticipantsStatus computeParticipantsStatus() {
