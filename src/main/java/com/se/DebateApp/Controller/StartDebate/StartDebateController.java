@@ -218,7 +218,7 @@ public class StartDebateController {
             return "error";
         }
 
-        model.addAttribute("user", currentUser);
+        model.addAttribute("userId", currentUser.getId());
         model.addAttribute("isJudge", isJudge);
         model.addAttribute("debateSessionId", debateSession.getId());
         return "active_debate";

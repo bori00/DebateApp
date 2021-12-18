@@ -16,12 +16,11 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
-<body th:onload="'joinDebateMeeting('+ ${user.getId()} +  ',' + ${isJudge} + ',' + ${debateSessionId} +');'">
+<body th:onload="'joinDebateMeeting('+ ${userId} +  ',' + ${isJudge} + ',' + ${debateSessionId} +');'">
 <div class="container text-center">
     <div class="card p-3 bg-light m-5">
         <div class="card-body">
             <p>My Active Debate</p>
-            <p th:text="${user.getId()}"></p>
         </div>
     </div>
     <div id="wrapper">
