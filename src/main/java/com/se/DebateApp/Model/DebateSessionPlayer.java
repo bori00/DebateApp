@@ -21,7 +21,7 @@ public class DebateSessionPlayer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @ToString.Exclude
     private DebateSession debateSession;
 

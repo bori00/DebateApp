@@ -22,7 +22,8 @@ public enum DebateSessionPhase {
     NEGATIVE_REBUTTAL_2("NR2"),
     AFFIRMATIVE_REBUTTAL_2("AR2"),
     FINAL_VOTE("FV"),
-    FINAL_DISCUSSION("FD");
+    FINAL_DISCUSSION("FD"),
+    FINISHED("-");
 
 
     private final String code;

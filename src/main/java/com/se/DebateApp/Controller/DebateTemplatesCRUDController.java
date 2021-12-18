@@ -117,11 +117,6 @@ public class DebateTemplatesCRUDController {
                 linkToResource.getDebateTemplate().getId();
     }
 
-    @GetMapping("/process_start_debate")
-    public String processStartDebate(@RequestParam(name = "debateTemplateId") Long debateTemplateId) {
-        return "redirect:/start_debate?debateTemplateId=" + debateTemplateId;
-    }
-
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
