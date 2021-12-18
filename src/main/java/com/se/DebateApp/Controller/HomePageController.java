@@ -47,7 +47,7 @@ public class HomePageController {
 
     @GetMapping("/start_debate")
     public String goToStartDebatePage(Model model) {
-        model.addAttribute(getCurrentUser());
+        model.addAttribute("user", getCurrentUser());
         return "start_debate";
     }
 
