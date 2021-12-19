@@ -13,4 +13,5 @@ import lombok.Setter;
 public class DebateMeetingDTO {
     private String meetingName;
     private String meetingUrl;
+    private String meetingType;
 }

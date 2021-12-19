@@ -3,10 +3,9 @@ package com.se.DebateApp.Controller;
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributes;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
-import com.se.DebateApp.Model.Constants.MeetingType;
-import com.se.DebateApp.Model.DTOs.*;
+import com.se.DebateApp.Model.DTOs.DebateMeetingDTO;
+import com.se.DebateApp.Model.DTOs.DebateSessionPlayerDTO;
 import com.se.DebateApp.Model.*;
-import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Repository.DebateMeetingRepository;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
@@ -21,9 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class DebateMeetingController {
@@ -56,24 +54,20 @@ public class DebateMeetingController {
         debateSessionRepository.save(debateSession);
     }
 
-    @GetMapping(value = "/process_get_meeting", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/process_get_all_meetings", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DebateMeetingDTO processGetMeeting(@RequestParam(value = "debateSessionId") Long debateSessionId, @RequestParam(value = "meetingType") String meetingType) {
+    public List<DebateMeetingDTO> processGetAllMeetings(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
-        MeetingType.MeetingTypeConverter converter = new MeetingType.MeetingTypeConverter();
-        DebateMeeting debateMeeting = debateMeetingRepository.findDebateMeetingOfDebateSessionByType(debateSession, converter.convertToEntityAttribute(meetingType));
+        List<DebateMeeting> debateMeetings = debateMeetingRepository.findByDebateSession(debateSession);
 
-        DebateMeetingDTO debateMeetingDTO = new DebateMeetingDTO();
-
-        debateMeetingDTO.setMeetingName(debateMeeting.getName());
-        debateMeetingDTO.setMeetingUrl(debateMeeting.getUrl());
-
-        return debateMeetingDTO;
+        return debateMeetings.stream()
+                .map(debateMeeting -> new DebateMeetingDTO(debateMeeting.getName(), debateMeeting.getUrl(), debateMeeting.getMeetingType().getCode()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping(value = "/process_get_debate_session_player", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DebateSessionPlayerDTO processGetDebateSessionPlayer(@RequestParam(value="debateSessionId") Long debateSessionId) {
+    public DebateSessionPlayerDTO processGetDebateSessionPlayer(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSessionPlayer debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUserAndDebateSession(getCurrentUser(), debateSessionRepository.getById(debateSessionId))
                 .orElseThrow(() -> new NotFoundException("The given user is not a player in the debate session"));
 

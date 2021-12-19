@@ -13,9 +13,27 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     callFrame
         .on('left-meeting', handleLeftMeeting);
 
-    activeDebateMeeting = await getMeeting(debateSessionId, "ACTIVE");
-    preparationMeetingTeamPro = await getMeeting(debateSessionId, "PREPARATION_PRO");
-    preparationMeetingTeamContra = await getMeeting(debateSessionId, "PREPARATION_CONTRA");
+    let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
+    console.log(meetings);
+    for ( let {meetingName, meetingUrl, meetingType} of meetings) {
+        console.log("name=" + meetingName);
+        console.log("url=" + meetingUrl);
+        console.log("type=" + meetingType);
+        switch(meetingType) {
+            case "ACTIVE" : {
+                activeDebateMeeting = {meetingName, meetingUrl, meetingType}
+                break;
+            }
+            case "PREPARATION_PRO" : {
+                preparationMeetingTeamPro = {meetingName, meetingUrl, meetingType}
+                break;
+            }
+            case "PREPARATION_CONTRA" : {
+                preparationMeetingTeamContra = {meetingName, meetingUrl, meetingType}
+                break;
+            }
+        }
+    }
 
     let meetingToken;
 
@@ -100,8 +118,8 @@ async function joinPreparationMeetingOfTeamContra() {
     await joinMeetingWithToken(preparationMeetingTeamContra.meetingUrl, meetingToken.token);
 }
 
-async function getMeeting(debateSessionId, meetingType) {
-    const debateMeetingDestEndpoint = "/process_get_meeting?debateSessionId=" + debateSessionId + "&meetingType=" + meetingType;
+async function getAllMeetingsOfDebateSession(debateSessionId) {
+    const debateMeetingDestEndpoint = "/process_get_all_meetings?debateSessionId=" + debateSessionId;
 
     return await getDataFromServer(debateMeetingDestEndpoint);
 }
