@@ -4,6 +4,8 @@ let isJudge;
 let debateSessionId;
 let endOfPreparationPhase = false;
 
+const PREP_TIME_PHASE = "prep-time";
+
 async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     isJudge = isParticipantJudge;
     debateSessionId = currentDebateSessionId;
@@ -41,11 +43,12 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         setElementVisibility("join-preparation-team-pro", true);
         setElementVisibility("join-preparation-team-contra", true);
 
-        let seconds = await getTimeIntervalForNextPhaseOfDebateSession();
+        //let seconds = await getTimeIntervalForNextPhaseOfDebateSession(); //todo
+        let seconds = 10;
         window.setTimeout(handleEndOfPreparationPhaseForJudge, seconds * 1000); // convert to millis
 
     } else {
-        await subscribeToPreparationTimerNotificationSocket();
+        await subscribeToTimerNotificationSocket(PREP_TIME_PHASE);
 
         let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId="+debateSessionId;
         let debateSessionPlayer = await getDataFromServer(debateSessionPlayerDestination);
@@ -69,14 +72,14 @@ async function getTimeIntervalForNextPhaseOfDebateSession() {
     return await getDataFromServer(destinationEndpoint);
 }
 
-async function subscribeToPreparationTimerNotificationSocket() {
+async function subscribeToTimerNotificationSocket(phase) {
     const socket = new SockJS('/secured/debates');
     const stompClient = Stomp.over(socket);
 
     console.log("Socket initialized");
 
     stompClient.connect({}, function (frame) {
-        stompClient.subscribe("/user/queue/debate-prep_time-times-up",
+        stompClient.subscribe("/user/queue/debate-" + phase + "-times-up",
             function (timesUp) {
                onPreparationTimesUp();
             });

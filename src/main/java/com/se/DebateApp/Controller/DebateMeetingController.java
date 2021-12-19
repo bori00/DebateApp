@@ -21,6 +21,7 @@ import org.webjars.NotFoundException;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -130,19 +131,19 @@ public class DebateMeetingController {
     @ResponseBody
     public void processEndOfPreparationPhase() {
         DebateSession debateSession = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(getCurrentUser(), DebateSessionPhase.PREP_TIME).get(0);
+        DebateSessionPhase previousPhase = debateSession.getDebateSessionPhase();
         debateSession.setDebateSessionPhase(DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1);
         debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         debateSessionRepository.save(debateSession);
-        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession);
+        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession.getPlayers(), previousPhase);
     }
 
-    private void announceAllDebatePlayersAboutEndOfTimeInterval(DebateSession debateSession) {
-        String debatePhase = debateSession.getDebateSessionPhase().name().toLowerCase();
-        for (DebateSessionPlayer player : debateSession.getPlayers()) {
+    private void announceAllDebatePlayersAboutEndOfTimeInterval(Set<DebateSessionPlayer> players, DebateSessionPhase phase) {
+        String destinationUrl = "/queue/debate-" + phase.name().toLowerCase().replace('_', '-') + "-times-up";
+        System.out.println(destinationUrl);
+        for (DebateSessionPlayer player : players) {
             simpMessagingTemplate.convertAndSendToUser(
-                    player.getUser().getUserName(),
-                    "/queue/debate-" + debatePhase + "-times-up",
-                    "timesUp");
+                    player.getUser().getUserName(), destinationUrl, "timesUp");
         }
     }
 
