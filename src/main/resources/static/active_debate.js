@@ -5,6 +5,7 @@ let debateSessionId;
 let endOfPreparationPhase = false;
 
 const PREP_TIME_PHASE = "prep-time";
+const SPEECH_TIME_PHASE = "speech-time";
 
 async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     isJudge = isParticipantJudge;
@@ -13,14 +14,12 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     callFrame = await createDebateCallFrame(callWrapper);
 
     callFrame
-        .on('left-meeting', handleLeftMeeting);
+        .on('left-meeting', handleLeftMeeting)
+        .on('joined-meeting', handleJoinedMeeting);
 
     let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
-    console.log(meetings);
+
     for ( let {meetingName, meetingUrl, meetingType} of meetings) {
-        console.log("name=" + meetingName);
-        console.log("url=" + meetingUrl);
-        console.log("type=" + meetingType);
         switch(meetingType) {
             case "ACTIVE" : {
                 activeDebateMeeting = {meetingName, meetingUrl, meetingType}
@@ -43,16 +42,13 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         setElementVisibility("join-preparation-team-pro", true);
         setElementVisibility("join-preparation-team-contra", true);
 
-        //let seconds = await getTimeIntervalForNextPhaseOfDebateSession(); //todo
-        let seconds = 10;
+        let seconds = await getTimeIntervalForNextPhaseOfDebateSession();
         window.setTimeout(handleEndOfPreparationPhaseForJudge, seconds * 1000); // convert to millis
 
     } else {
         await subscribeToTimerNotificationSocket(PREP_TIME_PHASE);
 
-        let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId="+debateSessionId;
-        let debateSessionPlayer = await getDataFromServer(debateSessionPlayerDestination);
-
+        let debateSessionPlayer = await getDebateSessionPlayer();
         let teamPreparationMeeting;
 
         if(debateSessionPlayer.team === "P") {
@@ -67,8 +63,15 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     }
 }
 
+async function getDebateSessionPlayer() {
+    let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId="+debateSessionId;
+
+    return await getDataFromServer(debateSessionPlayerDestination);
+}
+
 async function getTimeIntervalForNextPhaseOfDebateSession() {
     let destinationEndpoint = "/process_get_time_interval?debateSessionId="+debateSessionId;
+
     return await getDataFromServer(destinationEndpoint);
 }
 
@@ -94,6 +97,7 @@ async function onPreparationTimesUp() {
 
 async function handleEndOfPreparationPhaseForJudge() {
     let timerEndNotificationDestination = "/process_end_of_preparation_phase";
+
     await sendDataToServer(timerEndNotificationDestination);
     await onPreparationTimesUp();
 }
@@ -107,7 +111,6 @@ async function joinPreparationMeetingOfTeamPro() {
 
     let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName));
     await joinMeetingWithToken(preparationMeetingTeamPro.meetingUrl, meetingToken.token);
-
 }
 
 async function joinPreparationMeetingOfTeamContra() {
@@ -121,10 +124,21 @@ async function joinPreparationMeetingOfTeamContra() {
     await joinMeetingWithToken(preparationMeetingTeamContra.meetingUrl, meetingToken.token);
 }
 
-async function getAllMeetingsOfDebateSession(debateSessionId) {
-    const debateMeetingDestEndpoint = "/process_get_all_meetings?debateSessionId=" + debateSessionId;
+async function rejoinDebate() {
+    const lastDebateMeetingDestEndpoint = "/process_get_last_meeting?debateSessionId=" + debateSessionId;
 
-    return await getDataFromServer(debateMeetingDestEndpoint);
+    let lastMeeting = await getDataFromServer(lastDebateMeetingDestEndpoint);
+
+    let privilegeOptions = (isJudge)? getJudgePrivileges(lastMeeting.meetingName) : getPlayerPrivileges(lastMeeting.meetingName);
+    let meetingToken = await createMeetingToken(privilegeOptions);
+
+    await joinMeetingWithToken(lastMeeting.meetingUrl, meetingToken.token);
+}
+
+async function getAllMeetingsOfDebateSession(debateSessionId) {
+    const allDebateMeetingsDestEndpoint = "/process_get_all_meetings?debateSessionId=" + debateSessionId;
+
+    return await getDataFromServer(allDebateMeetingsDestEndpoint);
 }
 
 async function joinMeetingWithToken(meetingUrl, meetingToken) {
@@ -170,11 +184,17 @@ async function leaveMeeting() {
 }
 
 function handleLeftMeeting() {
+    setElementVisibility("rejoin", !isJudge || endOfPreparationPhase);
     setElementVisibility("join-preparation-team-pro", isJudge && !endOfPreparationPhase);
     setElementVisibility("join-preparation-team-contra", isJudge && !endOfPreparationPhase);
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.remove('pro-team');
     callWrapper.classList.remove('contra-team');
+}
+
+async function handleJoinedMeeting() {
+    setElementVisibility("rejoin", false);
+    await updateParticipantsView();
 }
 
 function setElementVisibility(id, visible) {
@@ -184,6 +204,52 @@ function setElementVisibility(id, visible) {
     } else {
         element.classList.add('hide');
     }
+}
+
+async function updateParticipantsView() {
+    let currentDeputy = undefined; // todo fetch from server
+
+    let debateSessionPlayer = await getDebateSessionPlayer();
+    if(debateSessionPlayer === currentDeputy && debateSessionPlayer.playerRole !== "N") {
+        highlightCurrentDeputy(debateSessionPlayer.team);
+    }
+
+    // mute all participants except the current deputy: TODO
+    if(debateSessionPlayer === currentDeputy) {
+        callFrame.setLocalAudio(true);
+    }else{
+        callFrame.setLocalAudio(false);
+    }
+
+    // set frame color according to current team
+    if(!isJudge) {
+        const callWrapper = document.getElementById('wrapper');
+        if(debateSessionPlayer.team === "P") {
+            callWrapper.classList.add('pro-team');
+        }else{
+            callWrapper.classList.add('contra-team');
+        }
+    }
+}
+
+function highlightCurrentDeputy(team) {
+    const color = (team === "P")? 'green' : 'red';
+    callFrame.updateParticipant('local', {
+        styles: {
+            cam: {
+                div: {
+                    visibility: 'visible',
+                    'border-color': color,
+                    'border-width': '10px',
+                    'border-style': 'solid',
+                    top: 20,
+                    left: 20,
+                    width: 20,
+                    height: 20,
+                },
+            },
+        },
+    });
 }
 
 
