@@ -41,7 +41,7 @@ public class DebateMeetingController {
 
     @PostMapping(value = "/process_create_meeting", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void processCreateActiveMeeting(@RequestBody DebateMeetingAttributes debateMeetingAttributes) {
+    public void processCreateMeeting(@RequestBody DebateMeetingAttributes debateMeetingAttributes) {
         DebateSession debateSession = debateSessionRepository.getById(debateMeetingAttributes.getDebateSessionId());
 
         DebateMeeting debateMeeting = createDebateMeeting(debateMeetingAttributes);
@@ -54,12 +54,12 @@ public class DebateMeetingController {
 
     @GetMapping(value = "/process_get_meeting", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DebateMeetingDTO processGetActiveMeeting(@RequestParam(value = "debateSessionId") Long debateSessionId, @RequestParam(value = "meetingType") String meetingType) {
+    public DebateMeetingDTO processGetMeeting(@RequestParam(value = "debateSessionId") Long debateSessionId, @RequestParam(value = "meetingType") String meetingType) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         MeetingType.MeetingTypeConverter converter = new MeetingType.MeetingTypeConverter();
         DebateMeeting debateMeeting = debateMeetingRepository.findDebateMeetingOfDebateSessionByType(debateSession, converter.convertToEntityAttribute(meetingType));
 
-        com.se.DebateApp.Model.DTOs.DebateMeetingDTO debateMeetingDTO = new com.se.DebateApp.Model.DTOs.DebateMeetingDTO();
+        DebateMeetingDTO debateMeetingDTO = new DebateMeetingDTO();
 
         debateMeetingDTO.setMeetingName(debateMeeting.getName());
         debateMeetingDTO.setMeetingUrl(debateMeeting.getUrl());
@@ -116,7 +116,7 @@ public class DebateMeetingController {
                 return debateTemplate.getCrossExaminationSeconds();
             }
             default: {
-                return 24*60*60; // 24 hours
+                return 24 * 60 * 60; // 24 hours
             }
         }
     }
