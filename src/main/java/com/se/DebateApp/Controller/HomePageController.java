@@ -104,7 +104,7 @@ public class HomePageController {
             if (session.getDebateSessionPhase() == DebateSessionPhase.WAITING_FOR_PLAYERS) {
                 return new StringWrapper("/reenter_start_debate");
             }
-            return new StringWrapper("active_debate");
+            return new StringWrapper("/reenter_active_debate");
             // TODO: possibly extend
         } else {
             if (ongoingDebatesAsPlayer.size() > 1) {
@@ -118,12 +118,12 @@ public class HomePageController {
                                 .filter(p -> p.getUser().equals(user))
                                 .collect(Collectors.toList()).get(0);
                 if (player.getPlayerState().equals(PlayerState.WAITING_TO_JOIN_TEAM)) {
-                    return new StringWrapper("choose_team");
+                    return new StringWrapper("/reenter_choose_team");
                 } else {
-                    return new StringWrapper("debate_lobby");
+                    return new StringWrapper("/reenter_debate_lobby");
                 }
             }
-            return new StringWrapper("active_debate");
+            return new StringWrapper("/reenter_active_debate");
             // TODO: possibly extend
         }
     }

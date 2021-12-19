@@ -79,7 +79,7 @@ public class StartDebateController {
     }
 
     @GetMapping("/reenter_start_debate")
-    public String processStartDebateSession(Model model) {
+    public String reenterStartDebateSession(Model model) {
         User user = getCurrentUser();
         List<DebateSession> ongoingsSessionsAsJudge =
                 debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
@@ -138,6 +138,11 @@ public class StartDebateController {
                         waitingToJoinDebates.get(0).getDebateTemplate());
         model.addAttribute("team_choice_information", teamChoiceInformation);
         return "choose_team";
+    }
+
+    @GetMapping("/reenter_choose_team")
+    public String reenterChooseTeamPageRequest(Model model) {
+        return processGoToChooseTeamPageRequest(model);
     }
 
     @PostMapping(value = "/process_join_team", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -204,6 +209,11 @@ public class StartDebateController {
         return "debate_lobby";
     }
 
+    @GetMapping("/reenter_debate_lobby")
+    public String reenterDebateLobbyPage(Model model) {
+        return processGoToDebateLobbyPage(model);
+    }
+
     @GetMapping("/process_activate_debate_session")
     public String activateDebateSession() {
         User user = getCurrentUser();
@@ -226,6 +236,11 @@ public class StartDebateController {
 
     @GetMapping("/go_to_active_debate")
     public String goToActiveDebatePage(Model model) {
+        return "active_debate";
+    }
+
+    @GetMapping("/reenter_active_debate")
+    public String reenterActiveDebatePage(Model model) {
         return "active_debate";
     }
 
