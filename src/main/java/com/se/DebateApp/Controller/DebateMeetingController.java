@@ -1,5 +1,6 @@
 package com.se.DebateApp.Controller;
 
+import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributes;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.MeetingType;
@@ -13,6 +14,8 @@ import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
@@ -69,8 +72,9 @@ public class DebateMeetingController {
 
     @GetMapping(value = "/process_get_debate_session_player", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DebateSessionPlayerDTO processGetDebateSessionPlayer(@RequestParam(value = "userId") Long userId) {
-        DebateSessionPlayer debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUser(userRepository.getById(userId)).orElseThrow(() -> new NotFoundException("The given user is not a player in the debate session"));
+    public DebateSessionPlayerDTO processGetDebateSessionPlayer() {
+        DebateSessionPlayer debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUser(getCurrentUser())
+                .orElseThrow(() -> new NotFoundException("The given user is not a player in the debate session"));
 
         DebateSessionPlayerDTO debateSessionPlayerDTO = new DebateSessionPlayerDTO();
 
@@ -123,9 +127,8 @@ public class DebateMeetingController {
 
     @PostMapping("/process_end_of_preparation_phase")
     @ResponseBody
-    public void processEndOfPreparationPhase(@RequestBody Long userId) {
-        User judge = userRepository.getById(userId);
-        DebateSession debateSession = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(judge, DebateSessionPhase.PREP_TIME).get(0);
+    public void processEndOfPreparationPhase() {
+        DebateSession debateSession = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(getCurrentUser(), DebateSessionPhase.PREP_TIME).get(0);
         debateSession.setDebateSessionPhase(DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1);
         debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(debateSession.getPlayers());
@@ -140,5 +143,10 @@ public class DebateMeetingController {
                     "/queue/debate-" + phase + "-times-up",
                     "timesUp");
         }
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
     }
 }
