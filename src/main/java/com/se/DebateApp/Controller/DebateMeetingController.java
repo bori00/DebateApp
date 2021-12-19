@@ -138,16 +138,16 @@ public class DebateMeetingController {
         DebateSession debateSession = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(getCurrentUser(), DebateSessionPhase.PREP_TIME).get(0);
         debateSession.setDebateSessionPhase(DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1);
         debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
-        Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(debateSession.getPlayers());
         debateSessionRepository.save(debateSession);
-        announceAllDebatePlayersAboutEndOfTimeInterval(joinedPlayers, debateSession.getDebateSessionPhase().name().toLowerCase());
+        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession);
     }
 
-    private void announceAllDebatePlayersAboutEndOfTimeInterval(Set<DebateSessionPlayer> joinedPlayers, String phase) {
-        for (DebateSessionPlayer player : joinedPlayers) {
+    private void announceAllDebatePlayersAboutEndOfTimeInterval(DebateSession debateSession) {
+        String debatePhase = debateSession.getDebateSessionPhase().name().toLowerCase();
+        for (DebateSessionPlayer player : debateSession.getPlayers()) {
             simpMessagingTemplate.convertAndSendToUser(
                     player.getUser().getUserName(),
-                    "/queue/debate-" + phase + "-times-up",
+                    "/queue/debate-" + debatePhase + "-times-up",
                     "timesUp");
         }
     }
