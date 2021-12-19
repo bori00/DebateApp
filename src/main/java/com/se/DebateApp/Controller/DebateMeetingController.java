@@ -4,9 +4,9 @@ import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributes;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.MeetingType;
-import com.se.DebateApp.Model.DTOs.DebateMeetingDTO;
-import com.se.DebateApp.Model.DTOs.DebateSessionPlayerDTO;
+import com.se.DebateApp.Model.DTOs.*;
 import com.se.DebateApp.Model.*;
+import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Repository.DebateMeetingRepository;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
@@ -22,6 +22,7 @@ import org.webjars.NotFoundException;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Controller
@@ -72,8 +73,8 @@ public class DebateMeetingController {
 
     @GetMapping(value = "/process_get_debate_session_player", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DebateSessionPlayerDTO processGetDebateSessionPlayer() {
-        DebateSessionPlayer debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUser(getCurrentUser())
+    public DebateSessionPlayerDTO processGetDebateSessionPlayer(@RequestParam(value="debateSessionId") Long debateSessionId) {
+        DebateSessionPlayer debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUserAndDebateSession(getCurrentUser(), debateSessionRepository.getById(debateSessionId))
                 .orElseThrow(() -> new NotFoundException("The given user is not a player in the debate session"));
 
         DebateSessionPlayerDTO debateSessionPlayerDTO = new DebateSessionPlayerDTO();
