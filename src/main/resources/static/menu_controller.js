@@ -31,7 +31,27 @@ function checkIfasUserAnOngoingDebate() {
 }
 
 function loadMenuForUserWithActiveDebate() {
-    addMenuItem("/home", "My Ongoing Debate")
+    let url = new URL("/get_ongoing_debate_href", document.URL);
+
+    let token = $("meta[name='_csrf']").attr("content");
+    let header = $("meta[name='_csrf_header']").attr("content");
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            [header]: token,
+            "charset": "UTF-8",
+            "Content-Type": "application/json"
+        },
+        body: {}
+    })
+        .catch(error => console.log('failed to send request to server '+ error))
+        .then(response => {
+            return response.json();
+        })
+        .catch(error => console.log('failed to parse response: ' + error))
+        .then(linkResponse => {
+            addMenuItem(linkResponse.value, "My Ongoing Debate")
+        });
 }
 
 function loadMenuForUserWithNoActiveDebate() {
