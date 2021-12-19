@@ -120,6 +120,12 @@ public class DebateMeetingController {
             case CROSS_EXAMINATION_4: {
                 return debateTemplate.getCrossExaminationSeconds();
             }
+            case AFFIRMATIVE_REBUTTAL_1:
+            case AFFIRMATIVE_REBUTTAL_2:
+            case NEGATIVE_REBUTTAL_1:
+            case NEGATIVE_REBUTTAL_2: {
+                return debateTemplate.getRebuttalSpeechSeconds();
+            }
             default: {
                 return 24 * 60 * 60; // 24 hours
             }
