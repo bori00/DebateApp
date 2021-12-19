@@ -7,6 +7,7 @@ import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,9 @@ public class HomePageController {
 
     @GetMapping("")
     public String viewHomePage() {
+        if (userIsAuthenticated()) {
+            return "home";
+        }
         return "index";
     }
 
@@ -52,5 +56,10 @@ public class HomePageController {
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
+    }
+
+    private boolean userIsAuthenticated() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getPrincipal() instanceof UserDetails;
     }
 }
