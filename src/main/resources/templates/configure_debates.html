@@ -6,43 +6,64 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
           type="text/css"/>
-    <script th:src="@{/configure_debates.js}"></script>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/configure_debates.js}"></script>
+    <script th:src="@{/menu_controller.js}"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
-<body>
+<body onload="loadMenu()">
 <div class="container text-center">
-    <h1>Configure Debates</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <a class="navbar-brand" th:href="@{/home}">Debate App</a>
+            <ul id="menu_items" class="navbar-nav mr-auto mt-2 mt-lg-0">
+            </ul>
+            <form th:action="@{/logout}" method="post">
+                <input type="submit" value = "Sign Out">
+            </form>
+        </div>
+    </nav>
 
-    <div>
-        <h5><a th:href="@{/}">Home</a></h5>
-        <h5><a th:href="@{/create_debate_template}">Create new Debate Template</a></h5>
-    </div>
+    <div class="card p-3 bg-light m-5">
+        <div class="card-body">
+            <h1>Configure Debates</h1>
 
-    <div class="list-group" th:each="debateTemplate : ${myDebateTemplates}">
-        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-            <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1" th:text="${debateTemplate.title}">Title</h5>
-                <small th:text="${debateTemplate.topic}">Topic</small>
+            <div>
+                <h5><a th:href="@{/create_debate_template}">Create new Debate Template</a></h5>
             </div>
-            <p class="mb-1 float-left" th:text="${debateTemplate.statement}">Statement</p>
-            <div class="container text-right">
-                <button th:onclick="'onDeleteDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
-                        type="button"
-                        class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
-                                                                  aria-hidden="true"></i></button>
-                <button th:onclick="'onViewDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
-                        type="button" class="btn btn-outline-secondary px-3"><i
-                        class="fa fa-eye"
-                                                                      aria-hidden="true"></i></button>
-                <button
-                        th:onclick="'onEditDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
-                        type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-edit"
-                                                                      aria-hidden="true"></i></button>
-                <button th:onclick="'onStartDebateButtonPushed(' + ${debateTemplate.getId()} + ');'"
-                        type="button" class="btn btn-outline-primary px-3"><i class="fa fa-play"
-                                                                      aria-hidden="true"></i></button>
+
+            <div class="list-group" th:each="debateTemplate : ${myDebateTemplates}">
+                <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1" th:text="${debateTemplate.title}">Title</h5>
+                        <small th:text="${debateTemplate.topic}">Topic</small>
+                    </div>
+                    <p class="mb-1 float-left" th:text="${debateTemplate.statement}">Statement</p>
+                    <div class="container text-right">
+                        <button th:onclick="'onDeleteDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                                type="button"
+                                class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
+                                                                          aria-hidden="true"></i></button>
+                        <button th:onclick="'onViewDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                                type="button" class="btn btn-outline-secondary px-3"><i
+                                class="fa fa-eye"
+                                                                              aria-hidden="true"></i></button>
+                        <button
+                                th:onclick="'onEditDebateTemplateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                                type="button" class="btn btn-outline-secondary px-3"><i class="fa fa-edit"
+                                                                              aria-hidden="true"></i></button>
+                        <button th:onclick="'onStartDebateButtonPushed(' + ${debateTemplate.getId()} + ');'"
+                                type="button" class="btn btn-outline-primary px-3"><i class="fa fa-play"
+                                                                              aria-hidden="true"></i></button>
+                    </div>
+                </a>
             </div>
-        </a>
+        </div>
     </div>
 </div>
 </body>
