@@ -1,13 +1,11 @@
 let callFrame;
 let preparationMeetingTeamPro, preparationMeetingTeamContra, activeDebateMeeting;
 let isJudge;
-let userId;
 let debateSessionId;
 let endOfPreparationPhase = false;
 
-async function joinDebateMeeting(currentUserId, isParticipantJudge, currentDebateSessionId) {
+async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     isJudge = isParticipantJudge;
-    userId = currentUserId;
     debateSessionId = currentDebateSessionId;
     const callWrapper = document.getElementById('wrapper');
     callFrame = await createDebateCallFrame(callWrapper);
@@ -31,7 +29,7 @@ async function joinDebateMeeting(currentUserId, isParticipantJudge, currentDebat
     } else {
         await subscribeToPreparationTimerNotificationSocket();
 
-        let debateSessionPlayerDestination = "/process_get_debate_session_player?userId=" + userId;
+        let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId="+debateSessionId;
         let debateSessionPlayer = await getDataFromServer(debateSessionPlayerDestination);
 
         let teamPreparationMeeting;
@@ -43,7 +41,7 @@ async function joinDebateMeeting(currentUserId, isParticipantJudge, currentDebat
             callWrapper.classList.add('contra-team');
             teamPreparationMeeting = preparationMeetingTeamContra;
         }
-        meetingToken = await createMeetingToken(getPlayerPrivileges(teamPreparationMeeting.meetingName, userId));
+        meetingToken = await createMeetingToken(getPlayerPrivileges(teamPreparationMeeting.meetingName));
         await joinMeetingWithToken(teamPreparationMeeting.meetingUrl, meetingToken.token);
     }
 }
@@ -75,7 +73,7 @@ async function onPreparationTimesUp() {
 
 async function handleEndOfPreparationPhaseForJudge() {
     let timerEndNotificationDestination = "/process_end_of_preparation_phase";
-    await sendDataToServer(timerEndNotificationDestination, userId);
+    await sendDataToServer(timerEndNotificationDestination);
     await onPreparationTimesUp();
 }
 
@@ -86,7 +84,7 @@ async function joinPreparationMeetingOfTeamPro() {
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('pro-team');
 
-    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName, userId));
+    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName));
     await joinMeetingWithToken(preparationMeetingTeamPro.meetingUrl, meetingToken.token);
 
 }
@@ -98,7 +96,7 @@ async function joinPreparationMeetingOfTeamContra() {
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('contra-team');
 
-    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName, userId));
+    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName));
     await joinMeetingWithToken(preparationMeetingTeamContra.meetingUrl, meetingToken.token);
 }
 
@@ -119,23 +117,21 @@ async function joinMeetingWithToken(meetingUrl, meetingToken) {
         .catch(console.log('failed to join meeting, invalid token'));
 }
 
-function getJudgePrivileges(roomName, userId) {
+function getJudgePrivileges(roomName) {
     return {
         properties: {
             room_name: roomName,
             is_owner: true,
-            user_id: userId,
             enable_screenshare: true,
         }
     };
 }
 
-function getPlayerPrivileges(roomName, userId) {
+function getPlayerPrivileges(roomName) {
     return {
         properties: {
             room_name: roomName,
             is_owner: false,
-            user_id: userId,
             enable_screenshare: false,
         }
     };
@@ -146,7 +142,7 @@ async function leaveMeeting() {
 
     if(endOfPreparationPhase) {
         let privileges = (isJudge) ? getJudgePrivileges(activeDebateMeeting.meetingName): getPlayerPrivileges(activeDebateMeeting.meetingName);
-        let meetingToken = await createMeetingToken(privileges, userId);
+        let meetingToken = await createMeetingToken(privileges);
 
         await joinMeetingWithToken(activeDebateMeeting.meetingUrl, meetingToken.token);
     }

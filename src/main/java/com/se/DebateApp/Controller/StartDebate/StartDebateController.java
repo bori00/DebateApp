@@ -198,27 +198,21 @@ public class StartDebateController {
     @GetMapping("/go_to_active_debate")
     public String goToActiveDebatePage(Model model) {
         User currentUser = getCurrentUser();
-        DebateSession debateSession = null;
+        DebateSession debateSession;
         boolean isJudge = false;
 
-        Optional<DebateSessionPlayer> debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUser(currentUser);
-
-        if(debateSessionPlayer.isPresent()) {
-            debateSession = debateSessionPlayer.get().getDebateSession();
-        }else{
+        List<DebateSession> debateSessionsOfJudgeInPreparationState = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
+        if(debateSessionsOfJudgeInPreparationState.size() == 1) {
             isJudge = true;
-            List<DebateSession> preparationPhaseDebatesOfJudge =
-                    debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser,
-                            DebateSessionPhase.PREP_TIME);
-            if (preparationPhaseDebatesOfJudge.size() == 1) {
-                debateSession = preparationPhaseDebatesOfJudge.get(0);
+            debateSession = debateSessionsOfJudgeInPreparationState.get(0);
+        }else{
+            List<DebateSession> debateSessionsOfPlayerInPreparationState = debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
+            if(debateSessionsOfPlayerInPreparationState.size() == 1) {
+                debateSession = debateSessionsOfPlayerInPreparationState.get(0);
+            }else{
+                return "error";
             }
         }
-        if(debateSession == null) {
-            return "error";
-        }
-
-        model.addAttribute("userId", currentUser.getId());
         model.addAttribute("isJudge", isJudge);
         model.addAttribute("debateSessionId", debateSession.getId());
         return "active_debate";
