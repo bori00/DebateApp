@@ -35,7 +35,7 @@ function handleJoinTeamStatus(joinTeamStatus) {
         window.location.href = "/go_to_debate_lobby"
     } else {
         window.alert(joinTeamStatus.errorMsg)
-        window.location.href = "/"
+        window.location.href = "/home"
     }
 }
 
