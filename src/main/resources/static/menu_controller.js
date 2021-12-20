@@ -1,5 +1,5 @@
 function loadMenu() {
-    checkIfasUserAnOngoingDebate()
+    checkIfUserAnOngoingDebate()
         .then(hasOngoingDebate => {
             if (hasOngoingDebate) {
                 loadMenuForUserWithActiveDebate();
@@ -9,7 +9,7 @@ function loadMenu() {
         })
 }
 
-function checkIfasUserAnOngoingDebate() {
+function checkIfUserAnOngoingDebate() {
     let url = new URL("/has_user_ongoing_debate", document.URL);
 
     let token = $("meta[name='_csrf']").attr("content");
