@@ -1,6 +1,7 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.HomePageController;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateLobbyInformation;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateSessionTeamChoiceInformation;
 import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
@@ -71,6 +72,27 @@ public class StartDebateController {
         debateTemplate.addNewSession(debateSession);
         DebateSession savedSession = debateSessionRepository.save(debateSession);
         model.addAttribute("debateCode", savedSession.getId());
+        model.addAttribute("waitingParticipants", 0);
+        model.addAttribute("proPlayers", 0);
+        model.addAttribute("conPlayers", 0);
+        return "start_debate";
+    }
+
+    @GetMapping("/reenter_start_debate")
+    public String reenterStartDebateSession(Model model) {
+        User user = getCurrentUser();
+        List<DebateSession> ongoingsSessionsAsJudge =
+                debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED);
+        if (ongoingsSessionsAsJudge.size() != 1) {
+            return "error";
+        }
+        DebateSession session = ongoingsSessionsAsJudge.get(0);
+        model.addAttribute("debateCode", session.getId());
+        DebateParticipantsStatus participantsStatus = session.computeParticipantsStatus();
+        model.addAttribute("waitingParticipants", participantsStatus.getNoWaitingToJoinParticipants());
+        model.addAttribute("proPlayers", participantsStatus.getNoProParticipants());
+        model.addAttribute("conPlayers", participantsStatus.getNoConParticipants());
         return "start_debate";
     }
 
@@ -116,6 +138,11 @@ public class StartDebateController {
                         waitingToJoinDebates.get(0).getDebateTemplate());
         model.addAttribute("team_choice_information", teamChoiceInformation);
         return "choose_team";
+    }
+
+    @GetMapping("/reenter_choose_team")
+    public String reenterChooseTeamPageRequest(Model model) {
+        return processGoToChooseTeamPageRequest(model);
     }
 
     @PostMapping(value = "/process_join_team", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -182,6 +209,11 @@ public class StartDebateController {
         return "debate_lobby";
     }
 
+    @GetMapping("/reenter_debate_lobby")
+    public String reenterDebateLobbyPage(Model model) {
+        return processGoToDebateLobbyPage(model);
+    }
+
     @GetMapping("/process_activate_debate_session")
     public String activateDebateSession() {
         User user = getCurrentUser();
@@ -204,6 +236,11 @@ public class StartDebateController {
 
     @GetMapping("/go_to_active_debate")
     public String goToActiveDebatePage(Model model) {
+        return "active_debate";
+    }
+
+    @GetMapping("/reenter_active_debate")
+    public String reenterActiveDebatePage(Model model) {
         return "active_debate";
     }
 
@@ -237,6 +274,30 @@ public class StartDebateController {
                 debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
                         DebateSessionPhase.FINISHED);
         return !ongoingDebatesAsPlayer.isEmpty();
+    }
+
+    private Optional<DebateSession> getOngoingDebate() {
+        User user = getCurrentUser();
+        List<DebateSession> ongoingDebatesAsJudge =
+                debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED);
+        List<DebateSession> ongoingDebatesAsPlayer =
+                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED);
+        if (ongoingDebatesAsJudge.isEmpty() && ongoingDebatesAsPlayer.isEmpty()) {
+            return Optional.empty();
+        }
+        if (ongoingDebatesAsJudge.size() > 0) {
+            if (ongoingDebatesAsJudge.size() > 1) {
+                return Optional.empty();
+            }
+            return Optional.of(ongoingDebatesAsJudge.get(0));
+        } else {
+            if (ongoingDebatesAsPlayer.size() > 1) {
+                return Optional.empty();
+            }
+            return Optional.of(ongoingDebatesAsPlayer.get(0));
+        }
     }
 
     private User getCurrentUser() {

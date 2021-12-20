@@ -2,4 +2,4 @@
 const DAILY_API_KEY = ""
 
 // the application domain, which is used for REST operations: get/create/update rooms
-const DAILY_REST_DOMAIN = ""
+const DAILY_REST_DOMAIN = "https://api.daily.co/v1"
