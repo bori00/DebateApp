@@ -124,17 +124,6 @@ async function joinPreparationMeetingOfTeamContra() {
     await joinMeetingWithToken(preparationMeetingTeamContra.meetingUrl, meetingToken.token);
 }
 
-async function rejoinDebate() {
-    const lastDebateMeetingDestEndpoint = "/process_get_last_meeting?debateSessionId=" + debateSessionId;
-
-    let lastMeeting = await getDataFromServer(lastDebateMeetingDestEndpoint);
-
-    let privilegeOptions = (isJudge)? getJudgePrivileges(lastMeeting.meetingName) : getPlayerPrivileges(lastMeeting.meetingName);
-    let meetingToken = await createMeetingToken(privilegeOptions);
-
-    await joinMeetingWithToken(lastMeeting.meetingUrl, meetingToken.token);
-}
-
 async function getAllMeetingsOfDebateSession(debateSessionId) {
     const allDebateMeetingsDestEndpoint = "/process_get_all_meetings?debateSessionId=" + debateSessionId;
 

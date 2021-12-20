@@ -3,8 +3,6 @@ package com.se.DebateApp.Controller;
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributes;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
-import com.se.DebateApp.Model.Constants.MeetingType;
-import com.se.DebateApp.Model.Constants.TeamType;
 import com.se.DebateApp.Model.DTOs.DebateMeetingDTO;
 import com.se.DebateApp.Model.DTOs.DebateSessionPlayerDTO;
 import com.se.DebateApp.Model.*;
@@ -23,7 +21,6 @@ import org.webjars.NotFoundException;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,16 +66,6 @@ public class DebateMeetingController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(value = "/process_get_last_meeting", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public DebateMeetingDTO processGetLastMeeting(@RequestParam(value = "debateSessionId") Long debateSessionId) {
-        DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
-        DebateMeeting debateMeeting = debateMeetingRepository.findByDebateSessionAndMeetingType(debateSession, getTypeOfCurrentDebateMeeting(debateSession)).orElseThrow();
-
-        return new DebateMeetingDTO(debateMeeting.getName(), debateMeeting.getUrl(), debateMeeting.getMeetingType().getCode());
-    }
-
-
     @GetMapping(value = "/process_get_debate_session_player", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DebateSessionPlayerDTO processGetDebateSessionPlayer(@RequestParam(value = "debateSessionId") Long debateSessionId) {
@@ -103,28 +90,19 @@ public class DebateMeetingController {
         DebateTemplate debateTemplate = debateSession.getDebateTemplate();
 
         switch (debateSession.getDebateSessionPhase()) {
-            case PREP_TIME: {
+            case PREP_TIME -> {
                 return debateTemplate.getPrepTimeSeconds();
             }
-            case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1:
-            case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2:
-            case NEGATIVE_CONSTRUCTIVE_SPEECH_1:
-            case NEGATIVE_CONSTRUCTIVE_SPEECH_2: {
+            case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1, AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2, NEGATIVE_CONSTRUCTIVE_SPEECH_1, NEGATIVE_CONSTRUCTIVE_SPEECH_2 -> {
                 return debateTemplate.getConstSpeechSeconds();
             }
-            case CROSS_EXAMINATION_1:
-            case CROSS_EXAMINATION_2:
-            case CROSS_EXAMINATION_3:
-            case CROSS_EXAMINATION_4: {
+            case CROSS_EXAMINATION_1, CROSS_EXAMINATION_2, CROSS_EXAMINATION_3, CROSS_EXAMINATION_4 -> {
                 return debateTemplate.getCrossExaminationSeconds();
             }
-            case AFFIRMATIVE_REBUTTAL_1:
-            case AFFIRMATIVE_REBUTTAL_2:
-            case NEGATIVE_REBUTTAL_1:
-            case NEGATIVE_REBUTTAL_2: {
+            case AFFIRMATIVE_REBUTTAL_1, AFFIRMATIVE_REBUTTAL_2, NEGATIVE_REBUTTAL_1, NEGATIVE_REBUTTAL_2 -> {
                 return debateTemplate.getRebuttalSpeechSeconds();
             }
-            default: {
+            default -> {
                 return 24 * 60 * 60; // 24 hours
             }
         }
@@ -158,16 +136,6 @@ public class DebateMeetingController {
         debateMeeting.setUrl(debateMeetingAttributes.getMeetingUrl());
 
         return debateMeeting;
-    }
-
-    private MeetingType getTypeOfCurrentDebateMeeting(DebateSession debateSession) {
-        if (debateSession.getDebateSessionPhase().equals(DebateSessionPhase.PREP_TIME)) {
-            Optional<DebateSessionPlayer> debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUserAndDebateSession(getCurrentUser(), debateSession);
-            if (debateSessionPlayer.isPresent()) {
-                return (debateSessionPlayer.get().getTeam().equals(TeamType.PRO)) ? MeetingType.PREPARATION_PRO_TEAM : MeetingType.PREPARATION_CONTRA_TEAM;
-            }
-        }
-        return MeetingType.ACTIVE;
     }
 
     private User getCurrentUser() {
