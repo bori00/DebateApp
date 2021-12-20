@@ -286,6 +286,7 @@ public class StartDebateController {
         return !ongoingDebatesAsPlayer.isEmpty();
     }
 
+    // todo : method not used
     private Optional<DebateSession> getOngoingDebate() {
         User user = getCurrentUser();
         List<DebateSession> ongoingDebatesAsJudge =

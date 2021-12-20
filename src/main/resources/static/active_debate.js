@@ -175,6 +175,7 @@ async function leaveMeeting() {
 function handleLeftMeeting() {
     setElementVisibility("join-preparation-team-pro", isJudge && !endOfPreparationPhase);
     setElementVisibility("join-preparation-team-contra", isJudge && !endOfPreparationPhase);
+
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.remove('pro-team');
     callWrapper.classList.remove('contra-team');
