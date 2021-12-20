@@ -173,7 +173,6 @@ async function leaveMeeting() {
 }
 
 function handleLeftMeeting() {
-    setElementVisibility("rejoin", !isJudge || endOfPreparationPhase);
     setElementVisibility("join-preparation-team-pro", isJudge && !endOfPreparationPhase);
     setElementVisibility("join-preparation-team-contra", isJudge && !endOfPreparationPhase);
     const callWrapper = document.getElementById('wrapper');
@@ -182,7 +181,6 @@ function handleLeftMeeting() {
 }
 
 async function handleJoinedMeeting() {
-    setElementVisibility("rejoin", false);
     await updateParticipantsView();
 }
 

@@ -234,8 +234,8 @@ public class StartDebateController {
 
         List<DebateSession> debateSessionsOfJudgeInPreparationState = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
         if(debateSessionsOfJudgeInPreparationState.size() == 1) {
-            isJudge = true;
             debateSession = debateSessionsOfJudgeInPreparationState.get(0);
+            isJudge = true;
         }else{
             List<DebateSession> debateSessionsOfPlayerInPreparationState = debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
             if(debateSessionsOfPlayerInPreparationState.size() == 1) {
@@ -251,7 +251,7 @@ public class StartDebateController {
 
     @GetMapping("/reenter_active_debate")
     public String reenterActiveDebatePage(Model model) {
-        return "active_debate";
+        return goToActiveDebatePage(model);
     }
 
     private void announceJudgeAboutDebateSessionParticipantsState(
