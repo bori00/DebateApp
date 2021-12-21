@@ -55,7 +55,7 @@
 
     <div class="card p-3 bg-light m-5">
         <div class="card-body" id="card-body">
-            <p>My Active Debate</p>
+            <p>Debate Preparation phase</p>
             <h3 id="timer-clock">00:00:00</h3>
         </div>
     </div>
@@ -77,7 +77,26 @@
             Join preparation of team Contra
         </button>
     </div>
-    <div id="wrapper">
+
+    <div class="row">
+        <div class="col-sm-8">
+            <div id="wrapper">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <form th:object="${debateTemplate}"
+                  class="card p-3 bg-light"
+                  style="max-width: 600px; margin: 0 auto;">
+                <h5>Resources</h5>
+                <ul class="list-group" th:each="resourceLink : *{resourceLinks}">
+                    <li class="list-group-item">
+                        <a th:href="${resourceLink.link}" th:text="${resourceLink.title}">
+                            Link
+                        </a>
+                    </li>
+                </ul>
+            </form>
+        </div>
     </div>
 </div>
 </body>

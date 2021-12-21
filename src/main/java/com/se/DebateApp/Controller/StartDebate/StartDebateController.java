@@ -249,6 +249,7 @@ public class StartDebateController {
         }
         model.addAttribute("isJudge", isJudge);
         model.addAttribute("debateSessionId", debateSession.getId());
+        model.addAttribute("debateTemplate", debateSession.getDebateTemplate());
         return "debate_preparation";
     }
 
