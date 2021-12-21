@@ -206,8 +206,8 @@ public class StartDebateController {
         return processGoToDebateLobbyPage(model);
     }
 
-    @GetMapping("/process_activate_debate_session")
-    public String activateDebateSession(Model model) {
+    @GetMapping("/process_start_debate_preparation")
+    public String startDebatePreparation(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToActivateDebates =
                 debateSessionRepository.findDebateSessionOfJudgeWithGivenState(user,
@@ -216,18 +216,21 @@ public class StartDebateController {
             return "error";
         }
         DebateSession session = waitingToActivateDebates.get(0);
-        // TODO: update when timing solutions are clarified
-        session.setDebateSessionPhase(DebateSessionPhase.PREP_TIME);
+        DebateTemplate debateTemplate = session.getDebateTemplate();
+        boolean skipPhase = debateTemplate.getPrepTimeSeconds() == 0;
+
+        session.setDebateSessionPhase((skipPhase)? DebateSessionPhase.DEPUTY1_VOTING_TIME: DebateSessionPhase.PREP_TIME);
         session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(session.getPlayers());
         session.removePlayersWhoDidntJoinATeam();
+
         debateSessionRepository.save(session);
         announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
-        return goToActiveDebatePage(model);
+        return (skipPhase)? goToDeputySelectionPage(model) : goToDebatePreparationPage(model);
     }
 
-    @GetMapping("/go_to_active_debate")
-    public String goToActiveDebatePage(Model model) {
+    @GetMapping("/go_to_debate_preparation")
+    public String goToDebatePreparationPage(Model model) {
         User currentUser = getCurrentUser();
         DebateSession debateSession;
         boolean isJudge = false;
@@ -246,12 +249,17 @@ public class StartDebateController {
         }
         model.addAttribute("isJudge", isJudge);
         model.addAttribute("debateSessionId", debateSession.getId());
-        return "active_debate";
+        return "debate_preparation";
     }
 
-    @GetMapping("/reenter_active_debate")
+    @GetMapping("/go_to_deputy_selection")
+    public String goToDeputySelectionPage(Model model) {
+        return "deputy_selection";
+    }
+
+    @GetMapping("/reenter_debate_preparation")
     public String reenterActiveDebatePage(Model model) {
-        return goToActiveDebatePage(model);
+        return goToDebatePreparationPage(model);
     }
 
     private void announceJudgeAboutDebateSessionParticipantsState(
@@ -286,7 +294,6 @@ public class StartDebateController {
         return !ongoingDebatesAsPlayer.isEmpty();
     }
 
-    // todo : method not used
     private Optional<DebateSession> getOngoingDebate() {
         User user = getCurrentUser();
         List<DebateSession> ongoingDebatesAsJudge =

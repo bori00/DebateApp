@@ -104,7 +104,7 @@ public class HomePageController {
             if (session.getDebateSessionPhase() == DebateSessionPhase.WAITING_FOR_PLAYERS) {
                 return new StringWrapper("/reenter_start_debate");
             }
-            return new StringWrapper("/reenter_active_debate");
+            return new StringWrapper("/reenter_debate_preparation");
             // TODO: possibly extend
         } else {
             if (ongoingDebatesAsPlayer.size() > 1) {
@@ -123,7 +123,7 @@ public class HomePageController {
                     return new StringWrapper("/reenter_debate_lobby");
                 }
             }
-            return new StringWrapper("/reenter_active_debate");
+            return new StringWrapper("/reenter_debate_preparation");
             // TODO: possibly extend
         }
     }

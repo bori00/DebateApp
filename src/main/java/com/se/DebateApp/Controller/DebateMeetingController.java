@@ -66,6 +66,12 @@ public class DebateMeetingController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping(value = "/process_get_username_of_current_user")
+    @ResponseBody
+    public String processGetUserNameOfCurrentUser() {
+        return getCurrentUser().getUserName();
+    }
+
     @GetMapping(value = "/process_get_debate_session_player", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DebateSessionPlayerDTO processGetDebateSessionPlayer(@RequestParam(value = "debateSessionId") Long debateSessionId) {

@@ -10,7 +10,6 @@ async function createDebateCallFrame(callWrapper) {
     });
 }
 
-
 async function createMeetingRoom() {
     const newRoomEndpoint = DAILY_REST_DOMAIN + "/rooms";
     // room expires in 24 hours
@@ -18,7 +17,7 @@ async function createMeetingRoom() {
 
     const options = {
         properties: {
-            enable_prejoin_ui: true,
+            enable_prejoin_ui: false,
             enable_video_processing_ui: true,
             enable_chat: true,
             start_video_off: true,
@@ -59,4 +58,37 @@ async function createMeetingToken(options) {
         .catch(error => console.log('failed to create meeting token: ' + error))
         .then(response => response.json())
         .catch(error => console.log('failed to parse response to json: ' + error));
+}
+
+async function joinMeetingWithToken(meetingUrl, meetingToken) {
+    callFrame.join({
+        url: meetingUrl,
+        token: meetingToken,
+        showLeaveButton: true,
+        showFullscreenButton: true,
+        showParticipantsBar: true,
+    })
+        .catch(console.log('failed to join meeting, invalid token'));
+}
+
+function getJudgePrivileges(roomName, userName) {
+    return {
+        properties: {
+            room_name: roomName,
+            user_name: userName,
+            is_owner: true,
+            enable_screenshare: true,
+        }
+    };
+}
+
+function getPlayerPrivileges(roomName, userName) {
+    return {
+        properties: {
+            room_name: roomName,
+            is_owner: false,
+            user_name: userName,
+            enable_screenshare: false,
+        }
+    };
 }

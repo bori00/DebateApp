@@ -40,7 +40,7 @@ function updateUIWithNewParticipantsStatus(participantsStatus) {
 }
 
 function activateDebateSession() {
-    window.location.href="/process_activate_debate_session";
+    window.location.href="/process_start_debate_preparation";
 }
 
 async function createDebateMeetings(debateSessionId) {

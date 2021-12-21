@@ -8,7 +8,7 @@ async function subscribeToDebateActivationSocket() {
     stompClient.connect({}, function (frame) {
         stompClient.subscribe("/user/queue/debate-session-activated",
             function (activated) {
-                window.location.href = "/go_to_active_debate"
+                window.location.href = "/go_to_debate_preparation"
             });
     });
 }
