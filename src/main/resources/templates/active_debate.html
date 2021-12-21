@@ -9,6 +9,7 @@
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/timing_utils.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
     <script type="text/javascript" th:src="@{/active_debate.js}"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
@@ -25,13 +26,13 @@
         .pro-team{
             border-width: 5px;
             border-style: solid;
-            border-radius: 5px;
+            border-radius: 15px;
             color:green;
         }
         .contra-team {
             border-width: 5px;
             border-style: solid;
-            border-radius: 5px;
+            border-radius: 15px;
             color: #c62424;
         }
     </style>
@@ -55,6 +56,7 @@
     <div class="card p-3 bg-light m-5">
         <div class="card-body" id="card-body">
             <p>My Active Debate</p>
+            <h3 id="timer-clock">00:00:00</h3>
         </div>
     </div>
     <div>

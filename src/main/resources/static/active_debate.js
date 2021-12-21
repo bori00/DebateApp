@@ -17,7 +17,7 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         .on('left-meeting', handleLeftMeeting)
         .on('joined-meeting', handleJoinedMeeting);
 
-    let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
+    let meetings = await getAllMeetingsOfDebateSession(debateSessionId, onPreparationTimesUp);
 
     for ( let {meetingName, meetingUrl, meetingType} of meetings) {
         switch(meetingType) {
@@ -42,11 +42,11 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         setElementVisibility("join-preparation-team-pro", true);
         setElementVisibility("join-preparation-team-contra", true);
 
-        let seconds = await getTimeIntervalForNextPhaseOfDebateSession();
-        window.setTimeout(handleEndOfPreparationPhaseForJudge, seconds * 1000); // convert to millis
-
+        await displayCountDownTimerForJudge(debateSessionId, window, onPreparationTimesUp);
     } else {
-        await subscribeToTimerNotificationSocket(PREP_TIME_PHASE);
+
+        await displayCountDownTimerForPlayers(debateSessionId, window);
+        await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
 
         let debateSessionPlayer = await getDebateSessionPlayer();
         let teamPreparationMeeting;
@@ -69,37 +69,10 @@ async function getDebateSessionPlayer() {
     return await getDataFromServer(debateSessionPlayerDestination);
 }
 
-async function getTimeIntervalForNextPhaseOfDebateSession() {
-    let destinationEndpoint = "/process_get_time_interval?debateSessionId="+debateSessionId;
-
-    return await getDataFromServer(destinationEndpoint);
-}
-
-async function subscribeToTimerNotificationSocket(phase) {
-    const socket = new SockJS('/secured/debates');
-    const stompClient = Stomp.over(socket);
-
-    console.log("Socket initialized");
-
-    stompClient.connect({}, function (frame) {
-        stompClient.subscribe("/user/queue/debate-" + phase + "-times-up",
-            function (timesUp) {
-               onPreparationTimesUp();
-            });
-    });
-}
-
-async function onPreparationTimesUp() {
+async function onPreparationTimesUp(timesUp) {
     window.alert("Times up! The preparation for the debate has ended!");
     endOfPreparationPhase = true;
     await leaveMeeting();
-}
-
-async function handleEndOfPreparationPhaseForJudge() {
-    let timerEndNotificationDestination = "/process_end_of_preparation_phase";
-
-    await sendDataToServer(timerEndNotificationDestination);
-    await onPreparationTimesUp();
 }
 
 async function joinPreparationMeetingOfTeamPro() {
@@ -182,7 +155,9 @@ function handleLeftMeeting() {
 }
 
 async function handleJoinedMeeting() {
-    await updateParticipantsView();
+    if (!isJudge) {
+        await updateParticipantsView();
+    }
 }
 
 function setElementVisibility(id, visible) {

@@ -108,20 +108,31 @@ public class DebateMeetingController {
         }
     }
 
-    @PostMapping("/process_end_of_preparation_phase")
+    @GetMapping(value = "/process_get_current_phase_starting_time", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void processEndOfPreparationPhase() {
-        DebateSession debateSession = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(getCurrentUser(), DebateSessionPhase.PREP_TIME).get(0);
-        DebateSessionPhase previousPhase = debateSession.getDebateSessionPhase();
-        debateSession.setDebateSessionPhase(DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1);
+    public Date processGetCurrentPhaseStartingTime(@RequestParam(value = "debateSessionId") Long debateSessionId) {
+        DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
+
+        return debateSession.getCurrentPhaseStartingTime();
+    }
+
+    @PostMapping("/process_end_of_current_phase")
+    @ResponseBody
+    public void processEndOfCurrentPhase(@RequestParam Long debateSessionId) {
+        DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
+        DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
+        if(currentPhase.equals(DebateSessionPhase.FINISHED)) {
+            return;
+        }
+        int nextPhase = currentPhase.ordinal() + 1;
+        debateSession.setDebateSessionPhase(DebateSessionPhase.values()[nextPhase]);
         debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         debateSessionRepository.save(debateSession);
-        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession.getPlayers(), previousPhase);
+        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession.getPlayers(), currentPhase);
     }
 
     private void announceAllDebatePlayersAboutEndOfTimeInterval(Set<DebateSessionPlayer> players, DebateSessionPhase phase) {
         String destinationUrl = "/queue/debate-" + phase.name().toLowerCase().replace('_', '-') + "-times-up";
-        System.out.println(destinationUrl);
         for (DebateSessionPlayer player : players) {
             simpMessagingTemplate.convertAndSendToUser(
                     player.getUser().getUserName(), destinationUrl, "timesUp");
