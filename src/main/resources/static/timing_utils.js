@@ -25,10 +25,10 @@ async function subscribeToTimerNotificationSocket(phase, onTimesUp) {
     });
 }
 
-async function displayCountDownTimerForPlayers(debateSessionId,  parentElement) {
+async function displayCountDownTimerForPlayers(debateSessionId) {
     countDownTime = await getCountDownTime(debateSessionId);
 
-    countDownTimer = parentElement.setInterval(function() {
+    countDownTimer = window.setInterval(function() {
         let {hours, minutes, seconds} = getTimeUnits();
 
         if(remainingTime >= 0) {
@@ -37,15 +37,24 @@ async function displayCountDownTimerForPlayers(debateSessionId,  parentElement) 
             clearInterval(countDownTimer);
         }
     }, refreshPeriod);
+
+    return countDownTimer;
 }
 
-async function displayCountDownTimerForJudge(debateSessionId, parentElement, onTimesUp) {
+async function isDebateClosed(debateSessionId) {
+    let destEndpoint = "/process_is_debate_finished?debateSessionId=" + debateSessionId;
+
+    return await getDataFromServer(destEndpoint);
+}
+
+async function displayCountDownTimerForJudge(debateSessionId, onTimesUp) {
     countDownTime = await getCountDownTime(debateSessionId);
 
-    countDownTimer = parentElement.setInterval(async function() {
+    countDownTimer = window.setInterval(async function() {
         let {hours, minutes, seconds} = getTimeUnits();
+        let isClosed = await isDebateClosed(debateSessionId);
 
-        if(remainingTime >= 0) {
+        if(remainingTime >= 0 && !isClosed) {
             displayTime(hours, minutes, seconds);
         }else{
             clearInterval(countDownTimer);

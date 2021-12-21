@@ -37,9 +37,9 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         setElementVisibility("join-preparation-team-pro", true);
         setElementVisibility("join-preparation-team-contra", true);
 
-        await displayCountDownTimerForJudge(debateSessionId, window, onPreparationTimesUp);
+        await displayCountDownTimerForJudge(debateSessionId, onPreparationTimesUp);
     } else {
-        await displayCountDownTimerForPlayers(debateSessionId, window);
+        await displayCountDownTimerForPlayers(debateSessionId);
         await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
 
         let debateSessionPlayer = await getDebateSessionPlayer();

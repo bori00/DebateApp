@@ -10,14 +10,4 @@ async function updateDeputiesView() {
     }else{
         callFrame.setLocalAudio(false);
     }
-
-    // set frame color according to current team
-    if(!isJudge) {
-        const callWrapper = document.getElementById('wrapper');
-        if(debateSessionPlayer.team === "P") {
-            callWrapper.classList.add('pro-team');
-        }else{
-            callWrapper.classList.add('contra-team');
-        }
-    }
 }

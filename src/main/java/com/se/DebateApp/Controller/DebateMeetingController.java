@@ -122,6 +122,14 @@ public class DebateMeetingController {
         return debateSession.getCurrentPhaseStartingTime();
     }
 
+    @GetMapping(value = "/process_is_debate_finished")
+    @ResponseBody
+    public Boolean processIsDebateFinished(@RequestParam(value = "debateSessionId") Long debateSessionId) {
+        DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
+
+        return debateSession.getDebateSessionPhase().equals(DebateSessionPhase.FINISHED);
+    }
+
     @PostMapping("/process_end_of_current_phase")
     @ResponseBody
     public void processEndOfCurrentPhase(@RequestParam Long debateSessionId) {
@@ -135,6 +143,22 @@ public class DebateMeetingController {
         debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         debateSessionRepository.save(debateSession);
         announceAllDebatePlayersAboutEndOfTimeInterval(debateSession.getPlayers(), currentPhase);
+    }
+
+    @PostMapping("/process_close_debate")
+    @ResponseBody
+    public void processCloseDebate(@RequestParam Long debateSessionId) {
+        DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
+        debateSession.setDebateSessionPhase(DebateSessionPhase.FINISHED);
+        debateSessionRepository.save(debateSession);
+        announceAllDebatePlayersAboutDebateClosed(debateSession.getPlayers());
+    }
+
+    private void announceAllDebatePlayersAboutDebateClosed(Set<DebateSessionPlayer> players) {
+        for (DebateSessionPlayer player : players) {
+            simpMessagingTemplate.convertAndSendToUser(
+                    player.getUser().getUserName(), "queue/debate-closed", "closed");
+        }
     }
 
     private void announceAllDebatePlayersAboutEndOfTimeInterval(Set<DebateSessionPlayer> players, DebateSessionPhase phase) {
