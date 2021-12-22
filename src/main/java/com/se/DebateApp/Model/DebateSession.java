@@ -42,6 +42,9 @@ public class DebateSession {
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession", orphanRemoval=true)
     private Set<DebateMeeting> meetings = new HashSet<>();
 
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="debateSession", orphanRemoval=true)
+    private Set<DebateRoleVote> roleVotes = new HashSet<>();
+
     public void addNewPlayer(DebateSessionPlayer debateSessionPlayer) {
         debateSessionPlayer.setDebateSession(this);
         this.players.add(debateSessionPlayer);
@@ -50,6 +53,11 @@ public class DebateSession {
     public void addNewMeeting(DebateMeeting debateMeeting) {
         debateMeeting.setDebateSession(this);
         this.meetings.add(debateMeeting);
+    }
+
+    public void addNewRoleVote(DebateRoleVote roleVote) {
+        roleVote.setDebateSession(this);
+        roleVotes.add(roleVote);
     }
 
     public DebateParticipantsStatus computeParticipantsStatus() {
