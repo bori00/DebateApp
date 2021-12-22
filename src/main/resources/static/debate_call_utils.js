@@ -60,35 +60,26 @@ async function createMeetingToken(options) {
         .catch(error => console.log('failed to parse response to json: ' + error));
 }
 
-async function joinMeetingWithToken(meetingUrl, meetingToken) {
+async function joinMeetingWithToken(isJudge, meetingUrl, meetingToken) {
     callFrame.join({
         url: meetingUrl,
         token: meetingToken,
-        showLeaveButton: true,
+        showLeaveButton: !isJudge,
         showFullscreenButton: true,
         showParticipantsBar: true,
     })
         .catch(console.log('failed to join meeting, invalid token'));
 }
 
-function getJudgePrivileges(roomName, userName) {
+function getParticipantPrivileges(roomName, userName, isJudge) {
     return {
         properties: {
             room_name: roomName,
-            user_name: userName,
-            is_owner: true,
-            enable_screenshare: true,
-        }
-    };
-}
-
-function getPlayerPrivileges(roomName, userName) {
-    return {
-        properties: {
-            room_name: roomName,
-            is_owner: false,
+            is_owner: isJudge,
             user_name: userName,
             enable_screenshare: false,
+            start_video_off: true,
+            start_audio_off: true,
         }
     };
 }
