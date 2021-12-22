@@ -39,9 +39,9 @@ public class DeputySelectionController {
     @Autowired
     private DebateRoleVoteRepository roleVotesRepository;
 
-    @PostMapping("/get_deputy1_candidates")
+    @PostMapping("/get_next_deputy_candidates")
     @ResponseBody
-    DeputyCandidatesListDTO getDeputy1Candidates() {
+    DeputyCandidatesListDTO getNextDeputyCandidates() {
         User user = getCurrentUser();
         Optional<DebateSession> optDebateSession = getOngoingDebate(user);
         if (optDebateSession.isEmpty()) {
@@ -49,10 +49,7 @@ public class DeputySelectionController {
                     DeputyCandidatesListDTO.UNEXPECTED_ERROR_MSG);
         }
         DebateSession debateSession = optDebateSession.get();
-        if (debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY1_VOTING_TIME) {
-            return new DeputyCandidatesListDTO(new ArrayList<>(), false,
-                    DeputyCandidatesListDTO.PHASE_PASSED_MSG);
-        }
+
         DebateSessionPlayer usersPlayer =
                 debateSession.getPlayers()
                         .stream()
@@ -60,10 +57,13 @@ public class DeputySelectionController {
                         .collect(Collectors.toList())
                         .get(0);
 
+        // Select players in the same team as the current user, who do not have a role assigned
+        // yet and are not the same as the current user
         List<DeputyCandidateDTO> candidatePlayersInUsersTeam =
                 debateSession.getPlayers()
                         .stream()
                         .filter(player -> !player.getUser().equals(getCurrentUser()))
+                        .filter(player -> player.getPlayerRole().equals(PlayerRole.NONE))
                         .filter(player -> !player.getTeam().equals(usersPlayer.getTeam()))
                         .map(player -> new DeputyCandidateDTO(player.getUser().getUserName()))
                         .collect(Collectors.toList());
@@ -83,7 +83,7 @@ public class DeputySelectionController {
         DebateSession debateSession = optDebateSession.get();
         if (debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY1_VOTING_TIME) {
             return new CastVoteResponseDTO(false,
-                    DeputyCandidatesListDTO.PHASE_PASSED_MSG);
+                    CastVoteResponseDTO.PHASE_PASSED_MSG);
         }
 
         List<DebateSessionPlayer> selectedPlayersList = debateSession.getPlayers()

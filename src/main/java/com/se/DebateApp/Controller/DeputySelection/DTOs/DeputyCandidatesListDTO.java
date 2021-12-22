@@ -14,6 +14,4 @@ public class DeputyCandidatesListDTO {
 
     public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred. Please retry" +
             " later.";
-    public static final String PHASE_PASSED_MSG = "Seems like you missed the voting phase. We're " +
-            "sorry.";
 }
