@@ -1,12 +1,16 @@
 package com.se.DebateApp.Controller.DeputySelection;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.DeputySelection.DTOs.CastVoteResponseDTO;
 import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyCandidateDTO;
 import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyCandidatesListDTO;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
+import com.se.DebateApp.Model.Constants.PlayerRole;
+import com.se.DebateApp.Model.DebateRoleVote;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.User;
+import com.se.DebateApp.Repository.DebateRoleVoteRepository;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
@@ -15,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
@@ -30,6 +35,9 @@ public class DeputySelectionController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DebateRoleVoteRepository roleVotesRepository;
 
     @PostMapping("/get_deputy1_candidates")
     @ResponseBody
@@ -61,6 +69,48 @@ public class DeputySelectionController {
                         .collect(Collectors.toList());
 
         return new DeputyCandidatesListDTO(candidatePlayersInUsersTeam, true, "");
+    }
+
+    @PostMapping("/cast_deputy_vote")
+    @ResponseBody
+    CastVoteResponseDTO castDeputyVote(@RequestParam String selectedCandidateName,
+                                       @RequestParam int deputyNumber) {
+        User user = getCurrentUser();
+        Optional<DebateSession> optDebateSession = getOngoingDebate(user);
+        if (optDebateSession.isEmpty()) {
+            return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
+        }
+        DebateSession debateSession = optDebateSession.get();
+        if (debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY1_VOTING_TIME) {
+            return new CastVoteResponseDTO(false,
+                    DeputyCandidatesListDTO.PHASE_PASSED_MSG);
+        }
+
+        List<DebateSessionPlayer> selectedPlayersList = debateSession.getPlayers()
+                .stream()
+                .filter(player -> player.getPlayerRole().equals(PlayerRole.NONE))
+                .filter(player -> player.getUser().getUserName().equals(selectedCandidateName))
+                .collect(Collectors.toList());
+
+        if (selectedPlayersList.size() != 1) {
+            return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
+        }
+        DebateSessionPlayer selectedPlayer = selectedPlayersList.get(0);
+
+        DebateRoleVote vote = new DebateRoleVote();
+        vote.setDebateSession(debateSession);
+        vote.setForPlayer(selectedPlayer);
+        if (deputyNumber == 1) {
+            vote.setForPlayerRole(PlayerRole.DEPUTY1);
+        } else if (deputyNumber == 2) {
+            vote.setForPlayerRole(PlayerRole.DEPUTY2);
+        } else {
+            return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
+        }
+        // TODO: add to session/player
+        roleVotesRepository.save(vote);
+
+        return new CastVoteResponseDTO(true, "");
     }
 
     private Optional<DebateSession> getOngoingDebate(User user) {
