@@ -45,21 +45,25 @@ public class DebateStateTransitionsController {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateTemplate debateTemplate = debateSession.getDebateTemplate();
 
-        switch (debateSession.getDebateSessionPhase()) {
-            case PREP_TIME -> {
-                return debateTemplate.getPrepTimeSeconds();
-            }
-            case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1, AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2, NEGATIVE_CONSTRUCTIVE_SPEECH_1, NEGATIVE_CONSTRUCTIVE_SPEECH_2 -> {
-                return debateTemplate.getConstSpeechSeconds();
-            }
-            case CROSS_EXAMINATION_1, CROSS_EXAMINATION_2, CROSS_EXAMINATION_3, CROSS_EXAMINATION_4 -> {
-                return debateTemplate.getCrossExaminationSeconds();
-            }
-            case AFFIRMATIVE_REBUTTAL_1, AFFIRMATIVE_REBUTTAL_2, NEGATIVE_REBUTTAL_1, NEGATIVE_REBUTTAL_2 -> {
-                return debateTemplate.getRebuttalSpeechSeconds();
-            }
-            default -> {
-                return 24 * 60 * 60; // 24 hours
+        if (debateSession.getDebateSessionPhase().getDefaultLengthInSeconds().isPresent()) {
+            return debateSession.getDebateSessionPhase().getDefaultLengthInSeconds().get();
+        } else {
+            switch (debateSession.getDebateSessionPhase()) {
+                case PREP_TIME -> {
+                    return debateTemplate.getPrepTimeSeconds();
+                }
+                case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1, AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2, NEGATIVE_CONSTRUCTIVE_SPEECH_1, NEGATIVE_CONSTRUCTIVE_SPEECH_2 -> {
+                    return debateTemplate.getConstSpeechSeconds();
+                }
+                case CROSS_EXAMINATION_1, CROSS_EXAMINATION_2, CROSS_EXAMINATION_3, CROSS_EXAMINATION_4 -> {
+                    return debateTemplate.getCrossExaminationSeconds();
+                }
+                case AFFIRMATIVE_REBUTTAL_1, AFFIRMATIVE_REBUTTAL_2, NEGATIVE_REBUTTAL_1, NEGATIVE_REBUTTAL_2 -> {
+                    return debateTemplate.getRebuttalSpeechSeconds();
+                }
+                default -> {
+                    return 24 * 60 * 60; // 24 hours
+                }
             }
         }
     }
