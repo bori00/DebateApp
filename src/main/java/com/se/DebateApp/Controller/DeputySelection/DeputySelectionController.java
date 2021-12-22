@@ -11,13 +11,14 @@ import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateRoleVoteRepository;
-import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -38,6 +39,15 @@ public class DeputySelectionController {
 
     @Autowired
     private DebateRoleVoteRepository roleVotesRepository;
+
+    @GetMapping("/go_to_deputy_selection")
+    public String goToDeputySelectionPage(Model model) {
+        if (isCurrentUserJudge()) {
+            return "deputy_selection_for_judge";
+        } else {
+            return "deputy_selection_for_players";
+        }
+    }
 
     @PostMapping("/get_next_deputy_candidates")
     @ResponseBody
@@ -73,8 +83,7 @@ public class DeputySelectionController {
 
     @PostMapping("/cast_deputy_vote")
     @ResponseBody
-    CastVoteResponseDTO castDeputyVote(@RequestParam String selectedCandidateName,
-                                       @RequestParam int deputyNumber) {
+    CastVoteResponseDTO castDeputyVote(@RequestParam String selectedCandidateName) {
         User user = getCurrentUser();
         Optional<DebateSession> optDebateSession = getOngoingDebate(user);
         if (optDebateSession.isEmpty()) {
@@ -100,9 +109,9 @@ public class DeputySelectionController {
         DebateRoleVote vote = new DebateRoleVote();
         vote.setDebateSession(debateSession);
         vote.setForPlayer(selectedPlayer);
-        if (deputyNumber == 1) {
+        if (debateSession.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME)) {
             vote.setForPlayerRole(PlayerRole.DEPUTY1);
-        } else if (deputyNumber == 2) {
+        } else if (debateSession.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY2_VOTING_TIME)) {
             vote.setForPlayerRole(PlayerRole.DEPUTY2);
         } else {
             return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
@@ -139,5 +148,9 @@ public class DeputySelectionController {
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
+    }
+
+    private boolean isCurrentUserJudge() {
+        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), DebateSessionPhase.FINISHED).size() == 1;
     }
 }

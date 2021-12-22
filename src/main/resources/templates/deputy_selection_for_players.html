@@ -37,7 +37,27 @@
 
     <div class="card p-3 bg-light m-5">
         <div class="card-body" id="card-body">
-            <p>Deputy Selection</p>
+            <h3>Deputy Selection</h3>
+
+            <h5>Select the deputies to represent your team in the debate!</h5>
+
+            <p>Please select one of the below participants to represent the <span
+                    id="team-name">team</span> in the role of
+                <span id="role-name">the deputy</span></p>
+
+            <div class="list-group" th:if="${not isJudge}">
+                <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Name</h5>
+                    </div>
+                    <div class="container text-right">
+                        <button th:onclick=""
+                                type="button"
+                                class="btn btn-outline-secondary px-3">Vote</i></button>
+                    </div>
+                </a>
+            </div>
+        </div>
         </div>
     </div>
 
