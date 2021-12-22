@@ -245,7 +245,7 @@ public class StartDebateController {
                 return "error";
             }
         }
-        model.addAttribute("isJudge", isCurrentUserJudge(DebateSessionPhase.PREP_TIME));
+        model.addAttribute("isJudge", isCurrentUserJudge());
         model.addAttribute("debateSessionId", debateSession.getId());
         model.addAttribute("debateTemplate", debateSession.getDebateTemplate());
         return "debate_preparation";
@@ -258,13 +258,13 @@ public class StartDebateController {
 
     @GetMapping("/go_to_deputy_selection")
     public String goToDeputySelectionPage(Model model) {
-        model.addAttribute("isJudge", isCurrentUserJudge(DebateSessionPhase.DEPUTY1_VOTING_TIME));
+        model.addAttribute("isJudge", isCurrentUserJudge());
         return "deputy_selection";
     }
 
     @GetMapping("/go_to_active_debate")
     public String goToActiveDebatePage(Model model) {
-        model.addAttribute("isJudge", isCurrentUserJudge(DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1));
+        model.addAttribute("isJudge", isCurrentUserJudge());
         return "active_debate";
     }
 
@@ -324,8 +324,8 @@ public class StartDebateController {
         }
     }
 
-    private boolean isCurrentUserJudge(DebateSessionPhase phase) {
-        return debateSessionRepository.findDebateSessionOfJudgeWithGivenState(getCurrentUser(), phase).size() == 1;
+    private boolean isCurrentUserJudge() {
+        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), DebateSessionPhase.FINISHED).size() == 1;
     }
 
     private User getCurrentUser() {

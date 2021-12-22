@@ -18,8 +18,8 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
 
     let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
 
-    for ( let {meetingName, meetingUrl, meetingType} of meetings) {
-        switch(meetingType) {
+    for (let {meetingName, meetingUrl, meetingType} of meetings) {
+        switch (meetingType) {
             case "PREPARATION_PRO" : {
                 preparationMeetingTeamPro = {meetingName, meetingUrl, meetingType}
                 break;
@@ -42,15 +42,15 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         let debateSessionPlayer = await getDebateSessionPlayer();
         let teamPreparationMeeting;
 
-        if(debateSessionPlayer.team === "P") {
+        if (debateSessionPlayer.team === "P") {
             callWrapper.classList.add('pro-team');
             teamPreparationMeeting = preparationMeetingTeamPro;
-        }else {
+        } else {
             callWrapper.classList.add('contra-team');
             teamPreparationMeeting = preparationMeetingTeamContra;
         }
-        meetingToken = await createMeetingToken(getPlayerPrivileges(teamPreparationMeeting.meetingName, userName));
-        await joinMeetingWithToken(teamPreparationMeeting.meetingUrl, meetingToken.token);
+        meetingToken = await createMeetingToken(getParticipantPrivileges(teamPreparationMeeting.meetingName, userName, isJudge));
+        await joinMeetingWithToken(isJudge, teamPreparationMeeting.meetingUrl, meetingToken.token);
 
         await displayCountDownTimerForPlayers(debateSessionId);
         await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
@@ -58,15 +58,19 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
 }
 
 async function getDebateSessionPlayer() {
-    let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId="+debateSessionId;
+    let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId=" + debateSessionId;
 
     return await getRequestToServer(debateSessionPlayerDestination);
 }
 
 async function onPreparationTimesUp(timesUp) {
-    window.alert("Times up! The preparation for the debate has ended!");
     await leaveMeeting();
-    document.defaultView.location.href = "/go_to_deputy_selection";
+    window.setTimeout(handleEndOfPreparationForParticipant,1000);
+}
+
+function handleEndOfPreparationForParticipant() {
+    window.alert("Times up! The preparation for the debate has ended!");
+    window.location.href = "/go_to_deputy_selection";
 }
 
 async function joinPreparationMeetingOfTeamPro() {
@@ -76,8 +80,8 @@ async function joinPreparationMeetingOfTeamPro() {
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('pro-team');
 
-    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName, userName));
-    await joinMeetingWithToken(preparationMeetingTeamPro.meetingUrl, meetingToken.token);
+    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, userName, isJudge));
+    await joinMeetingWithToken(isJudge, preparationMeetingTeamPro.meetingUrl, meetingToken.token);
 }
 
 async function joinPreparationMeetingOfTeamContra() {
@@ -87,8 +91,8 @@ async function joinPreparationMeetingOfTeamContra() {
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('contra-team');
 
-    let meetingToken = await createMeetingToken(getJudgePrivileges(preparationMeetingTeamPro.meetingName, userName));
-    await joinMeetingWithToken(preparationMeetingTeamContra.meetingUrl, meetingToken.token);
+    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, userName, isJudge));
+    await joinMeetingWithToken(isJudge, preparationMeetingTeamContra.meetingUrl, meetingToken.token);
 }
 
 async function getAllMeetingsOfDebateSession(debateSessionId) {
@@ -105,12 +109,12 @@ async function getUserNameOfCurrentUser() {
 
 async function updateParticipantsView() {
     // set frame color according to current team
-    if(!isJudge) {
+    if (!isJudge) {
         let debateSessionPlayer = await getDebateSessionPlayer();
         const callWrapper = document.getElementById('wrapper');
-        if(debateSessionPlayer.team === "P") {
+        if (debateSessionPlayer.team === "P") {
             callWrapper.classList.add('pro-team');
-        }else{
+        } else {
             callWrapper.classList.add('contra-team');
         }
     }
