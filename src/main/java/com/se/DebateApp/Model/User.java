@@ -29,16 +29,8 @@ public class User {
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy="owner")
     private Set<DebateTemplate> debateTemplates = new HashSet<>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="forUser")
-    private Set<DebateRoleVote> roleVotes = new HashSet<>();
-
     public void addNewDebateTemplate(DebateTemplate debateTemplate) {
         debateTemplate.setOwner(this);
         debateTemplates.add(debateTemplate);
-    }
-
-    public void addNewVote(DebateRoleVote roleVote) {
-        roleVote.setForUser(this);
-        roleVotes.add(roleVote);
     }
 }

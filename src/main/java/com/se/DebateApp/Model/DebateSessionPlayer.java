@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "debate_session_players")
@@ -37,4 +39,12 @@ public class DebateSessionPlayer {
 
     @Column(nullable = true)
     private TeamType team = null;
+
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="forPlayer")
+    private Set<DebateRoleVote> roleVotes = new HashSet<>();
+
+    public void addNewVote(DebateRoleVote roleVote) {
+        roleVote.setForPlayer(this);
+        roleVotes.add(roleVote);
+    }
 }

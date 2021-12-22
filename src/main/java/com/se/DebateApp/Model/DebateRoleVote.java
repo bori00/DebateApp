@@ -27,7 +27,7 @@ public class DebateRoleVote {
 
     @ManyToOne(optional = false)
     @ToString.Exclude
-    private User forUser;
+    private DebateSessionPlayer forPlayer;
 
     @Column(nullable = false)
     private PlayerRole forPlayerRole = PlayerRole.NONE;
