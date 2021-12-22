@@ -251,15 +251,21 @@ public class StartDebateController {
         return "debate_preparation";
     }
 
+    @GetMapping("/reenter_debate_preparation")
+    public String reenterActiveDebatePage(Model model) {
+        return goToDebatePreparationPage(model);
+    }
+
     @GetMapping("/go_to_deputy_selection")
     public String goToDeputySelectionPage(Model model) {
         model.addAttribute("isJudge", isCurrentUserJudge(DebateSessionPhase.DEPUTY1_VOTING_TIME));
         return "deputy_selection";
     }
 
-    @GetMapping("/reenter_debate_preparation")
-    public String reenterActiveDebatePage(Model model) {
-        return goToDebatePreparationPage(model);
+    @GetMapping("/go_to_active_debate")
+    public String goToActiveDebatePage(Model model) {
+        model.addAttribute("isJudge", isCurrentUserJudge(DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1));
+        return "active_debate";
     }
 
     private void announceJudgeAboutDebateSessionParticipantsState(

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINISHED;
+
 @Controller
 public class DebateMeetingController {
 
@@ -127,7 +129,7 @@ public class DebateMeetingController {
     public Boolean processIsDebateFinished(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
 
-        return debateSession.getDebateSessionPhase().equals(DebateSessionPhase.FINISHED);
+        return debateSession.getDebateSessionPhase().equals(FINISHED);
     }
 
     @PostMapping("/process_end_of_current_phase")
@@ -135,7 +137,7 @@ public class DebateMeetingController {
     public void processEndOfCurrentPhase(@RequestParam Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
-        if(currentPhase.equals(DebateSessionPhase.FINISHED)) {
+        if(currentPhase.equals(FINISHED)) {
             return;
         }
         int nextPhase = currentPhase.ordinal() + 1;
@@ -145,13 +147,17 @@ public class DebateMeetingController {
         announceAllDebatePlayersAboutEndOfTimeInterval(debateSession.getPlayers(), currentPhase);
     }
 
-    @PostMapping("/process_close_debate")
-    @ResponseBody
-    public void processCloseDebate(@RequestParam Long debateSessionId) {
-        DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
-        debateSession.setDebateSessionPhase(DebateSessionPhase.FINISHED);
+    @GetMapping("/process_close_debate")
+    public String processCloseDebate() {
+        List<DebateSession> ongoingDebateSessions = debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), FINISHED);
+        if(ongoingDebateSessions.size() != 1) {
+            return "error";
+        }
+        DebateSession debateSession = ongoingDebateSessions.get(0);
+        debateSession.setDebateSessionPhase(FINISHED);
         debateSessionRepository.save(debateSession);
         announceAllDebatePlayersAboutDebateClosed(debateSession.getPlayers());
+        return "home";
     }
 
     private void announceAllDebatePlayersAboutDebateClosed(Set<DebateSessionPlayer> players) {

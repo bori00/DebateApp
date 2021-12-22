@@ -39,16 +39,17 @@
         <div class="card-body" id="card-body">
             <p>Deputy Selection</p>
         </div>
-        <button
-                type="button"
-                id="close-debate"
-                class="btn btn-warning"
-                th:if="${isJudge}"
-                th:onclick="'closeDebate(' + ${debateSessionId} + ')'"
-        >
-            Close debate session
-        </button>
     </div>
+
+    <button
+            type="button"
+            id="close-debate"
+            class="btn btn-warning"
+            th:if="${isJudge}"
+            onclick="closeDebate()"
+    >
+        Close debate session
+    </button>
 </div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 
 
-async function getDataFromServer(destEndpoint) {
+async function getRequestToServer(destEndpoint) {
     const token = $("meta[name='_csrf']").attr("content");
     const header = $("meta[name='_csrf_header']").attr("content");
 
@@ -18,7 +18,7 @@ async function getDataFromServer(destEndpoint) {
         .catch(error => console.log('failed to parse json: ' + error))
 }
 
-async function sendDataToServer(destEndpoint, body) {
+async function postRequestToServer(destEndpoint, body) {
     const token = $("meta[name='_csrf']").attr("content");
     const header = $("meta[name='_csrf_header']").attr("content");
 
