@@ -2,7 +2,6 @@ package com.se.DebateApp.Repository;
 
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
-import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

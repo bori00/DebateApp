@@ -6,6 +6,11 @@ function copyDebateCode() {
     copyButton.innerHTML = 'Copied!';
 }
 
+async function initDebate(debateSessionId) {
+    await createDebateMeetings(debateSessionId);
+    await subscribeToParticipantAnnouncementSocket();
+}
+
 async function subscribeToParticipantAnnouncementSocket() {
     var socket = new SockJS('/secured/debates');
     var stompClient = Stomp.over(socket);
@@ -35,5 +40,38 @@ function updateUIWithNewParticipantsStatus(participantsStatus) {
 }
 
 function activateDebateSession() {
-    window.location.href="/process_activate_debate_session";
+    window.location.href="/process_start_debate_preparation";
+}
+
+async function createDebateMeetings(debateSessionId) {
+    await createDebateMeetingRoom(debateSessionId, "ACTIVE");
+    await createDebateMeetingRoom(debateSessionId, "PREPARATION_PRO");
+    await createDebateMeetingRoom(debateSessionId, "PREPARATION_CONTRA");
+}
+
+async function createDebateMeetingRoom(debateSessionId, meetingType) {
+    let room = await createMeetingRoom();
+
+    const destEndpoint = "/process_create_meeting";
+    const token = $("meta[name='_csrf']").attr("content");
+    const header = $("meta[name='_csrf_header']").attr("content");
+
+    let requestBody = {
+            "debateSessionId": debateSessionId,
+            "meetingName": room.name,
+            "meetingUrl": room.url,
+            "meetingType": meetingType,
+    }
+
+    fetch(destEndpoint, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            "charset": "UTF-8",
+            [header]: token,
+        },
+        body: JSON.stringify(requestBody),
+    })
+        .catch(error => console.log('failed to save meeting: ' + error))
 }

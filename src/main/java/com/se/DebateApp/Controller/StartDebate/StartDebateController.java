@@ -1,19 +1,12 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Controller.HomePageController;
-import com.se.DebateApp.Controller.StartDebate.DTOs.DebateLobbyInformation;
-import com.se.DebateApp.Controller.StartDebate.DTOs.DebateSessionTeamChoiceInformation;
-import com.se.DebateApp.Controller.StartDebate.DTOs.JoinDebateRequestResponse;
-import com.se.DebateApp.Controller.StartDebate.DTOs.JoinTeamRequestResponse;
+import com.se.DebateApp.Controller.StartDebate.DTOs.*;
+import com.se.DebateApp.Model.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerState;
 import com.se.DebateApp.Model.Constants.TeamType;
 import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
-import com.se.DebateApp.Model.DebateSession;
-import com.se.DebateApp.Model.DebateSessionPlayer;
-import com.se.DebateApp.Model.DebateTemplate;
-import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
@@ -27,7 +20,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -214,8 +206,8 @@ public class StartDebateController {
         return processGoToDebateLobbyPage(model);
     }
 
-    @GetMapping("/process_activate_debate_session")
-    public String activateDebateSession() {
+    @GetMapping("/process_start_debate_preparation")
+    public String startDebatePreparation(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToActivateDebates =
                 debateSessionRepository.findDebateSessionOfJudgeWithGivenState(user,
@@ -224,23 +216,55 @@ public class StartDebateController {
             return "error";
         }
         DebateSession session = waitingToActivateDebates.get(0);
-        // TODO: update when timing solutions are clarified
-        session.setDebateSessionPhase(DebateSessionPhase.PREP_TIME);
+        DebateTemplate debateTemplate = session.getDebateTemplate();
+        boolean skipPhase = debateTemplate.getPrepTimeSeconds() == 0;
+
+        session.setDebateSessionPhase((skipPhase)? DebateSessionPhase.DEPUTY1_VOTING_TIME: DebateSessionPhase.PREP_TIME);
         session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(session.getPlayers());
         session.removePlayersWhoDidntJoinATeam();
+
         debateSessionRepository.save(session);
         announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
-        return "active_debate";
+        return (skipPhase)? goToDeputySelectionPage(model) : goToDebatePreparationPage(model);
+    }
+
+    @GetMapping("/go_to_debate_preparation")
+    public String goToDebatePreparationPage(Model model) {
+        User currentUser = getCurrentUser();
+        DebateSession debateSession;
+
+        List<DebateSession> debateSessionsOfJudgeInPreparationState = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
+        if(debateSessionsOfJudgeInPreparationState.size() == 1) {
+            debateSession = debateSessionsOfJudgeInPreparationState.get(0);
+        }else{
+            List<DebateSession> debateSessionsOfPlayerInPreparationState = debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
+            if(debateSessionsOfPlayerInPreparationState.size() == 1) {
+                debateSession = debateSessionsOfPlayerInPreparationState.get(0);
+            }else{
+                return "error";
+            }
+        }
+        model.addAttribute("isJudge", isCurrentUserJudge());
+        model.addAttribute("debateSessionId", debateSession.getId());
+        model.addAttribute("debateTemplate", debateSession.getDebateTemplate());
+        return "debate_preparation";
+    }
+
+    @GetMapping("/reenter_debate_preparation")
+    public String reenterActiveDebatePage(Model model) {
+        return goToDebatePreparationPage(model);
+    }
+
+    @GetMapping("/go_to_deputy_selection")
+    public String goToDeputySelectionPage(Model model) {
+        model.addAttribute("isJudge", isCurrentUserJudge());
+        return "deputy_selection";
     }
 
     @GetMapping("/go_to_active_debate")
     public String goToActiveDebatePage(Model model) {
-        return "active_debate";
-    }
-
-    @GetMapping("/reenter_active_debate")
-    public String reenterActiveDebatePage(Model model) {
+        model.addAttribute("isJudge", isCurrentUserJudge());
         return "active_debate";
     }
 
@@ -298,6 +322,10 @@ public class StartDebateController {
             }
             return Optional.of(ongoingDebatesAsPlayer.get(0));
         }
+    }
+
+    private boolean isCurrentUserJudge() {
+        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), DebateSessionPhase.FINISHED).size() == 1;
     }
 
     private User getCurrentUser() {
