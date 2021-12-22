@@ -206,62 +206,6 @@ public class StartDebateController {
         return processGoToDebateLobbyPage(model);
     }
 
-    @GetMapping("/process_start_debate_preparation")
-    public String startDebatePreparation(Model model) {
-        User user = getCurrentUser();
-        List<DebateSession> waitingToActivateDebates =
-                debateSessionRepository.findDebateSessionOfJudgeWithGivenState(user,
-                        DebateSessionPhase.WAITING_FOR_PLAYERS);
-        if (waitingToActivateDebates.size() != 1) {
-            return "error";
-        }
-        DebateSession session = waitingToActivateDebates.get(0);
-        DebateTemplate debateTemplate = session.getDebateTemplate();
-        boolean skipPhase = debateTemplate.getPrepTimeSeconds() == 0;
-
-        session.setDebateSessionPhase((skipPhase)? DebateSessionPhase.DEPUTY1_VOTING_TIME: DebateSessionPhase.PREP_TIME);
-        session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
-        Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(session.getPlayers());
-        session.removePlayersWhoDidntJoinATeam();
-
-        debateSessionRepository.save(session);
-        announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
-        return (skipPhase)? goToDeputySelectionPage(model) : goToDebatePreparationPage(model);
-    }
-
-    @GetMapping("/go_to_debate_preparation")
-    public String goToDebatePreparationPage(Model model) {
-        User currentUser = getCurrentUser();
-        DebateSession debateSession;
-
-        List<DebateSession> debateSessionsOfJudgeInPreparationState = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
-        if(debateSessionsOfJudgeInPreparationState.size() == 1) {
-            debateSession = debateSessionsOfJudgeInPreparationState.get(0);
-        }else{
-            List<DebateSession> debateSessionsOfPlayerInPreparationState = debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
-            if(debateSessionsOfPlayerInPreparationState.size() == 1) {
-                debateSession = debateSessionsOfPlayerInPreparationState.get(0);
-            }else{
-                return "error";
-            }
-        }
-        model.addAttribute("isJudge", isCurrentUserJudge());
-        model.addAttribute("debateSessionId", debateSession.getId());
-        model.addAttribute("debateTemplate", debateSession.getDebateTemplate());
-        return "debate_preparation";
-    }
-
-    @GetMapping("/reenter_debate_preparation")
-    public String reenterActiveDebatePage(Model model) {
-        return goToDebatePreparationPage(model);
-    }
-
-    @GetMapping("/go_to_deputy_selection")
-    public String goToDeputySelectionPage(Model model) {
-        model.addAttribute("isJudge", isCurrentUserJudge());
-        return "deputy_selection";
-    }
-
     @GetMapping("/go_to_active_debate")
     public String goToActiveDebatePage(Model model) {
         model.addAttribute("isJudge", isCurrentUserJudge());
@@ -278,15 +222,6 @@ public class StartDebateController {
 
     }
 
-    private void announceAllDebatePlayersAboutDebateActivation(Set<DebateSessionPlayer> joinedPlayers) {
-        for (DebateSessionPlayer player : joinedPlayers) {
-            simpMessagingTemplate.convertAndSendToUser(
-                    player.getUser().getUserName(),
-                    "/queue/debate-session-activated",
-                    "activated");
-        }
-    }
-
     private boolean hasOngoingDebate(User user) {
         List<DebateSession> ongoingSessionsAsJudge =
                 debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
@@ -298,30 +233,6 @@ public class StartDebateController {
                 debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
                         DebateSessionPhase.FINISHED);
         return !ongoingDebatesAsPlayer.isEmpty();
-    }
-
-    private Optional<DebateSession> getOngoingDebate() {
-        User user = getCurrentUser();
-        List<DebateSession> ongoingDebatesAsJudge =
-                debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
-                        DebateSessionPhase.FINISHED);
-        List<DebateSession> ongoingDebatesAsPlayer =
-                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
-                        DebateSessionPhase.FINISHED);
-        if (ongoingDebatesAsJudge.isEmpty() && ongoingDebatesAsPlayer.isEmpty()) {
-            return Optional.empty();
-        }
-        if (ongoingDebatesAsJudge.size() > 0) {
-            if (ongoingDebatesAsJudge.size() > 1) {
-                return Optional.empty();
-            }
-            return Optional.of(ongoingDebatesAsJudge.get(0));
-        } else {
-            if (ongoingDebatesAsPlayer.size() > 1) {
-                return Optional.empty();
-            }
-            return Optional.of(ongoingDebatesAsPlayer.get(0));
-        }
     }
 
     private boolean isCurrentUserJudge() {
