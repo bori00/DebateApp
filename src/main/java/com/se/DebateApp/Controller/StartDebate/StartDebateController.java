@@ -233,12 +233,10 @@ public class StartDebateController {
     public String goToDebatePreparationPage(Model model) {
         User currentUser = getCurrentUser();
         DebateSession debateSession;
-        boolean isJudge = false;
 
         List<DebateSession> debateSessionsOfJudgeInPreparationState = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
         if(debateSessionsOfJudgeInPreparationState.size() == 1) {
             debateSession = debateSessionsOfJudgeInPreparationState.get(0);
-            isJudge = true;
         }else{
             List<DebateSession> debateSessionsOfPlayerInPreparationState = debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
             if(debateSessionsOfPlayerInPreparationState.size() == 1) {
@@ -247,7 +245,7 @@ public class StartDebateController {
                 return "error";
             }
         }
-        model.addAttribute("isJudge", isJudge);
+        model.addAttribute("isJudge", isCurrentUserJudge(DebateSessionPhase.PREP_TIME));
         model.addAttribute("debateSessionId", debateSession.getId());
         model.addAttribute("debateTemplate", debateSession.getDebateTemplate());
         return "debate_preparation";
@@ -255,6 +253,7 @@ public class StartDebateController {
 
     @GetMapping("/go_to_deputy_selection")
     public String goToDeputySelectionPage(Model model) {
+        model.addAttribute("isJudge", isCurrentUserJudge(DebateSessionPhase.DEPUTY1_VOTING_TIME));
         return "deputy_selection";
     }
 
@@ -317,6 +316,10 @@ public class StartDebateController {
             }
             return Optional.of(ongoingDebatesAsPlayer.get(0));
         }
+    }
+
+    private boolean isCurrentUserJudge(DebateSessionPhase phase) {
+        return debateSessionRepository.findDebateSessionOfJudgeWithGivenState(getCurrentUser(), phase).size() == 1;
     }
 
     private User getCurrentUser() {

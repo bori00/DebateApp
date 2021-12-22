@@ -16,7 +16,7 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         .on('left-meeting', handleLeftMeeting)
         .on('joined-meeting', handleJoinedMeeting);
 
-    let meetings = await getAllMeetingsOfDebateSession(debateSessionId, onPreparationTimesUp);
+    let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
 
     for ( let {meetingName, meetingUrl, meetingType} of meetings) {
         switch(meetingType) {
@@ -39,9 +39,6 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
 
         await displayCountDownTimerForJudge(debateSessionId, onPreparationTimesUp);
     } else {
-        await displayCountDownTimerForPlayers(debateSessionId);
-        await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
-
         let debateSessionPlayer = await getDebateSessionPlayer();
         let teamPreparationMeeting;
 
@@ -54,6 +51,9 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         }
         meetingToken = await createMeetingToken(getPlayerPrivileges(teamPreparationMeeting.meetingName, userName));
         await joinMeetingWithToken(teamPreparationMeeting.meetingUrl, meetingToken.token);
+
+        await displayCountDownTimerForPlayers(debateSessionId);
+        await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
     }
 }
 
@@ -65,11 +65,8 @@ async function getDebateSessionPlayer() {
 
 async function onPreparationTimesUp(timesUp) {
     window.alert("Times up! The preparation for the debate has ended!");
-    if(isJudge) {
-        setElementVisibility("join-preparation-team-pro", false);
-        setElementVisibility("join-preparation-team-contra", false);
-    }
     await leaveMeeting();
+    document.defaultView.location.href = "/go_to_deputy_selection";
 }
 
 async function joinPreparationMeetingOfTeamPro() {

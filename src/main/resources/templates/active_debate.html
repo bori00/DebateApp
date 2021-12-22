@@ -39,16 +39,16 @@
     <div class="card p-3 bg-light m-5">
         <div class="card-body" id="card-body">
             <p>My Active Debate</p>
-            <button
-                    type="button"
-                    id="close-debate"
-                    class="btn btn-warning"
-                    th:if="${isJudge}"
-                    th:onclick="'closeDebate(' + ${debateSessionId} + ')'"
-            >
-                Close debate session
-            </button>
         </div>
+        <button
+                type="button"
+                id="close-debate"
+                class="btn btn-warning"
+                th:if="${isJudge}"
+                th:onclick="'closeDebate(' + ${debateSessionId} + ')'"
+        >
+            Close debate session
+        </button>
     </div>
 </div>
 </body>

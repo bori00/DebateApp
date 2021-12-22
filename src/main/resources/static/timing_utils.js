@@ -1,4 +1,3 @@
-let countDownTimer;
 let countDownTime, remainingTime;
 const refreshPeriod = 1000; // update the clock every second
 
@@ -28,7 +27,7 @@ async function subscribeToTimerNotificationSocket(phase, onTimesUp) {
 async function displayCountDownTimerForPlayers(debateSessionId) {
     countDownTime = await getCountDownTime(debateSessionId);
 
-    countDownTimer = window.setInterval(function() {
+    let countDownTimer = window.setInterval(function() {
         let {hours, minutes, seconds} = getTimeUnits();
 
         if(remainingTime >= 0) {
@@ -50,7 +49,7 @@ async function isDebateClosed(debateSessionId) {
 async function displayCountDownTimerForJudge(debateSessionId, onTimesUp) {
     countDownTime = await getCountDownTime(debateSessionId);
 
-    countDownTimer = window.setInterval(async function() {
+    let countDownTimer = window.setInterval(async function() {
         let {hours, minutes, seconds} = getTimeUnits();
         let isClosed = await isDebateClosed(debateSessionId);
 
