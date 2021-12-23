@@ -1,6 +1,7 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.OngoingDebateRequestResponse;
 import com.se.DebateApp.Controller.StartDebate.DTOs.*;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.*;
@@ -44,16 +45,16 @@ public class StartDebateController {
 
     @PostMapping(SupportedMappings.JUDGE_START_DEBATE_REQUEST)
     @ResponseBody
-    public StartDebateRequestResponse processStartDebateSession(@RequestBody Long debateTemplateId, Model model) {
+    public OngoingDebateRequestResponse processStartDebateSession(@RequestBody Long debateTemplateId, Model model) {
         if (hasOngoingDebate(getCurrentUser())) {
-            return new StartDebateRequestResponse(false,
-                    StartDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
         }
         Optional<DebateTemplate> optDebateTemplate =
                 debateTemplateRepository.findById(debateTemplateId);
         if (optDebateTemplate.isEmpty()) {
-            return new StartDebateRequestResponse(false,
-                    StartDebateRequestResponse.UNEXPECTED_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateTemplate debateTemplate = optDebateTemplate.get();
         DebateSession debateSession = new DebateSession();
@@ -61,7 +62,7 @@ public class StartDebateController {
         debateSession.setCurrentPhaseStartingTime(currentTime);
         debateTemplate.addNewSession(debateSession);
         DebateSession savedSession = debateSessionRepository.save(debateSession);
-        return new StartDebateRequestResponse(true, "");
+        return new OngoingDebateRequestResponse(true, true,"");
     }
 
     @GetMapping(SupportedMappings.JUDGE_GO_TO_STARTING_DEBATE_REQUEST)
@@ -84,29 +85,29 @@ public class StartDebateController {
 
     @PostMapping(value = SupportedMappings.PLAYER_JOIN_DEBATE_REQUEST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JoinDebateRequestResponse processJoinDebateSession(@RequestBody Long debateCode) {
+    public OngoingDebateRequestResponse processJoinDebateSession(@RequestBody Long debateCode) {
         User currentUser = getCurrentUser();
         if (hasOngoingDebate(getCurrentUser())) {
-            return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
         }
         Optional<DebateSession> optDebateSession =
                 debateSessionRepository.findById(debateCode);
         if (optDebateSession.isEmpty()) {
-            return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.DEBATE_NOT_FOUND_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.DEBATE_NOT_FOUND_ERROR_MSG);
         }
         DebateSession debateSession = optDebateSession.get();
         if (debateSession.getDebateSessionPhase() != DebateSessionPhase.WAITING_FOR_PLAYERS) {
-            return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.DEBATE_NO_LONGER_ACCEPTING_PLAYERS_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.DEBATE_NO_LONGER_ACCEPTING_PLAYERS_ERROR_MSG);
         }
         DebateSessionPlayer debateSessionPlayer = new DebateSessionPlayer();
         debateSessionPlayer.setUser(currentUser);
         debateSession.addNewPlayer(debateSessionPlayer);
         debateSessionPlayerRepository.save(debateSessionPlayer);
         announceJudgeAboutDebateSessionParticipantsState(debateSession.getDebateTemplate().getOwner(), debateSession.computeParticipantsStatus());
-        return new JoinDebateRequestResponse(true, null);
+        return new OngoingDebateRequestResponse(true, true,null);
     }
 
     @GetMapping(SupportedMappings.PLAYER_GO_TO_CHOOSE_TEAM_REQUEST)
@@ -128,7 +129,7 @@ public class StartDebateController {
 
     @PostMapping(value = SupportedMappings.PLAYER_JOIN_TEAM_REQUEST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JoinTeamRequestResponse processJoinDebateSession(@RequestBody Boolean joinsProTeam) {
+    public OngoingDebateRequestResponse processJoinDebateSession(@RequestBody Boolean joinsProTeam) {
         User user = getCurrentUser();
         List<DebateSession> waitingToJoinDebates =
                 debateSessionRepository.findDebateSessionOfPlayerWithGivenState(
@@ -139,14 +140,16 @@ public class StartDebateController {
                     debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user
                             , DebateSessionPhase.FINISHED);
             if (nonFinishedDebates.isEmpty()) {
-                return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+                return new OngoingDebateRequestResponse(false, 
+                        false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
             } else {
-                return new JoinTeamRequestResponse(false,
-                        JoinTeamRequestResponse.TOO_LATE_TO_JOIN_TEAM);
+                return new OngoingDebateRequestResponse(false, false,
+                        OngoingDebateRequestResponse.TOO_LATE_TO_JOIN_TEAM_MSG);
             }
         }
         if (waitingToJoinDebates.size() > 1) {
-            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSession session = waitingToJoinDebates.get(0);
         List<DebateSessionPlayer> usersPlayers =
@@ -155,11 +158,13 @@ public class StartDebateController {
                         .filter(player -> player.getUser().getId().equals(user.getId()))
                         .collect(Collectors.toList());
         if (usersPlayers.size() != 1) {
-            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSessionPlayer usersPlayer = usersPlayers.get(0);
         if (usersPlayer.getPlayerState().equals(PlayerState.JOINED_A_TEAM)) {
-            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.ALREADY_JOINED_TEAM);
+            return new OngoingDebateRequestResponse(false,
+                    false, OngoingDebateRequestResponse.ALREADY_JOINED_TEAM_MSG);
         }
         usersPlayer.setPlayerState(PlayerState.JOINED_A_TEAM);
         if (joinsProTeam) {
@@ -171,7 +176,7 @@ public class StartDebateController {
         announceJudgeAboutDebateSessionParticipantsState(
                 session.getDebateTemplate().getOwner(),
                 session.computeParticipantsStatus());
-        return new JoinTeamRequestResponse(true, "");
+        return new OngoingDebateRequestResponse(true, true, "");
     }
 
     @GetMapping(SupportedMappings.PLAYER_GO_TO_DEBATE_LOBBY_REQUEST)

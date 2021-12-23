@@ -42,7 +42,7 @@ public class DebateStateTransitionsController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    @GetMapping("/redirect_to_debates_current_phase")
+    @GetMapping(SupportedMappings.GO_TO_ONGOING_DEBATES_CURRENT_PHASE)
     public String redirectToDebatesCurrentPhase(Model model) {
         User user = getCurrentUser();
         List<DebateSession> ongoingDebatesAsJudge =

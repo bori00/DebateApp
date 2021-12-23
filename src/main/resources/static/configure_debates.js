@@ -25,7 +25,6 @@ function onDeleteDebateTemplateResourceLinkButtonPushed(resourceLinkId) {
 }
 
 function onStartDebateButtonPushed(debateTemplateId) {
-
     destEndpoint = "/start_debate";
     body = debateTemplateId
     postRequestToServer(destEndpoint, body)
@@ -35,7 +34,9 @@ function onStartDebateButtonPushed(debateTemplateId) {
         .catch(error => console.log('failed to parse response: ' + error))
         .then(response => {
             if (response.success) {
-                window.location.href = "/redirect_to_debates_current_phase";
+                if (response.debatePhaseRedirectNeeded) {
+                    window.location.href = "/go_to_ongoing_debates_current_phase";
+                }
             } else {
                 window.alert(response.errorMsg);
             }

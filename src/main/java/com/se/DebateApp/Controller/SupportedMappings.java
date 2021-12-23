@@ -2,6 +2,12 @@ package com.se.DebateApp.Controller;
 
 public class SupportedMappings {
 
+    // ----- general
+    // --- request mappings
+    // redirecting requests
+    public static final String GO_TO_ONGOING_DEBATES_CURRENT_PHASE =
+            "/go_to_ongoing_debates_current_phase";
+
     // ----- starting a debate
     // --- requests mappings
     // redirecting requests

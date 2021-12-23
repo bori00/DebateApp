@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class OngoingDebateRequestResponse {
     private final boolean success;
-    private final boolean redirectNeeded;
+    private final boolean debatePhaseRedirectNeeded;
     private final String errorMsg;
 
     public static final String HAS_OTHER_ONGOING_DEBATE_ERROR_MSG = "You can't join a new debate," +
