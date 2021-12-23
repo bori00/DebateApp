@@ -96,7 +96,7 @@ async function joinPreparationMeetingOfTeamContra() {
 }
 
 async function getAllMeetingsOfDebateSession(debateSessionId) {
-    const allDebateMeetingsDestEndpoint = "/process_get_all_meetings?debateSessionId=" + debateSessionId;
+    const allDebateMeetingsDestEndpoint = "/get_all_meetings?debateSessionId=" + debateSessionId;
 
     return await getRequestToServer(allDebateMeetingsDestEndpoint);
 }

@@ -60,7 +60,7 @@ async function createDebateMeetings(debateSessionId) {
 async function createDebateMeetingRoom(debateSessionId, meetingType) {
     let room = await createMeetingRoom();
 
-    const destEndpoint = "/process_create_meeting";
+    const destEndpoint = "/create_meeting";
     const token = $("meta[name='_csrf']").attr("content");
     const header = $("meta[name='_csrf_header']").attr("content");
 

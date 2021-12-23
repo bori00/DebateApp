@@ -8,6 +8,14 @@ public class SupportedMappings {
     public static final String GO_TO_ONGOING_DEBATES_CURRENT_PHASE =
             "/go_to_ongoing_debates_current_phase";
 
+    // ----- registration
+    // --- request mappings
+    // redirecting requests
+    public static final String REGISTER_AND_GO_TO_DESTINATION = "register_and_redirect";
+    // --- pages
+    public static final String REGISTER_PAGE = "register";
+    public static final String REGISTER_SUCCESS_PAGE = "register_success";
+
     // ----- starting a debate
     // --- requests mappings
     // redirecting requests

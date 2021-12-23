@@ -18,7 +18,7 @@ public class RegistrationController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/process_register")
+    @PostMapping(SupportedMappings.REGISTER_AND_GO_TO_DESTINATION)
     public String processRegistration(User user, Model model) {
         if (!userNameIsTaken(user.getUserName())) {
             // Valid new user data.
@@ -26,11 +26,11 @@ public class RegistrationController {
             String encodedPassword = encoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
             userRepository.save(user);
-            return "register_success";
+            return SupportedMappings.REGISTER_SUCCESS_PAGE;
         } else {
             // invalid username: username is taken.
             model.addAttribute(errorMessageName, usernameTakenErrorMessage);
-            return "register";
+            return SupportedMappings.REGISTER_PAGE;
         }
     }
 
