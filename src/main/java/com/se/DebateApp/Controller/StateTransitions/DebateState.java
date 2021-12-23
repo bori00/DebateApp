@@ -4,9 +4,11 @@ import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 
 public interface DebateState {
 
+    String getRedirectTargetOnStateBegin();
+
     default void onEndOfState() {}
 
-    String getRedirectionTargetOnEndOfState();
+    DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded();
 
     DebateSessionPhase getCorrespondingDebateSessionPhase();
 }

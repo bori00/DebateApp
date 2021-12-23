@@ -16,13 +16,19 @@ public class WaitingForPlayersState implements DebateState {
     }
 
     @Override
+    public String getRedirectTargetOnStateBegin() {
+        return null;
+    }
+
+    @Override
     public void onEndOfState() {
 
     }
 
     @Override
-    public String getRedirectionTargetOnEndOfState() {
-        return null;
+    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded() {
+        // TODO
+        return DebateSessionPhase.FINISHED;
     }
 
     @Override

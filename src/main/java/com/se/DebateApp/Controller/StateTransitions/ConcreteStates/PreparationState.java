@@ -17,7 +17,12 @@ public class PreparationState implements DebateState {
     }
 
     @Override
-    public String getRedirectionTargetOnEndOfState() {
+    public String getRedirectTargetOnStateBegin() {
+        return null;
+    }
+
+    @Override
+    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded() {
         return null;
     }
 

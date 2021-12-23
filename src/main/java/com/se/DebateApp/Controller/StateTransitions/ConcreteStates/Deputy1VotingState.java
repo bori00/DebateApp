@@ -14,14 +14,19 @@ public class Deputy1VotingState implements DebateState {
         }
         return instance;
     }
-    
+
+    @Override
+    public String getRedirectTargetOnStateBegin() {
+        return null;
+    }
+
     @Override
     public void onEndOfState() {
         
     }
 
     @Override
-    public String getRedirectionTargetOnEndOfState() {
+    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded() {
         return null;
     }
 

@@ -22,8 +22,13 @@ public class GeneralState implements DebateState {
     }
 
     @Override
-    public String getRedirectionTargetOnEndOfState() {
-        return "/";
+    public String getRedirectTargetOnStateBegin() {
+        return null;
+    }
+
+    @Override
+    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded() {
+        return null;
     }
 
     @Override
