@@ -1,6 +1,7 @@
 package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.DeputySelection.DeputySelectionController;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
@@ -60,7 +61,8 @@ public class PrepTimeController {
 
         debateSessionRepository.save(session);
         announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
-        return (skipPhase)? goToDeputySelectionPage(model) : goToDebatePreparationPage(model);
+        return (skipPhase)? "redirect:/go_to_deputy_selection" :
+                goToDebatePreparationPage(model);
     }
 
     @GetMapping("/go_to_debate_preparation")
@@ -97,12 +99,6 @@ public class PrepTimeController {
                     "/queue/debate-session-activated",
                     "activated");
         }
-    }
-
-    @GetMapping("/go_to_deputy_selection")
-    public String goToDeputySelectionPage(Model model) {
-        model.addAttribute("isJudge", isCurrentUserJudge());
-        return "deputy_selection";
     }
 
     private boolean isCurrentUserJudge() {

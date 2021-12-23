@@ -64,7 +64,7 @@ public class DeputySelectionController {
             model.addAttribute("teamName",
                     player.getTeam().equals(TeamType.PRO) ? "Affirmative" : "Negative");
             model.addAttribute("isPro",
-                    player.getTeam().equals(TeamType.PRO) ? true : false);
+                    player.getTeam().equals(TeamType.PRO));
             model.addAttribute("roleName",
                     session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
             return "deputy_selection_for_players";
