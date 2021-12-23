@@ -19,6 +19,8 @@ async function subscribeToTimerNotificationSocket(phase, onTimesUp) {
 
     console.log("Socket initialized");
 
+    console.log("Subscribed")
+
     stompClient.connect({}, function (frame) {
         stompClient.subscribe("/user/queue/debate-" + phase + "-times-up", onTimesUp);
     });
@@ -64,7 +66,7 @@ async function displayCountDownTimerForJudge(debateSessionId, onTimesUp) {
 async function handleEndOfDebateSessionPhaseByJudge(debateSessionId, onTimesUp) {
     let timerEndNotificationDestination = "/process_end_of_current_phase?debateSessionId="+debateSessionId;
     await postRequestToServer(timerEndNotificationDestination);
-    await onTimesUp(true);
+    await onTimesUp();
 }
 
 async function getCountDownTime(debateSessionId) {
