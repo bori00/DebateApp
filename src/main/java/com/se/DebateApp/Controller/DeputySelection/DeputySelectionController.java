@@ -18,10 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +45,7 @@ public class DeputySelectionController {
                     debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
                             DebateSessionPhase.FINISHED);
             DebateSession session = sessions.get(0);
+            model.addAttribute("debateSessionId", session.getId());
             model.addAttribute("roleName",
                     session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
             return "deputy_selection_for_judge";
@@ -60,6 +58,7 @@ public class DeputySelectionController {
             }
             DebateSession session = sessions.get(0);
             DebateSessionPlayer player = findPlayerOfUserInDebateSession(user, session);
+            model.addAttribute("debateSessionId", session.getId());
             model.addAttribute("candidates", getNextDeputyCandidates(player, session));
             model.addAttribute("teamName",
                     player.getTeam().equals(TeamType.PRO) ? "Affirmative" : "Negative");
@@ -73,25 +72,30 @@ public class DeputySelectionController {
 
     @PostMapping("/cast_deputy_vote")
     @ResponseBody
-    CastVoteResponseDTO castDeputyVote(@RequestParam String selectedCandidateName) {
+    CastVoteResponseDTO castDeputyVote(@RequestBody DeputyCandidateDTO deputyCandidateDTO) {
         User user = getCurrentUser();
         Optional<DebateSession> optDebateSession = getOngoingDebate(user);
         if (optDebateSession.isEmpty()) {
+            System.out.println("No debate session found");
             return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
         }
         DebateSession debateSession = optDebateSession.get();
-        if (debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY1_VOTING_TIME) {
+        if (debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY1_VOTING_TIME &&
+            debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY2_VOTING_TIME) {
             return new CastVoteResponseDTO(false,
                     CastVoteResponseDTO.PHASE_PASSED_MSG);
         }
 
+        System.out.println("Searched name: " + deputyCandidateDTO.getUserName());
+        System.out.println("Players: " + debateSession.getPlayers());
         List<DebateSessionPlayer> selectedPlayersList = debateSession.getPlayers()
                 .stream()
                 .filter(player -> player.getPlayerRole().equals(PlayerRole.NONE))
-                .filter(player -> player.getUser().getUserName().equals(selectedCandidateName))
+                .filter(player -> player.getUser().getUserName().equals(deputyCandidateDTO.getUserName()))
                 .collect(Collectors.toList());
 
         if (selectedPlayersList.size() != 1) {
+            System.out.println(selectedPlayersList);
             return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
         }
         DebateSessionPlayer selectedPlayer = selectedPlayersList.get(0);
@@ -104,6 +108,7 @@ public class DeputySelectionController {
         } else if (debateSession.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY2_VOTING_TIME)) {
             vote.setForPlayerRole(PlayerRole.DEPUTY2);
         } else {
+            System.out.println(debateSession.getDebateSessionPhase());
             return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
         }
         // TODO: add to session/player

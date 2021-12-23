@@ -8,6 +8,7 @@
           type="text/css"/>
     <link rel="stylesheet" th:href="@{/teams_stylesheet.css}"/>
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+    <script type="text/javascript" th:src="@{/dom_utils.js}"></script>
     <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
     <script type="text/javascript" th:src="@{/timing_utils.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
@@ -20,6 +21,11 @@
     <script th:src="@{/menu_controller.js}"></script>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <style>
+        .hide {
+            display: none;
+        }
+    </style>
 </head>
 <body th:onload="'loadMenu();' +
                   'subscribeToClosedDebateNotificationSocket();' +
@@ -47,31 +53,44 @@
 
             <h3 id="timer-clock">00:00:00</h3>
 
-            <h5>Select the deputies to represent your team in the debate!</h5>
+            <div id="votingOptionsDiv">
+                <h5>Select the deputies to represent your team in the debate!</h5>
 
-            <p>Please select one of the below participants to represent the
-                <span
-                    th:text="${teamName}"
-                    th:classappend="${isPro} ? proTextClass : conTextClass">team
-                </span>
-                team in the role of
-                <span th:text="${roleName}"
-                      th:classappend="${isPro} ? proTextClass : conTextClass">
-                the deputy
-                </span>
-            </p>
+                <p>Please select one of the below participants to represent the
+                    <span
+                        th:text="${teamName}"
+                        th:classappend="${isPro} ? proTextClass : conTextClass">team
+                    </span>
+                    team in the role of
+                    <span th:text="${roleName}"
+                          th:classappend="${isPro} ? proTextClass : conTextClass">
+                    the deputy
+                    </span>
+                </p>
 
-            <div class="list-group" th:each="candidate : ${candidates}">
-                <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-                    <h3 class="mb-3 float-left" th:text="${candidate.userName}">Statement</h3>
-                    <div class="container text-right">
-                        <button th:onclick="console.log('clicked')"
-                                type="button"
-                                class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
-                                                                          aria-hidden="true"></i></button>
-                    </div>
-                </a>
+                <div class="list-group" th:each="candidate : ${candidates}">
+                    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <h3 class="mb-3 float-left" th:text="${candidate.userName}">Candidate
+                            Name</h3>
+                        <div class="container text-right">
+                            <button
+                                    th:data-votedName="${candidate.userName}"
+                                    onclick="voteFor(this.getAttribute('data-votedName'))"
+                                    type="button"
+                                    class="btn btn-outline-secondary px-3">Vote!</button>
+                        </div>
+                    </a>
+                </div>
             </div>
+
+            <div id="votingLobbyDiv" class="hide">
+                <p>You successfully casted your vote</p>
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <h4>Waiting for others to vote before kicking off the next phase.</h4>
+            </div>
+
         </div>
         </div>
         </div>
