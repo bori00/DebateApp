@@ -90,6 +90,7 @@ public class DebateStateTransitionsController {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
         if(currentPhase.equals(FINISHED)) {
+            // TODO: what to do?
             return;
         }
         int nextPhase = currentPhase.ordinal() + 1;
