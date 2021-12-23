@@ -81,8 +81,4 @@ public class DebateSession {
         return new DebateParticipantsStatus(noWaitingToJoinPlayers,
                 noProTeamPlayers, noConTeamPlayers);
     }
-
-    public void removePlayersWhoDidntJoinATeam() {
-        getPlayers().removeIf(player -> player.getPlayerState().equals(PlayerState.WAITING_TO_JOIN_TEAM));
-    }
 }
