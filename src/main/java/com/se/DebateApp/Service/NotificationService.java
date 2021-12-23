@@ -26,7 +26,7 @@ public class NotificationService {
             String socketDest) {
         simpMessagingTemplate.convertAndSendToUser(
                 user.getUserName(),
-                DEBATE_SESSION_PARTICIPANTS_STATUS_SOCKET_DEST
+                socketDest,
                 message);
 
     }
