@@ -22,6 +22,17 @@ public class SupportedMappings {
     public static final String PLAYER_CHOOSE_TEAM_PAGE = "choose_team";
     public static final String PLAYER_DEBATE_LOBBY_PAGE = "debate_lobby";
 
+
+    // ----- prep time
+    // --- request mappings
+    // redirecting requests
+    public static final String GO_TO_DEBATE_PREPARATION = "/go_to_debate_preparation";
+    // responding requests
+    public static final String JUDGE_ACTIVATE_DEBATE = "/activate_debate";
+    // pages
+    public static final String DEBATE_PREPARATION_PAGE = "debate_preparation";
+
+
     // error
     public static final String ERROR_PAGE = "error";
 

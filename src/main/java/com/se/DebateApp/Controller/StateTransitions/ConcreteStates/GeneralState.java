@@ -2,6 +2,8 @@ package com.se.DebateApp.Controller.StateTransitions.ConcreteStates;
 
 import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
+import com.se.DebateApp.Model.DebateSession;
+import com.se.DebateApp.Model.DebateSessionPlayer;
 
 /*
 TODO: this should be deleted by the end of the development process, when all States are
@@ -22,12 +24,17 @@ public class GeneralState implements DebateState {
     }
 
     @Override
-    public String getRedirectTargetOnStateBegin() {
+    public String getPlayersRedirectTargetOnStateEnter(DebateSessionPlayer player) {
         return null;
     }
 
     @Override
-    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded() {
+    public String getJudgesRedirectTargetOnStateEnter() {
+        return null;
+    }
+
+    @Override
+    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
         return null;
     }
 

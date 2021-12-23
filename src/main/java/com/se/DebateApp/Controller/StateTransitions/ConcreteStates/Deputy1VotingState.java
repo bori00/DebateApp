@@ -2,6 +2,9 @@ package com.se.DebateApp.Controller.StateTransitions.ConcreteStates;
 
 import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
+import com.se.DebateApp.Model.DebateSession;
+import com.se.DebateApp.Model.DebateSessionPlayer;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 public class Deputy1VotingState implements DebateState {
     private static Deputy1VotingState instance = null;
@@ -16,17 +19,17 @@ public class Deputy1VotingState implements DebateState {
     }
 
     @Override
-    public String getRedirectTargetOnStateBegin() {
+    public String getPlayersRedirectTargetOnStateEnter(DebateSessionPlayer player) {
         return null;
     }
 
     @Override
-    public void onEndOfState() {
-        
+    public String getJudgesRedirectTargetOnStateEnter() {
+        return null;
     }
 
     @Override
-    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded() {
+    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
         return null;
     }
 

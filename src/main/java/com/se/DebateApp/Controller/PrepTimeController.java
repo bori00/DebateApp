@@ -2,6 +2,7 @@ package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.DeputySelection.DeputySelectionController;
+import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
@@ -11,6 +12,7 @@ import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
+import com.se.DebateApp.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -39,66 +43,59 @@ public class PrepTimeController {
     private UserRepository userRepository;
 
     @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
+    private NotificationService notificationService;
 
-    @GetMapping("/process_start_debate_preparation")
-    public String startDebatePreparation(Model model) {
+    @PostMapping(SupportedMappings.JUDGE_ACTIVATE_DEBATE)
+    @ResponseBody
+    public OngoingDebateRequestResponse startDebatePreparation(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToActivateDebates =
                 debateSessionRepository.findDebateSessionOfJudgeWithGivenState(user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToActivateDebates.size() != 1) {
-            return "error";
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
+
         DebateSession session = waitingToActivateDebates.get(0);
-        DebateTemplate debateTemplate = session.getDebateTemplate();
-        boolean skipPhase = debateTemplate.getPrepTimeSeconds() == 0;
 
-        session.setDebateSessionPhase((skipPhase)? DebateSessionPhase.DEPUTY1_VOTING_TIME: DebateSessionPhase.PREP_TIME);
+        DebateState state = session.getDebateSessionPhase().getCorrespondingState();
+        state.onEndOfState(session, notificationService);
+
+        session.setDebateSessionPhase(state.getNextDebateSessionPhaseAfterStateEnded(session));
         session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
-        Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(session.getPlayers());
-        session.removePlayersWhoDidntJoinATeam();
-
         debateSessionRepository.save(session);
-        announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
-        return (skipPhase)? "redirect:/go_to_deputy_selection" :
-                goToDebatePreparationPage(model);
+
+        return new OngoingDebateRequestResponse(true, true, "");
     }
 
-    @GetMapping("/go_to_debate_preparation")
+    @GetMapping(SupportedMappings.GO_TO_DEBATE_PREPARATION)
     public String goToDebatePreparationPage(Model model) {
         User currentUser = getCurrentUser();
         DebateSession debateSession;
 
-        List<DebateSession> debateSessionsOfJudgeInPreparationState = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
+        List<DebateSession> debateSessionsOfJudgeInPreparationState =
+                debateSessionRepository
+                        .findDebateSessionOfJudgeWithGivenState(
+                                currentUser,
+                                DebateSessionPhase.PREP_TIME);
         if(debateSessionsOfJudgeInPreparationState.size() == 1) {
             debateSession = debateSessionsOfJudgeInPreparationState.get(0);
         }else{
-            List<DebateSession> debateSessionsOfPlayerInPreparationState = debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
+            List<DebateSession> debateSessionsOfPlayerInPreparationState =
+                    debateSessionRepository.findDebateSessionOfPlayerWithGivenState(
+                            currentUser,
+                            DebateSessionPhase.PREP_TIME);
             if(debateSessionsOfPlayerInPreparationState.size() == 1) {
                 debateSession = debateSessionsOfPlayerInPreparationState.get(0);
             }else{
-                return "error";
+                return SupportedMappings.ERROR_PAGE;
             }
         }
         model.addAttribute("isJudge", isCurrentUserJudge());
         model.addAttribute("debateSessionId", debateSession.getId());
         model.addAttribute("debateTemplate", debateSession.getDebateTemplate());
-        return "debate_preparation";
-    }
-
-    @GetMapping("/reenter_debate_preparation")
-    public String reenterActiveDebatePage(Model model) {
-        return goToDebatePreparationPage(model);
-    }
-
-    private void announceAllDebatePlayersAboutDebateActivation(Set<DebateSessionPlayer> joinedPlayers) {
-        for (DebateSessionPlayer player : joinedPlayers) {
-            simpMessagingTemplate.convertAndSendToUser(
-                    player.getUser().getUserName(),
-                    "/queue/debate-session-activated",
-                    "activated");
-        }
+        return SupportedMappings.DEBATE_PREPARATION_PAGE;
     }
 
     private boolean isCurrentUserJudge() {

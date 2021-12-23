@@ -13,6 +13,7 @@ import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
+import com.se.DebateApp.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.Notification;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,9 @@ public class StartDebateController {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping(SupportedMappings.JUDGE_START_DEBATE_REQUEST)
     @ResponseBody
@@ -204,11 +209,7 @@ public class StartDebateController {
     private void announceJudgeAboutDebateSessionParticipantsState(
             User judge,
             DebateParticipantsStatus debateParticipantsStatus) {
-        simpMessagingTemplate.convertAndSendToUser(
-                judge.getUserName(),
-                "/queue/debate-session-participants-status",
-                debateParticipantsStatus);
-
+        notificationService.notifyUser(judge, debateParticipantsStatus, NotificationService.DEBATE_SESSION_PARTICIPANTS_STATUS_SOCKET_DEST);
     }
 
     private boolean hasOngoingDebate(User user) {
