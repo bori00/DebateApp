@@ -1,9 +1,11 @@
 package com.se.DebateApp.Controller.StateTransitions.ConcreteStates;
 
 import com.se.DebateApp.Controller.StateTransitions.DebateState;
+import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
+import com.se.DebateApp.Service.NotificationService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 public class Deputy2VotingState implements DebateState {
@@ -20,21 +22,26 @@ public class Deputy2VotingState implements DebateState {
 
     @Override
     public String getPlayersRedirectTargetOnStateEnter(DebateSessionPlayer player) {
-        return null;
+        return SupportedMappings.GO_TO_DEPUTY_SELECTION;
     }
 
     @Override
     public String getJudgesRedirectTargetOnStateEnter() {
-        return null;
+        return SupportedMappings.GO_TO_DEPUTY_SELECTION;
+    }
+
+    @Override
+    public void onEndOfState(DebateSession debateSession, NotificationService notificationService) {
+        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession, notificationService);
     }
 
     @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        return null;
+        return DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1;
     }
 
     @Override
     public DebateSessionPhase getCorrespondingDebateSessionPhase() {
-        return null;
+        return DebateSessionPhase.DEPUTY2_VOTING_TIME;
     }
 }

@@ -7,6 +7,8 @@ public class SupportedMappings {
     // redirecting requests
     public static final String GO_TO_ONGOING_DEBATES_CURRENT_PHASE =
             "/go_to_ongoing_debates_current_phase";
+    public static final String STARTING_PAGE = "";
+
 
     // ----- registration
     // --- request mappings
@@ -15,6 +17,7 @@ public class SupportedMappings {
     // --- pages
     public static final String REGISTER_PAGE = "register";
     public static final String REGISTER_SUCCESS_PAGE = "register_success";
+
 
     // ----- starting a debate
     // --- requests mappings
@@ -41,11 +44,28 @@ public class SupportedMappings {
     public static final String DEBATE_PREPARATION_PAGE = "debate_preparation";
 
 
+    // ----- deputy selection
+    // --- request mappings
+    // redirecting requests
+    public static final String GO_TO_DEPUTY_SELECTION = "/go_to_deputy_selection";
+
     // ----- meetings
     // --- request mappings
     // responding requests
     public static final String CREATE_MEETING = "/create_meeting";
     public static final String GET_ALL_MEETINGS = "/get_all_meetings";
+
+
+    // ----- state transitions controller
+    // --- request mappings
+    // responding requests
+    public static final String GET_CURRENT_PHASES_TIME_INTERVAL =
+            "/get_current_phases_time_interval";
+    public static final String GET_CURRENT_PHASE_STARTING_TIME =
+            "/get_current_phase_starting_time";
+    public static final String IS_DEBATE_SESSION_FINISHED = "/is_debate_finished";
+    public static final String PROCESS_END_OF_TIMED_PHASE = "/process_end_of_timed_phase";
+    public static final String CLOSE_DEBATE = "/close_debate";
 
     // error
     public static final String ERROR_PAGE = "error";

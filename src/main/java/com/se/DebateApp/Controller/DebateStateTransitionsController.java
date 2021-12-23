@@ -10,6 +10,7 @@ import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
+import com.se.DebateApp.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -41,6 +42,9 @@ public class DebateStateTransitionsController {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping(SupportedMappings.GO_TO_ONGOING_DEBATES_CURRENT_PHASE)
     public String redirectToDebatesCurrentPhase(Model model) {
@@ -78,9 +82,9 @@ public class DebateStateTransitionsController {
     }
 
 
-    @GetMapping("/process_get_time_interval")
+    @GetMapping(SupportedMappings.GET_CURRENT_PHASES_TIME_INTERVAL)
     @ResponseBody
-    public Integer processGetTimeInterval(@RequestParam(value = "debateSessionId") Long debateSessionId) {
+    public Integer getTimeInterval(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateTemplate debateTemplate = debateSession.getDebateTemplate();
 
@@ -107,64 +111,55 @@ public class DebateStateTransitionsController {
         }
     }
 
-    @GetMapping(value = "/process_get_current_phase_starting_time", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = SupportedMappings.GET_CURRENT_PHASE_STARTING_TIME, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Date processGetCurrentPhaseStartingTime(@RequestParam(value = "debateSessionId") Long debateSessionId) {
+    public Date getCurrentPhaseStartingTime(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
 
         return debateSession.getCurrentPhaseStartingTime();
     }
 
-    @GetMapping(value = "/process_is_debate_finished")
+    @GetMapping(value = SupportedMappings.IS_DEBATE_SESSION_FINISHED)
     @ResponseBody
-    public Boolean processIsDebateFinished(@RequestParam(value = "debateSessionId") Long debateSessionId) {
+    public Boolean isDebateFinished(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
 
         return debateSession.getDebateSessionPhase().equals(FINISHED);
     }
 
-    @PostMapping("/process_end_of_current_phase")
+    @PostMapping(SupportedMappings.PROCESS_END_OF_TIMED_PHASE)
     @ResponseBody
-    public void processEndOfCurrentPhase(@RequestParam Long debateSessionId) {
+    public void processEndOfTimedPhase(@RequestParam Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
         if(currentPhase.equals(FINISHED)) {
-            // TODO: what to do?
             return;
         }
-        int nextPhase = currentPhase.ordinal() + 1;
-        debateSession.setDebateSessionPhase(DebateSessionPhase.values()[nextPhase]);
+        DebateState currentState = currentPhase.getCorrespondingState();
+        DebateSessionPhase nextPhase =
+                currentState.getNextDebateSessionPhaseAfterStateEnded(debateSession);
+        debateSession.setDebateSessionPhase(nextPhase);
+        DebateState nextState = nextPhase.getCorrespondingState();
         debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         debateSessionRepository.save(debateSession);
-        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession.getPlayers(), currentPhase);
+        currentState.onEndOfState(debateSession, notificationService);
+        nextState.onBeginningOfState(debateSession, notificationService);
     }
 
-    @GetMapping("/process_close_debate")
-    public String processCloseDebate() {
-        List<DebateSession> ongoingDebateSessions = debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), FINISHED);
+    @PostMapping(SupportedMappings.CLOSE_DEBATE)
+    @ResponseBody
+    public OngoingDebateRequestResponse processCloseDebate() {
+        List<DebateSession> ongoingDebateSessions = debateSessionRepository
+                .findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), FINISHED);
         if(ongoingDebateSessions.size() != 1) {
-            return "error";
+            return new OngoingDebateRequestResponse(false, false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSession debateSession = ongoingDebateSessions.get(0);
         debateSession.setDebateSessionPhase(FINISHED);
+        DebateState newState = debateSession.getDebateSessionPhase().getCorrespondingState();
         debateSessionRepository.save(debateSession);
-        announceAllDebatePlayersAboutDebateClosed(debateSession.getPlayers());
-        return "home";
-    }
-
-    private void announceAllDebatePlayersAboutDebateClosed(Set<DebateSessionPlayer> players) {
-        for (DebateSessionPlayer player : players) {
-            simpMessagingTemplate.convertAndSendToUser(
-                    player.getUser().getUserName(), "queue/debate-closed", "closed");
-        }
-    }
-
-    private void announceAllDebatePlayersAboutEndOfTimeInterval(Set<DebateSessionPlayer> players, DebateSessionPhase phase) {
-        String destinationUrl = "/queue/debate-" + phase.name().toLowerCase().replace('_', '-') + "-times-up";
-        for (DebateSessionPlayer player : players) {
-            simpMessagingTemplate.convertAndSendToUser(
-                    player.getUser().getUserName(), destinationUrl, "timesUp");
-        }
+        newState.onBeginningOfState(debateSession, notificationService);
+        return new OngoingDebateRequestResponse(true, true, "");
     }
 
     private User getCurrentUser() {

@@ -6,6 +6,7 @@ import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.DebateTemplate;
+import com.se.DebateApp.Service.NotificationService;
 import org.springframework.security.core.parameters.P;
 
 public class PreparationState implements DebateState {
@@ -31,12 +32,17 @@ public class PreparationState implements DebateState {
     }
 
     @Override
+    public void onEndOfState(DebateSession debateSession, NotificationService notificationService) {
+        announceAllDebatePlayersAboutEndOfTimeInterval(debateSession, notificationService);
+    }
+
+    @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        DebateTemplate debateTemplate = debateSession.getDebateTemplate();
-        if (debateTemplate.getConstSpeechSeconds() > 0) {
-            return DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1;
+        if (DebateSessionPhase.DEPUTY1_VOTING_TIME.getDefaultLengthInSeconds().isPresent() &&
+                DebateSessionPhase.DEPUTY1_VOTING_TIME.getDefaultLengthInSeconds().get() > 0) {
+            return DebateSessionPhase.DEPUTY1_VOTING_TIME;
         } else {
-            return DebateSessionPhase.AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1
+            return DebateSessionPhase.DEPUTY1_VOTING_TIME
                     .getCorrespondingState()
                     .getNextDebateSessionPhaseAfterStateEnded(debateSession);
         }
