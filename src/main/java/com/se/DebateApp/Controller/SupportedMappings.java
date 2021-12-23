@@ -29,9 +29,15 @@ public class SupportedMappings {
     public static final String GO_TO_DEBATE_PREPARATION = "/go_to_debate_preparation";
     // responding requests
     public static final String JUDGE_ACTIVATE_DEBATE = "/activate_debate";
-    // pages
+    // --- pages
     public static final String DEBATE_PREPARATION_PAGE = "debate_preparation";
 
+
+    // ----- meetings
+    // --- request mappings
+    // responding requests
+    public static final String CREATE_MEETING = "/create_meeting";
+    public static final String GET_ALL_MEETINGS = "/get_all_meetings";
 
     // error
     public static final String ERROR_PAGE = "error";

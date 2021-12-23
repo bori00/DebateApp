@@ -38,7 +38,7 @@ public class DebateMeetingController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping(value = "/process_create_meeting", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = SupportedMappings.CREATE_MEETING, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public void processCreateMeeting(@RequestBody DebateMeetingAttributes debateMeetingAttributes) {
         DebateSession debateSession = debateSessionRepository.getById(debateMeetingAttributes.getDebateSessionId());
@@ -51,7 +51,7 @@ public class DebateMeetingController {
         debateSessionRepository.save(debateSession);
     }
 
-    @GetMapping(value = "/process_get_all_meetings", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = SupportedMappings.GET_ALL_MEETINGS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DebateMeetingDTO> processGetAllMeetings(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
