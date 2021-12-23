@@ -34,9 +34,6 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     let meetingToken;
 
     if (isJudge) {
-        setElementVisibility("join-preparation-team-pro", true);
-        setElementVisibility("join-preparation-team-contra", true);
-
         await displayCountDownTimerForJudge(debateSessionId, onPreparationTimesUp);
     } else {
         let debateSessionPlayer = await getDebateSessionPlayer();
@@ -76,7 +73,7 @@ function handleEndOfPreparationForParticipant() {
 async function joinPreparationMeetingOfTeamPro() {
     await leaveMeeting();
 
-    setElementVisibility("join-preparation-team-pro", false);
+    toggleElementVisibility("join-preparation-team-pro");
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('pro-team');
 
@@ -87,7 +84,7 @@ async function joinPreparationMeetingOfTeamPro() {
 async function joinPreparationMeetingOfTeamContra() {
     await leaveMeeting();
 
-    setElementVisibility("join-preparation-team-contra", false);
+    toggleElementVisibility("join-preparation-team-contra");
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('contra-team');
 
@@ -107,6 +104,37 @@ async function getUserNameOfCurrentUser() {
     return await getRequestToServer(destEndpoint);
 }
 
+function handleLeftMeeting() {
+    const callWrapper = document.getElementById('wrapper');
+    callWrapper.classList.remove('pro-team');
+    callWrapper.classList.remove('contra-team');
+}
+
+async function leaveMeeting() {
+    callFrame.leave();
+    if(isJudge) {
+        setElementVisibility("join-preparation-team-pro", true);
+        setElementVisibility("join-preparation-team-contra", true);
+    }
+}
+
+async function handleJoinedMeeting() {
+    await updateParticipantsView();
+}
+
+function toggleElementVisibility(id) {
+    document.getElementById(id).classList.toggle('hide');
+}
+
+function setElementVisibility(id, visible) {
+    const element = document.getElementById(id);
+    if (visible) {
+        element.classList.remove('hide');
+    } else {
+        element.classList.add('hide');
+    }
+}
+
 async function updateParticipantsView() {
     // set frame color according to current team
     if (!isJudge) {
@@ -117,31 +145,5 @@ async function updateParticipantsView() {
         } else {
             callWrapper.classList.add('contra-team');
         }
-    }
-}
-
-function handleLeftMeeting() {
-    setElementVisibility("join-preparation-team-pro", isJudge);
-    setElementVisibility("join-preparation-team-contra", isJudge);
-
-    const callWrapper = document.getElementById('wrapper');
-    callWrapper.classList.remove('pro-team');
-    callWrapper.classList.remove('contra-team');
-}
-
-async function leaveMeeting() {
-    callFrame.leave();
-}
-
-async function handleJoinedMeeting() {
-    await updateParticipantsView();
-}
-
-function setElementVisibility(id, visible) {
-    const element = document.getElementById(id);
-    if (visible) {
-        element.classList.remove('hide');
-    } else {
-        element.classList.add('hide');
     }
 }
