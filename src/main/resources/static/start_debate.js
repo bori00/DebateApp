@@ -40,7 +40,15 @@ function updateUIWithNewParticipantsStatus(participantsStatus) {
 }
 
 function activateDebateSession() {
-    window.location.href="/process_start_debate_preparation";
+    const url = "/activate_debate";
+    postRequestToServer(url, "")
+        .then(response => {
+            return response.json();
+        })
+        .catch(error => console.log('failed to parse response: ' + error))
+        .then (response => {
+            handleOngoingDebateRequestResponse(response);
+        });
 }
 
 async function createDebateMeetings(debateSessionId) {

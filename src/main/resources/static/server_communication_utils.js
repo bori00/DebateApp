@@ -41,6 +41,6 @@ function handleOngoingDebateRequestResponse(response) {
             window.location.href = "/go_to_ongoing_debates_current_phase"
         }
     } else {
-        window.alert(joinDebateStatus.errorMessage)
+        window.alert(response.errorMsg)
     }
 }
