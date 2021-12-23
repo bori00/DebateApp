@@ -42,15 +42,8 @@
 
     <div class="card p-3 bg-light m-5">
         <div class="card-body">
-            <div th:if="${errorMessage!=null}">
-                <p style="color: red">
-                    <b>Debate couldn't be started.</b>
-                </p>
-                <p style="color: red" th:utext="${errorMessage}">
-                </p>
-            </div>
 
-            <div th:if="${debateCode!=null}" id="container">
+            <div id="container">
 
                 <div id="wrapper" class="wrapper">
 

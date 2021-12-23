@@ -1,0 +1,24 @@
+package com.se.DebateApp.Controller;
+
+public class SupportedMappings {
+
+    // ----- starting a debate
+    // --- requests mappings
+    // redirecting requests
+    public static final String PLAYER_GO_TO_CHOOSE_TEAM_REQUEST = "/go_to_choose_team";
+    public static final String PLAYER_GO_TO_DEBATE_LOBBY_REQUEST = "/go_to_debate_lobby";
+    public static final String JUDGE_GO_TO_STARTING_DEBATE_REQUEST = "/go_to_starting_debate";
+    // responding requests
+    public static final String PLAYER_JOIN_DEBATE_REQUEST = "/join_debate";
+    public static final String PLAYER_JOIN_TEAM_REQUEST = "/join_team";
+    public static final String JUDGE_START_DEBATE_REQUEST = "/start_debate";
+    // --- pages
+    public static final String PLAYER_CHOOSE_TEAM_PAGE = "choose_team";
+    public static final String PLAYER_DEBATE_LOBBY_PAGE = "debate_lobby";
+
+    // error
+    public static final String ERROR_PAGE = "error";
+
+    // redirect
+    public static final String REDIRECT_PREFIX = "redirect:";
+}

@@ -2,6 +2,7 @@ package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.StartDebate.DTOs.*;
+import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerState;
@@ -41,21 +42,18 @@ public class StartDebateController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    private static final String errorMessageName = "errorMessage";
-    private static final String hasOtherOngoingDebateErrorMsg = "You can't start a new debate, " +
-            "when you " +
-            "are a player/judge in an other ongoing debate. Please retry later!";
-
-    @GetMapping("/process_start_debate")
-    public String processStartDebateSession(@RequestParam Long debateTemplateId, Model model) {
+    @PostMapping(SupportedMappings.JUDGE_START_DEBATE_REQUEST)
+    @ResponseBody
+    public StartDebateRequestResponse processStartDebateSession(@RequestBody Long debateTemplateId, Model model) {
         if (hasOngoingDebate(getCurrentUser())) {
-            model.addAttribute(errorMessageName, hasOtherOngoingDebateErrorMsg);
-            return "start_debate";
+            return new StartDebateRequestResponse(false,
+                    StartDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
         }
         Optional<DebateTemplate> optDebateTemplate =
                 debateTemplateRepository.findById(debateTemplateId);
         if (optDebateTemplate.isEmpty()) {
-            throw new IllegalArgumentException();
+            return new StartDebateRequestResponse(false,
+                    StartDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateTemplate debateTemplate = optDebateTemplate.get();
         DebateSession debateSession = new DebateSession();
@@ -63,14 +61,10 @@ public class StartDebateController {
         debateSession.setCurrentPhaseStartingTime(currentTime);
         debateTemplate.addNewSession(debateSession);
         DebateSession savedSession = debateSessionRepository.save(debateSession);
-        model.addAttribute("debateCode", savedSession.getId());
-        model.addAttribute("waitingParticipants", 0);
-        model.addAttribute("proPlayers", 0);
-        model.addAttribute("conPlayers", 0);
-        return "start_debate";
+        return new StartDebateRequestResponse(true, "");
     }
 
-    @GetMapping("/reenter_start_debate")
+    @GetMapping(SupportedMappings.JUDGE_GO_TO_STARTING_DEBATE_REQUEST)
     public String reenterStartDebateSession(Model model) {
         User user = getCurrentUser();
         List<DebateSession> ongoingsSessionsAsJudge =
@@ -88,7 +82,7 @@ public class StartDebateController {
         return "start_debate";
     }
 
-    @PostMapping(value = "/process_join_debate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = SupportedMappings.PLAYER_JOIN_DEBATE_REQUEST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public JoinDebateRequestResponse processJoinDebateSession(@RequestBody Long debateCode) {
         User currentUser = getCurrentUser();
@@ -115,7 +109,7 @@ public class StartDebateController {
         return new JoinDebateRequestResponse(true, null);
     }
 
-    @GetMapping("/choose_team")
+    @GetMapping(SupportedMappings.PLAYER_GO_TO_CHOOSE_TEAM_REQUEST)
     public String processGoToChooseTeamPageRequest(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToJoinDebates =
@@ -123,21 +117,16 @@ public class StartDebateController {
                         user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToJoinDebates.isEmpty()) {
-            return "error";
+            return SupportedMappings.ERROR_PAGE;
         }
         DebateSessionTeamChoiceInformation teamChoiceInformation =
                 new DebateSessionTeamChoiceInformation(
                         waitingToJoinDebates.get(0).getDebateTemplate());
         model.addAttribute("team_choice_information", teamChoiceInformation);
-        return "choose_team";
+        return SupportedMappings.PLAYER_CHOOSE_TEAM_PAGE;
     }
 
-    @GetMapping("/reenter_choose_team")
-    public String reenterChooseTeamPageRequest(Model model) {
-        return processGoToChooseTeamPageRequest(model);
-    }
-
-    @PostMapping(value = "/process_join_team", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = SupportedMappings.PLAYER_JOIN_TEAM_REQUEST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public JoinTeamRequestResponse processJoinDebateSession(@RequestBody Boolean joinsProTeam) {
         User user = getCurrentUser();
@@ -185,7 +174,7 @@ public class StartDebateController {
         return new JoinTeamRequestResponse(true, "");
     }
 
-    @GetMapping("/go_to_debate_lobby")
+    @GetMapping(SupportedMappings.PLAYER_GO_TO_DEBATE_LOBBY_REQUEST)
     public String processGoToDebateLobbyPage(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToActivateDebates =
@@ -193,17 +182,12 @@ public class StartDebateController {
                         user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToActivateDebates.size() != 1) {
-            return "error";
+            return SupportedMappings.ERROR_PAGE;
         }
         DebateSession session = waitingToActivateDebates.get(0);
         model.addAttribute("debateInformation",
                 new DebateLobbyInformation(session.getDebateTemplate()));
-        return "debate_lobby";
-    }
-
-    @GetMapping("/reenter_debate_lobby")
-    public String reenterDebateLobbyPage(Model model) {
-        return processGoToDebateLobbyPage(model);
+        return SupportedMappings.PLAYER_DEBATE_LOBBY_PAGE;
     }
 
     @GetMapping("/go_to_active_debate")

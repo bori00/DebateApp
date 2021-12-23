@@ -1,7 +1,9 @@
 package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
+import com.se.DebateApp.Model.Constants.PlayerState;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.DebateTemplate;
@@ -14,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +26,7 @@ import javax.persistence.Column;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINISHED;
 
@@ -37,6 +41,41 @@ public class DebateStateTransitionsController {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+
+    @GetMapping("/redirect_to_debates_current_phase")
+    public String redirectToDebatesCurrentPhase(Model model) {
+        User user = getCurrentUser();
+        List<DebateSession> ongoingDebatesAsJudge =
+                debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED);
+        List<DebateSession> ongoingDebatesAsPlayer =
+                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED);
+        if (ongoingDebatesAsJudge.isEmpty() && ongoingDebatesAsPlayer.isEmpty()) {
+            return SupportedMappings.ERROR_PAGE;
+        }
+        if (ongoingDebatesAsJudge.size() > 0) {
+            if (ongoingDebatesAsJudge.size() > 1) {
+                return SupportedMappings.ERROR_PAGE;
+            }
+            DebateSession session = ongoingDebatesAsJudge.get(0);
+            DebateState sessionState = session.getDebateSessionPhase().getCorrespondingState();
+            return SupportedMappings.REDIRECT_PREFIX + sessionState.getJudgesRedirectTargetOnStateEnter();
+        } else {
+            if (ongoingDebatesAsPlayer.size() > 1) {
+                return SupportedMappings.ERROR_PAGE;
+            }
+            DebateSession session = ongoingDebatesAsPlayer.get(0);
+            DebateState sessionState = session.getDebateSessionPhase().getCorrespondingState();
+            List<DebateSessionPlayer> players =
+                    session.getPlayers().stream().filter(p -> p.getUser().equals(user)).collect(Collectors.toList());
+            if (players.size() != 1) {
+                return SupportedMappings.ERROR_PAGE;
+            }
+            return SupportedMappings.REDIRECT_PREFIX +
+                    sessionState.getPlayersRedirectTargetOnStateEnter(players.get(0));
+        }
+    }
 
 
     @GetMapping("/process_get_time_interval")
