@@ -3,9 +3,9 @@ package com.se.DebateApp.Controller.DeputySelection;
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.DeputySelection.DTOs.CastVoteResponseDTO;
 import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyCandidateDTO;
-import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyCandidatesListDTO;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
+import com.se.DebateApp.Model.Constants.TeamType;
 import com.se.DebateApp.Model.DebateRoleVote;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
@@ -42,43 +42,33 @@ public class DeputySelectionController {
 
     @GetMapping("/go_to_deputy_selection")
     public String goToDeputySelectionPage(Model model) {
-        if (isCurrentUserJudge()) {
+        User user = getCurrentUser();
+        if (isCurrentUserJudge(user)) {
+            List<DebateSession> sessions =
+                    debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
+                            DebateSessionPhase.FINISHED);
+            DebateSession session = sessions.get(0);
+            model.addAttribute("roleName",
+                    session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
             return "deputy_selection_for_judge";
         } else {
+            List<DebateSession> sessions =
+                    debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
+                            DebateSessionPhase.FINISHED);
+            if (sessions.size() != 1) {
+                return "error";
+            }
+            DebateSession session = sessions.get(0);
+            DebateSessionPlayer player = findPlayerOfUserInDebateSession(user, session);
+            model.addAttribute("candidates", getNextDeputyCandidates(player, session));
+            model.addAttribute("teamName",
+                    player.getTeam().equals(TeamType.PRO) ? "Affirmative" : "Negative");
+            model.addAttribute("isPro",
+                    player.getTeam().equals(TeamType.PRO) ? true : false);
+            model.addAttribute("roleName",
+                    session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
             return "deputy_selection_for_players";
         }
-    }
-
-    @PostMapping("/get_next_deputy_candidates")
-    @ResponseBody
-    DeputyCandidatesListDTO getNextDeputyCandidates() {
-        User user = getCurrentUser();
-        Optional<DebateSession> optDebateSession = getOngoingDebate(user);
-        if (optDebateSession.isEmpty()) {
-            return new DeputyCandidatesListDTO(new ArrayList<>(), false,
-                    DeputyCandidatesListDTO.UNEXPECTED_ERROR_MSG);
-        }
-        DebateSession debateSession = optDebateSession.get();
-
-        DebateSessionPlayer usersPlayer =
-                debateSession.getPlayers()
-                        .stream()
-                        .filter(player -> player.getUser().equals(getCurrentUser()))
-                        .collect(Collectors.toList())
-                        .get(0);
-
-        // Select players in the same team as the current user, who do not have a role assigned
-        // yet and are not the same as the current user
-        List<DeputyCandidateDTO> candidatePlayersInUsersTeam =
-                debateSession.getPlayers()
-                        .stream()
-                        .filter(player -> !player.getUser().equals(getCurrentUser()))
-                        .filter(player -> player.getPlayerRole().equals(PlayerRole.NONE))
-                        .filter(player -> !player.getTeam().equals(usersPlayer.getTeam()))
-                        .map(player -> new DeputyCandidateDTO(player.getUser().getUserName()))
-                        .collect(Collectors.toList());
-
-        return new DeputyCandidatesListDTO(candidatePlayersInUsersTeam, true, "");
     }
 
     @PostMapping("/cast_deputy_vote")
@@ -122,6 +112,20 @@ public class DeputySelectionController {
         return new CastVoteResponseDTO(true, "");
     }
 
+    private List<DeputyCandidateDTO> getNextDeputyCandidates(DebateSessionPlayer usersPlayer,
+                                                             DebateSession debateSession) {
+
+        // Select players in the same team as the current user, who do not have a role assigned
+        // yet and are not the same as the current user
+        return debateSession.getPlayers()
+                .stream()
+                .filter(player -> !player.getUser().equals(getCurrentUser()))
+                .filter(player -> player.getPlayerRole().equals(PlayerRole.NONE))
+                .filter(player -> player.getTeam().equals(usersPlayer.getTeam()))
+                .map(player -> new DeputyCandidateDTO(player.getUser().getUserName()))
+                .collect(Collectors.toList());
+    }
+
     private Optional<DebateSession> getOngoingDebate(User user) {
         List<DebateSession> ongoingDebatesAsJudge =
                 debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
@@ -150,7 +154,16 @@ public class DeputySelectionController {
         return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
     }
 
-    private boolean isCurrentUserJudge() {
-        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), DebateSessionPhase.FINISHED).size() == 1;
+    private boolean isCurrentUserJudge(User user) {
+        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
+                DebateSessionPhase.FINISHED).size() == 1;
+    }
+
+    private DebateSessionPlayer findPlayerOfUserInDebateSession(User user, DebateSession session) {
+        return session.getPlayers()
+                .stream()
+                .filter(player -> player.getUser().equals(getCurrentUser()))
+                .collect(Collectors.toList())
+                .get(0);
     }
 }

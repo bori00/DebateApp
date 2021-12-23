@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
           type="text/css"/>
+    <link rel="stylesheet" th:href="@{/teams_stylesheet.css}"/>
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
     <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
     <script type="text/javascript" th:src="@{/timing_utils.js}"></script>
@@ -37,39 +38,37 @@
 
     <div class="card p-3 bg-light m-5">
         <div class="card-body" id="card-body">
-            <h3>Deputy Selection</h3>
+            <h3 th:classappend="${isPro} ? proTextClass : conTextClass">Deputy Selection</h3>
 
             <h5>Select the deputies to represent your team in the debate!</h5>
 
-            <p>Please select one of the below participants to represent the <span
-                    id="team-name">team</span> in the role of
-                <span id="role-name">the deputy</span></p>
+            <p>Please select one of the below participants to represent the
+                <span
+                    th:text="${teamName}"
+                    th:classappend="${isPro} ? proTextClass : conTextClass">team
+                </span>
+                team in the role of
+                <span th:text="${roleName}"
+                      th:classappend="${isPro} ? proTextClass : conTextClass">
+                the deputy
+                </span>
+            </p>
 
-            <div class="list-group" th:if="${not isJudge}">
+            <div class="list-group" th:each="candidate : ${candidates}">
                 <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">Name</h5>
-                    </div>
+                    <h3 class="mb-3 float-left" th:text="${candidate.userName}">Statement</h3>
                     <div class="container text-right">
-                        <button th:onclick=""
+                        <button th:onclick="console.log('clicked')"
                                 type="button"
-                                class="btn btn-outline-secondary px-3">Vote</i></button>
+                                class="btn btn-outline-secondary px-3"><i class="fa fa-trash"
+                                                                          aria-hidden="true"></i></button>
                     </div>
                 </a>
             </div>
         </div>
         </div>
+        </div>
     </div>
-
-    <button
-            type="button"
-            id="close-debate"
-            class="btn btn-warning"
-            th:if="${isJudge}"
-            onclick="closeDebate()"
-    >
-        Close debate session
-    </button>
 </div>
 </body>
 </html>
