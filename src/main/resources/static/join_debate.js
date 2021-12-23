@@ -7,16 +7,6 @@ function joinDebate() {
         })
         .catch(error => console.log('failed to parse response: ' + error))
         .then (joinDebateStatus => {
-            handleJoinDebateStatus(joinDebateStatus)
+            handleOngoingDebateRequestResponse(joinDebateStatus);
         });
-}
-
-function handleJoinDebateStatus(joinDebateStatus) {
-    if (joinDebateStatus.success) {
-        if (joinDebateStatus.debatePhaseRedirectNeeded) {
-            window.location.href = "/go_to_ongoing_debates_current_phase"
-        }
-    } else {
-        window.alert(joinDebateStatus.errorMessage)
-    }
 }

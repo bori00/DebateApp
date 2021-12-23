@@ -33,12 +33,6 @@ function onStartDebateButtonPushed(debateTemplateId) {
         })
         .catch(error => console.log('failed to parse response: ' + error))
         .then(response => {
-            if (response.success) {
-                if (response.debatePhaseRedirectNeeded) {
-                    window.location.href = "/go_to_ongoing_debates_current_phase";
-                }
-            } else {
-                window.alert(response.errorMsg);
-            }
+            handleOngoingDebateRequestResponse(response);
         });
 }
