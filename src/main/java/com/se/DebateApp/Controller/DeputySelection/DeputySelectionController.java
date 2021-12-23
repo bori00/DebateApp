@@ -1,8 +1,9 @@
 package com.se.DebateApp.Controller.DeputySelection;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Controller.DeputySelection.DTOs.CastVoteResponseDTO;
 import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyCandidateDTO;
+import com.se.DebateApp.Controller.OngoingDebateRequestResponse;
+import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
 import com.se.DebateApp.Model.Constants.TeamType;
@@ -37,7 +38,7 @@ public class DeputySelectionController {
     @Autowired
     private DebateRoleVoteRepository roleVotesRepository;
 
-    @GetMapping("/go_to_deputy_selection")
+    @GetMapping(SupportedMappings.GO_TO_DEPUTY_SELECTION)
     public String goToDeputySelectionPage(Model model) {
         User user = getCurrentUser();
         if (isCurrentUserJudge(user)) {
@@ -48,13 +49,13 @@ public class DeputySelectionController {
             model.addAttribute("debateSessionId", session.getId());
             model.addAttribute("roleName",
                     session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
-            return "deputy_selection_for_judge";
+            return SupportedMappings.DEPUTY_SELECTION_FOR_JUDGE_PAGE;
         } else {
             List<DebateSession> sessions =
                     debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
                             DebateSessionPhase.FINISHED);
             if (sessions.size() != 1) {
-                return "error";
+                return SupportedMappings.ERROR_PAGE;
             }
             DebateSession session = sessions.get(0);
             DebateSessionPlayer player = findPlayerOfUserInDebateSession(user, session);
@@ -66,24 +67,24 @@ public class DeputySelectionController {
                     player.getTeam().equals(TeamType.PRO));
             model.addAttribute("roleName",
                     session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
-            return "deputy_selection_for_players";
+            return SupportedMappings.DEPUTY_SELECTION_FOR_PLAYER_PAGE;
         }
     }
 
-    @PostMapping("/cast_deputy_vote")
+    @PostMapping(SupportedMappings.CAST_VOTE)
     @ResponseBody
-    CastVoteResponseDTO castDeputyVote(@RequestBody DeputyCandidateDTO deputyCandidateDTO) {
+    OngoingDebateRequestResponse castDeputyVote(@RequestBody DeputyCandidateDTO deputyCandidateDTO) {
         User user = getCurrentUser();
         Optional<DebateSession> optDebateSession = getOngoingDebate(user);
         if (optDebateSession.isEmpty()) {
-            System.out.println("No debate session found");
-            return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false,
+                    false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSession debateSession = optDebateSession.get();
         if (debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY1_VOTING_TIME &&
             debateSession.getDebateSessionPhase() != DebateSessionPhase.DEPUTY2_VOTING_TIME) {
-            return new CastVoteResponseDTO(false,
-                    CastVoteResponseDTO.PHASE_PASSED_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.VOTING_PHASE_PASSED_MSG);
         }
 
         System.out.println("Searched name: " + deputyCandidateDTO.getUserName());
@@ -96,7 +97,8 @@ public class DeputySelectionController {
 
         if (selectedPlayersList.size() != 1) {
             System.out.println(selectedPlayersList);
-            return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false,
+                    false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSessionPlayer selectedPlayer = selectedPlayersList.get(0);
 
@@ -109,12 +111,13 @@ public class DeputySelectionController {
             vote.setForPlayerRole(PlayerRole.DEPUTY2);
         } else {
             System.out.println(debateSession.getDebateSessionPhase());
-            return new CastVoteResponseDTO(false, CastVoteResponseDTO.UNEXPECTED_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false,
+                    false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         // TODO: add to session/player
         roleVotesRepository.save(vote);
 
-        return new CastVoteResponseDTO(true, "");
+        return new OngoingDebateRequestResponse(true, false,"");
     }
 
     private List<DeputyCandidateDTO> getNextDeputyCandidates(DebateSessionPlayer usersPlayer,

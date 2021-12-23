@@ -16,9 +16,7 @@ function onDeputy2VotingTimesUp_Player() {
 }
 
 function voteFor(selectedCandidateName) {
-    const url = new URL("/cast_deputy_vote", document.URL);
-    const token = $("meta[name='_csrf']").attr("content");
-    const header = $("meta[name='_csrf_header']").attr("content");
+    const url = new URL("/cast_vote", document.URL);
     const body = {userName: selectedCandidateName};
     fetch(url, {
         method: 'POST',

@@ -30,4 +30,8 @@ public class OngoingDebateRequestResponse {
 
     public static final String DEBATE_NO_LONGER_ACCEPTING_PLAYERS_ERROR_MSG = "This debate no " +
             "longer accepts players. We're sorry, but you cannot join the debate.";
+
+    public static final String VOTING_PHASE_PASSED_MSG = "Seems like you missed the voting phase." +
+            " We're " +
+            "sorry.";
 }

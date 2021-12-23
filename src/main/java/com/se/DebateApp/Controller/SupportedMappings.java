@@ -48,6 +48,11 @@ public class SupportedMappings {
     // --- request mappings
     // redirecting requests
     public static final String GO_TO_DEPUTY_SELECTION = "/go_to_deputy_selection";
+    // responding requests
+    public static final String CAST_VOTE = "/cast_vote";
+    // --- pages
+    public static final String DEPUTY_SELECTION_FOR_JUDGE_PAGE = "deputy_selection_for_judge";
+    public static final String DEPUTY_SELECTION_FOR_PLAYER_PAGE = "deputy_selection_for_players";
 
     // ----- meetings
     // --- request mappings
