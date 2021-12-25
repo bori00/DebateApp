@@ -75,8 +75,13 @@ public class Deputy2VotingState implements DebateState {
                         .entrySet();
 
         if (playersToNoVotes.size() == 0) {
-            throw new IllegalStateException("There must be at least one player with a vote for " +
-                    "the role of deputy1 in team " + teamType);
+            List<DebateSessionPlayer> playersWithNoRoleList =
+                    debateSession.getPlayers().stream()
+                            .filter(p -> p.getTeam().equals(teamType))
+                            .filter(p -> p.getPlayerRole().equals(PlayerRole.NONE))
+                            .collect(Collectors.toList());
+            int num = (int) (Math.random() * playersWithNoRoleList.size());
+            return playersWithNoRoleList.get(num);
         }
 
         Long maxNoVotes =
