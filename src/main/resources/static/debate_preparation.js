@@ -70,7 +70,7 @@ async function onPreparationTimesUp(timesUp) {
 
 function handleEndOfPreparationForParticipant() {
     window.alert("Times up! The preparation for the debate has ended!");
-    window.location.href = "/go_to_deputy_selection";
+    window.location.href = "/go_to_ongoing_debates_current_phase";
 }
 
 async function joinPreparationMeetingOfTeamPro() {

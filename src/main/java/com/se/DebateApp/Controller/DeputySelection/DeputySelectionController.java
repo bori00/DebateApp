@@ -86,9 +86,6 @@ public class DeputySelectionController {
             return new OngoingDebateRequestResponse(false, false,
                     OngoingDebateRequestResponse.VOTING_PHASE_PASSED_MSG);
         }
-
-        System.out.println("Searched name: " + deputyCandidateDTO.getUserName());
-        System.out.println("Players: " + debateSession.getPlayers());
         List<DebateSessionPlayer> selectedPlayersList = debateSession.getPlayers()
                 .stream()
                 .filter(player -> player.getPlayerRole().equals(PlayerRole.NONE))
@@ -96,7 +93,6 @@ public class DeputySelectionController {
                 .collect(Collectors.toList());
 
         if (selectedPlayersList.size() != 1) {
-            System.out.println(selectedPlayersList);
             return new OngoingDebateRequestResponse(false,
                     false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
@@ -110,7 +106,6 @@ public class DeputySelectionController {
         } else if (debateSession.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY2_VOTING_TIME)) {
             vote.setForPlayerRole(PlayerRole.DEPUTY2);
         } else {
-            System.out.println(debateSession.getDebateSessionPhase());
             return new OngoingDebateRequestResponse(false,
                     false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
@@ -123,11 +118,10 @@ public class DeputySelectionController {
     private List<DeputyCandidateDTO> getNextDeputyCandidates(DebateSessionPlayer usersPlayer,
                                                              DebateSession debateSession) {
 
-        // Select players in the same team as the current user, who do not have a role assigned
-        // yet and are not the same as the current user
+        // Select players in the same team as the current user and who do not have a role assigned
+        // yet
         return debateSession.getPlayers()
                 .stream()
-                .filter(player -> !player.getUser().equals(getCurrentUser()))
                 .filter(player -> player.getPlayerRole().equals(PlayerRole.NONE))
                 .filter(player -> player.getTeam().equals(usersPlayer.getTeam()))
                 .map(player -> new DeputyCandidateDTO(player.getUser().getUserName()))

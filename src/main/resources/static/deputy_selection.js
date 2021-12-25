@@ -8,26 +8,18 @@ function onDeputyVotingTimesUp_Judge() {
 
 function onDeputy1VotingTimesUp_Player() {
     window.alert("The 1st deputy voting phase has ended!");
-    window.location.href="/go_to_deputy_selection";
+    window.location.href="/go_to_ongoing_debates_current_phase";
 }
 
 function onDeputy2VotingTimesUp_Player() {
     window.alert("The 2nd deputy voting phase has ended!");
+    window.location.href="/go_to_ongoing_debates_current_phase";
 }
 
 function voteFor(selectedCandidateName) {
     const url = new URL("/cast_vote", document.URL);
     const body = {userName: selectedCandidateName};
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            [header]: token,
-            "charset": "UTF-8",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-    })
-        .catch(error => console.log('failed to send request to server '+ error))
+    postRequestToServer(url, body)
         .then(response => {
             return response.json();
         })
