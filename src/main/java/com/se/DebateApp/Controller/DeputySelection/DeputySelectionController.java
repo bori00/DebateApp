@@ -8,7 +8,6 @@ import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
 import com.se.DebateApp.Model.Constants.TeamType;
-import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import com.se.DebateApp.Model.DebateRoleVote;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;

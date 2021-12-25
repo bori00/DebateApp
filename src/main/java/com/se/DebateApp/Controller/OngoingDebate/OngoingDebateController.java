@@ -1,8 +1,9 @@
-package com.se.DebateApp.Controller;
+package com.se.DebateApp.Controller.OngoingDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.OngoingDebate.DTOs.DebateSessionPlayerDTO;
+import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
-import com.se.DebateApp.Model.DTOs.DebateSessionPlayerDTO;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;

@@ -8,7 +8,6 @@ import com.se.DebateApp.Model.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerState;
 import com.se.DebateApp.Model.Constants.TeamType;
-import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.Notification;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,7 +79,7 @@ public class StartDebateController {
         }
         DebateSession session = ongoingsSessionsAsJudge.get(0);
         model.addAttribute("debateCode", session.getId());
-        DebateParticipantsStatus participantsStatus = session.computeParticipantsStatus();
+        DebateParticipantsStatusDTO participantsStatus = session.computeParticipantsStatus();
         model.addAttribute("waitingParticipants", participantsStatus.getNoWaitingToJoinParticipants());
         model.addAttribute("proPlayers", participantsStatus.getNoProParticipants());
         model.addAttribute("conPlayers", participantsStatus.getNoConParticipants());
@@ -208,7 +206,7 @@ public class StartDebateController {
 
     private void announceJudgeAboutDebateSessionParticipantsState(
             User judge,
-            DebateParticipantsStatus debateParticipantsStatus) {
+            DebateParticipantsStatusDTO debateParticipantsStatus) {
         notificationService.notifyUser(judge, debateParticipantsStatus, NotificationService.DEBATE_SESSION_PARTICIPANTS_STATUS_SOCKET_DEST);
     }
 

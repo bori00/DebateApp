@@ -1,10 +1,10 @@
 package com.se.DebateApp.Model;
 
+import com.se.DebateApp.Controller.StartDebate.DTOs.DebateParticipantsStatusDTO;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
 import com.se.DebateApp.Model.Constants.PlayerState;
 import com.se.DebateApp.Model.Constants.TeamType;
-import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -60,7 +60,7 @@ public class DebateSession {
         roleVotes.add(roleVote);
     }
 
-    public DebateParticipantsStatus computeParticipantsStatus() {
+    public DebateParticipantsStatusDTO computeParticipantsStatus() {
         int noWaitingToJoinPlayers =
                 (int) players.stream()
                         .filter(player -> player.getPlayerState().equals(PlayerState.WAITING_TO_JOIN_TEAM))
@@ -78,7 +78,7 @@ public class DebateSession {
                         .filter(player -> player.getTeam().equals(TeamType.CON))
                         .count();
 
-        return new DebateParticipantsStatus(noWaitingToJoinPlayers,
+        return new DebateParticipantsStatusDTO(noWaitingToJoinPlayers,
                 noProTeamPlayers, noConTeamPlayers);
     }
 

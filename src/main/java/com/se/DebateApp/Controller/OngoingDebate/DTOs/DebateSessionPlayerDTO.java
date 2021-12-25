@@ -1,4 +1,4 @@
-package com.se.DebateApp.Model.DTOs;
+package com.se.DebateApp.Controller.OngoingDebate.DTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

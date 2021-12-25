@@ -1,4 +1,4 @@
-package com.se.DebateApp.Model.DTOs;
+package com.se.DebateApp.Controller.StartDebate.DTOs;
 
 import com.se.DebateApp.Model.Constants.DebateConstants;
 import lombok.AllArgsConstructor;
@@ -6,13 +6,13 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class DebateParticipantsStatus {
+public class DebateParticipantsStatusDTO {
     private final Integer noWaitingToJoinParticipants;
     private final Integer noProParticipants;
     private final Integer noConParticipants;
     private final Boolean canActivateSession;
 
-    public DebateParticipantsStatus(Integer noWaitingToJoinParticipants, Integer noProParticipants, Integer noConParticipants) {
+    public DebateParticipantsStatusDTO(Integer noWaitingToJoinParticipants, Integer noProParticipants, Integer noConParticipants) {
         this.noWaitingToJoinParticipants = noWaitingToJoinParticipants;
         this.noProParticipants = noProParticipants;
         this.noConParticipants = noConParticipants;
