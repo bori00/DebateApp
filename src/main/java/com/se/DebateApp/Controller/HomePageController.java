@@ -36,37 +36,31 @@ public class HomePageController {
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping(SupportedMappings.STARTING_PAGE)
+    @GetMapping(SupportedMappings.GO_TO_STARTING_PAGE)
     public String viewUserDependentHomePage() {
         if (userIsAuthenticated()) {
-            return "home";
+            return SupportedMappings.AUTHENTICATED_HOME_PAGE;
         }
-        return "index";
+        return SupportedMappings.UNAUTHENTICATED_INDEX_PAGE;
     }
 
-    @GetMapping("/home")
+    @GetMapping(SupportedMappings.GO_TO_AUTHENTICATED_HOME_PAGE)
     public String viewHomePage() {
-        return "home";
+        return SupportedMappings.AUTHENTICATED_HOME_PAGE;
     }
 
-    @GetMapping("/register")
+    @GetMapping(SupportedMappings.GO_TO_REGISTER_PAGE)
     public String showSignUpForm(Model model) {
         model.addAttribute("user", new User());
         return "register";
     }
 
-    @GetMapping("/join_debate")
+    @GetMapping(SupportedMappings.GO_TO_JOIN_DEBATE_PAGE)
     public String goToJoinDebatePage() {
         return "join_debate";
     }
 
-    @GetMapping("/start_debate")
-    public String goToStartDebatePage(Model model) {
-        model.addAttribute("user", getCurrentUser());
-        return "start_debate";
-    }
-
-    @GetMapping("/configure_debates")
+    @GetMapping(SupportedMappings.GO_TO_CONFIGURE_DEBATES_PAGE)
     public String goToConfigureDebatesPage(Model model) {
         model.addAttribute("myDebateTemplates",
                 debateTemplateRepository.findAllDebateTemplatesOfUser(getCurrentUser()));

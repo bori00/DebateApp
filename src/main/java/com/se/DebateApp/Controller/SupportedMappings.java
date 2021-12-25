@@ -7,7 +7,18 @@ public class SupportedMappings {
     // redirecting requests
     public static final String GO_TO_ONGOING_DEBATES_CURRENT_PHASE =
             "/go_to_ongoing_debates_current_phase";
-    public static final String STARTING_PAGE = "";
+
+    // ----- home controller
+    // --- request mappings
+    // redirecting requests
+    public static final String GO_TO_STARTING_PAGE = "";
+    public static final String GO_TO_AUTHENTICATED_HOME_PAGE = "/go_to_home";
+    public static final String GO_TO_REGISTER_PAGE = "/go_to_registration";
+    public static final String GO_TO_JOIN_DEBATE_PAGE = "/go_to_join_debate";
+    public static final String GO_TO_CONFIGURE_DEBATES_PAGE = "/go_to_configure_debates";
+    // --- pages
+    public static final String AUTHENTICATED_HOME_PAGE = "home";
+    public static final String UNAUTHENTICATED_INDEX_PAGE = "index";
 
 
     // ----- registration

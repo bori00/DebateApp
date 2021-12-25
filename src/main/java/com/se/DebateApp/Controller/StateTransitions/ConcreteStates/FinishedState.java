@@ -23,12 +23,12 @@ public class FinishedState implements DebateState {
 
     @Override
     public String getPlayersRedirectTargetOnStateEnter(DebateSessionPlayer player) {
-        return SupportedMappings.STARTING_PAGE;
+        return SupportedMappings.GO_TO_STARTING_PAGE;
     }
 
     @Override
     public String getJudgesRedirectTargetOnStateEnter() {
-        return SupportedMappings.STARTING_PAGE;
+        return SupportedMappings.GO_TO_STARTING_PAGE;
     }
 
     @Override

@@ -30,7 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/", "/register_and_redirect", "/register_success",
-                        "/register",
+                        "/register", "/go_to_registration",
                         "/webjars/**")
                     .permitAll()
                 .anyRequest()

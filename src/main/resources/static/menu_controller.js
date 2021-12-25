@@ -35,8 +35,8 @@ function loadMenuForUserWithActiveDebate() {
 }
 
 function loadMenuForUserWithNoActiveDebate() {
-    addMenuItem("join_debate", "Join a Debate")
-    addMenuItem("configure_debates", "Setup a Debate")
+    addMenuItem("go_to_join_debate", "Join a Debate")
+    addMenuItem("go_to_configure_debates", "Setup a Debate")
 }
 
 function addMenuItem(link, text) {
