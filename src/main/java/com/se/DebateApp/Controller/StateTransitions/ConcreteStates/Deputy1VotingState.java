@@ -76,16 +76,8 @@ public class Deputy1VotingState implements DebateState {
 
     private DebateSessionPlayer getDeputy1(DebateSession debateSession, TeamType teamType) {
         Set<Map.Entry<DebateSessionPlayer, Long>> playersToNoVotes =
-                debateSession
-                    .getPlayers()
-                    .stream()
-                    .filter(p -> p.getTeam().equals(teamType))
-                    .map(DebateSessionPlayer::getRoleVotes)
-                    .flatMap(Collection::stream)
-                    .filter(roleVote -> roleVote.getForPlayerRole().equals(PlayerRole.DEPUTY1))
-                    .collect(Collectors.groupingBy(DebateRoleVote::getForPlayer,
-                            Collectors.counting()))
-                    .entrySet();
+                debateSession.getPlayersToNoVotesForDeputyRole(teamType, PlayerRole.DEPUTY1)
+                .entrySet();
 
         if (playersToNoVotes.size() == 0) {
             throw new IllegalStateException("There must be at least one player with a vote for " +

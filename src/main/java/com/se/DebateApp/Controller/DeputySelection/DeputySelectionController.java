@@ -2,11 +2,13 @@ package com.se.DebateApp.Controller.DeputySelection;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyCandidateDTO;
+import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyVotingStatusDTO;
 import com.se.DebateApp.Controller.OngoingDebateRequestResponse;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
 import com.se.DebateApp.Model.Constants.TeamType;
+import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import com.se.DebateApp.Model.DebateRoleVote;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
@@ -14,6 +16,7 @@ import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateRoleVoteRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
+import com.se.DebateApp.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +41,9 @@ public class DeputySelectionController {
     @Autowired
     private DebateRoleVoteRepository roleVotesRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping(SupportedMappings.GO_TO_DEPUTY_SELECTION)
     public String goToDeputySelectionPage(Model model) {
         User user = getCurrentUser();
@@ -49,6 +55,7 @@ public class DeputySelectionController {
             model.addAttribute("debateSessionId", session.getId());
             model.addAttribute("roleName",
                     session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
+            model.addAttribute("votingStatus", new DeputyVotingStatusDTO(session));
             return SupportedMappings.DEPUTY_SELECTION_FOR_JUDGE_PAGE;
         } else {
             List<DebateSession> sessions =
@@ -111,7 +118,7 @@ public class DeputySelectionController {
         }
         // TODO: add to session/player
         roleVotesRepository.save(vote);
-
+        announceJudgeAboutDeputyVotingStatus(debateSession);
         return new OngoingDebateRequestResponse(true, false,"");
     }
 
@@ -167,5 +174,13 @@ public class DeputySelectionController {
                 .filter(player -> player.getUser().equals(getCurrentUser()))
                 .collect(Collectors.toList())
                 .get(0);
+    }
+
+    private void announceJudgeAboutDeputyVotingStatus(
+            DebateSession debateSession) {
+        User judge = debateSession.getDebateTemplate().getOwner();
+        DeputyVotingStatusDTO votingStatusDTO = new DeputyVotingStatusDTO(debateSession);
+        notificationService.notifyUser(judge, votingStatusDTO,
+                NotificationService.DEBATE_DEPUTY_VOTING_STATUS_SOCKET_DEST);
     }
 }

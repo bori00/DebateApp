@@ -22,6 +22,8 @@ public class NotificationService {
     public static final String DEBATE_SESSION_CLOSED_SOCKET_DEST = "queue/debate-closed";
     public static final String DEBATE_TIMED_INTERVAL_IS_UP_SOCKET_TEMPLATE = "/queue/debate" +
             "-%s-times-up";
+    public static final String DEBATE_DEPUTY_VOTING_STATUS_SOCKET_DEST = "/queue/debate-voting" +
+            "-status";
 
     public void notifyUser(
             User user,

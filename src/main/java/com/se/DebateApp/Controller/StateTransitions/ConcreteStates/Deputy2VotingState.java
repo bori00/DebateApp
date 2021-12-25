@@ -71,15 +71,7 @@ public class Deputy2VotingState implements DebateState {
 
     private DebateSessionPlayer getDeputy2(DebateSession debateSession, TeamType teamType) {
         Set<Map.Entry<DebateSessionPlayer, Long>> playersToNoVotes =
-                debateSession
-                        .getPlayers()
-                        .stream()
-                        .filter(p -> p.getTeam().equals(teamType))
-                        .map(DebateSessionPlayer::getRoleVotes)
-                        .flatMap(Collection::stream)
-                        .filter(roleVote -> roleVote.getForPlayerRole().equals(PlayerRole.DEPUTY2))
-                        .collect(Collectors.groupingBy(DebateRoleVote::getForPlayer,
-                                Collectors.counting()))
+                debateSession.getPlayersToNoVotesForDeputyRole(teamType, PlayerRole.DEPUTY2)
                         .entrySet();
 
         if (playersToNoVotes.size() == 0) {

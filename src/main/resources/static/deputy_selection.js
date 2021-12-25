@@ -37,3 +37,18 @@ function showWaitingStateForPlayerWhoVoted() {
     setElementVisibility("votingOptionsDiv", false);
     setElementVisibility("votingLobbyDiv", true);
 }
+
+async function subscribeToDebateVotingStatusSocket() {
+    var socket = new SockJS('/secured/debates');
+    var stompClient = Stomp.over(socket);
+    var sessionId = "";
+
+    console.log("Socket initialized");
+
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe("/user/queue/debate-voting-status",
+            function (votingStatus) {
+                console.log(votingStatus)
+            });
+    });
+}

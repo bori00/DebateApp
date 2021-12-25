@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
     <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
           type="text/css"/>
+    <link rel="stylesheet" th:href="@{/teams_stylesheet.css}"/>
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
     <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
     <script type="text/javascript" th:src="@{/timing_utils.js}"></script>
@@ -16,13 +17,16 @@
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+
+
     <script th:src="@{/menu_controller.js}"></script>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body th:onload="'loadMenu();' +
                 'subscribeToClosedDebateNotificationSocket();' +
-                'displayCountDownTimerForJudge(' + ${debateSessionId} + ', onDeputyVotingTimesUp_Judge)'">
+                'displayCountDownTimerForJudge(' + ${debateSessionId} + ', onDeputyVotingTimesUp_Judge); ' +
+                'subscribeToDebateVotingStatusSocket();'">
 <div class="container text-center">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +54,44 @@
                 the deputy
                 </span>
             </p>
+
+            <hr class="my-4">
+
+            <h4>Assigned Roles</h4>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col" class="proTextClass" >Affirmative Team, Deputy 1</th>
+                    <th scope="col" class="conTextClass">Negative Team, Deputy 1</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="proDeputy1NameCell" th:text="${votingStatus.proDeputy1Name}">0</td>
+                    <td id="conDeputy1NameCell" th:text="${votingStatus.conDeputy1Name}">0</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-bordered" th:obect="${votingStatus}">
+                <thead>
+                <tr>
+                    <th scope="col" class="proTextClass" >Affirmative Team, Deputy 2</th>
+                    <th scope="col" class="conTextClass">Negative Team, Deputy 2</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="proDeputy2NameCell" th:text="${votingStatus.proDeputy2Name}">0</td>
+                    <td id="conDeputy2NameCell" th:text="${votingStatus.proDeputy2Name}">0</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <hr class="my-4">
+
+            <h4>Votes for the role of <span th:text="${roleName}">the deputy</span></h4>
 
         </div>
         </div>

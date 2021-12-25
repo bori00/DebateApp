@@ -11,8 +11,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "debate_sessions")
@@ -80,5 +80,24 @@ public class DebateSession {
 
         return new DebateParticipantsStatus(noWaitingToJoinPlayers,
                 noProTeamPlayers, noConTeamPlayers);
+    }
+
+    public Optional<DebateSessionPlayer> getDeputy(TeamType teamType, PlayerRole playerRole) {
+        return players
+                .stream()
+                .filter(p -> p.getPlayerRole().equals(playerRole))
+                .filter(p -> p.getTeam().equals(teamType))
+                .findFirst();
+    }
+
+    public Map<DebateSessionPlayer, Long> getPlayersToNoVotesForDeputyRole(TeamType teamType,
+                                                                           PlayerRole playerRole) {
+        return players.stream()
+                        .filter(p -> p.getTeam().equals(teamType))
+                        .map(DebateSessionPlayer::getRoleVotes)
+                        .flatMap(Collection::stream)
+                        .filter(roleVote -> roleVote.getForPlayerRole().equals(playerRole))
+                        .collect(Collectors.groupingBy(DebateRoleVote::getForPlayer,
+                                Collectors.counting()));
     }
 }
