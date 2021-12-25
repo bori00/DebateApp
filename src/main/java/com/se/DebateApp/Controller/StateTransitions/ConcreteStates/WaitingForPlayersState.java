@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,9 +48,15 @@ public class WaitingForPlayersState implements DebateState {
     }
 
     @Override
-    public void onEndOfState(DebateSession debateSession, NotificationService notificationService) {
-        announceAllDebatePlayersAboutDebateActivation(debateSession, notificationService);
+    public void onEndOfState(DebateSession debateSession,
+                             NotificationService notificationService,
+                             DebateSessionRepository debateSessionRepository) {
+        Collection<DebateSessionPlayer> joinedPlayers = new ArrayList<>(debateSession.getPlayers());
         removeSessionsPlayersWhoDidntJoinATeam(debateSession);
+        debateSession.setDebateSessionPhase(getNextDebateSessionPhaseAfterStateEnded(debateSession));
+        debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
+        debateSessionRepository.save(debateSession);
+        announceAllDebatePlayersAboutDebateActivation(joinedPlayers, notificationService);
     }
 
     @Override
@@ -72,13 +80,14 @@ public class WaitingForPlayersState implements DebateState {
         session.getPlayers().removeIf(player -> player.getPlayerState().equals(PlayerState.WAITING_TO_JOIN_TEAM));
     }
 
-    private void announceAllDebatePlayersAboutDebateActivation(DebateSession debateSession,
+    private void announceAllDebatePlayersAboutDebateActivation(Collection<DebateSessionPlayer> joinedPlayers,
                                                                NotificationService notificationService) {
-        Collection<User> joinedPlayers =
-                debateSession.getPlayers()
+        Collection<User> joinedUsers =
+                joinedPlayers
                         .stream()
                         .map(DebateSessionPlayer::getUser)
                         .collect(Collectors.toList());
-        notificationService.notifyUsers(joinedPlayers, "activated", NotificationService.DEBATE_SESSION_ACTIVATED_SOCKET_DEST);
+        notificationService.notifyUsers(joinedUsers, "activated",
+                NotificationService.DEBATE_SESSION_ACTIVATED_SOCKET_DEST);
     }
 }

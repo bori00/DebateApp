@@ -60,15 +60,9 @@ public class PrepTimeController {
         DebateSession session = waitingToActivateDebates.get(0);
 
         DebateState currentState = session.getDebateSessionPhase().getCorrespondingState();
-        DebateSessionPhase nextPhase =
-                currentState.getNextDebateSessionPhaseAfterStateEnded(session);
+        currentState.onEndOfState(session, notificationService, debateSessionRepository);
 
-        session.setDebateSessionPhase(nextPhase);
-        session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
-        debateSessionRepository.save(session);
-
-        currentState.onEndOfState(session, notificationService);
-        nextPhase.getCorrespondingState().onBeginningOfState(session, notificationService);
+        session.getDebateSessionPhase().getCorrespondingState().onBeginningOfState(session, notificationService);
 
         return new OngoingDebateRequestResponse(true, true, "");
     }

@@ -6,6 +6,7 @@ import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.DebateTemplate;
+import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Service.NotificationService;
 import org.springframework.security.core.parameters.P;
 
@@ -32,7 +33,10 @@ public class PreparationState implements DebateState {
     }
 
     @Override
-    public void onEndOfState(DebateSession debateSession, NotificationService notificationService) {
+    public void onEndOfState(DebateSession debateSession, NotificationService notificationService
+            , DebateSessionRepository debateSessionRepository) {
+        debateSession.setDebateSessionPhase(getNextDebateSessionPhaseAfterStateEnded(debateSession));
+        debateSessionRepository.save(debateSession);
         announceAllDebatePlayersAboutEndOfTimeInterval(debateSession, notificationService);
     }
 

@@ -136,14 +136,9 @@ public class DebateStateTransitionsController {
             return;
         }
         DebateState currentState = currentPhase.getCorrespondingState();
-        DebateSessionPhase nextPhase =
-                currentState.getNextDebateSessionPhaseAfterStateEnded(debateSession);
-        debateSession.setDebateSessionPhase(nextPhase);
-        DebateState nextState = nextPhase.getCorrespondingState();
-        debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
-        debateSessionRepository.save(debateSession);
-        currentState.onEndOfState(debateSession, notificationService);
-        nextState.onBeginningOfState(debateSession, notificationService);
+        currentState.onEndOfState(debateSession, notificationService, debateSessionRepository);
+        debateSession.getDebateSessionPhase().getCorrespondingState().onBeginningOfState(debateSession,
+                notificationService);
     }
 
     @PostMapping(SupportedMappings.CLOSE_DEBATE)

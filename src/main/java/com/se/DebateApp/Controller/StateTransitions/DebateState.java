@@ -19,7 +19,20 @@ public interface DebateState {
     default void onBeginningOfState(DebateSession debateSession,
                              NotificationService notificationService) {}
 
-    default void onEndOfState(DebateSession debateSession, NotificationService notificationService) {}
+    /**
+     * Performs any changes needed on the debateSession (including setting its phase to the next
+     * one), notifies anyone to be notified and saves the new state of the DebateSession in the
+     * database.
+     *
+     * Note: refers only to the normal ending of the state, not to its interruption by closing
+     * the debate.
+     */
+    default void onEndOfState(DebateSession debateSession,
+                              NotificationService notificationService,
+                              DebateSessionRepository debateSessionRepository) {
+        debateSession.setDebateSessionPhase(getNextDebateSessionPhaseAfterStateEnded(debateSession));
+        debateSessionRepository.save(debateSession);
+    }
 
     DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession);
 
