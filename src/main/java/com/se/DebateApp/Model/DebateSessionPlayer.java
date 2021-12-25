@@ -42,8 +42,6 @@ public class DebateSessionPlayer {
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy="forPlayer")
     private Set<DebateRoleVote> roleVotes = new HashSet<>();
 
-    public void addNewVote(DebateRoleVote roleVote) {
-        roleVote.setForPlayer(this);
-        roleVotes.add(roleVote);
-    }
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="byPlayer")
+    private Set<DebateRoleVote> castedVotes = new HashSet<>();
 }

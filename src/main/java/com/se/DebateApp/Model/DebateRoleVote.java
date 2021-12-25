@@ -29,6 +29,10 @@ public class DebateRoleVote {
     @ToString.Exclude
     private DebateSessionPlayer forPlayer;
 
+    @ManyToOne(optional = false)
+    @ToString.Exclude
+    private DebateSessionPlayer byPlayer;
+
     @Column(nullable = false)
     private PlayerRole forPlayerRole = PlayerRole.NONE;
 }

@@ -74,6 +74,11 @@ public class DeputySelectionController {
                     player.getTeam().equals(TeamType.PRO));
             model.addAttribute("roleName",
                     session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) ? "1st Deputy" : "2nd Deputy");
+            model.addAttribute("hasVoted",
+                    session.getRoleVotes().stream()
+                            .filter(vote -> (session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY1_VOTING_TIME) && vote.getForPlayerRole().equals(PlayerRole.DEPUTY1)) ||
+                                    (session.getDebateSessionPhase().equals(DebateSessionPhase.DEPUTY2_VOTING_TIME) && vote.getForPlayerRole().equals(PlayerRole.DEPUTY2)))
+                            .anyMatch(vote -> vote.getByPlayer().equals(player)));
             return SupportedMappings.DEPUTY_SELECTION_FOR_PLAYER_PAGE;
         }
     }
@@ -116,7 +121,10 @@ public class DeputySelectionController {
             return new OngoingDebateRequestResponse(false,
                     false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
-        // TODO: add to session/player
+        vote.setByPlayer(
+                debateSession.getPlayers().stream()
+                        .filter(p -> p.getUser().equals(user))
+                        .collect(Collectors.toList()).get(0));
         roleVotesRepository.save(vote);
         announceJudgeAboutDeputyVotingStatus(debateSession);
         return new OngoingDebateRequestResponse(true, false,"");
