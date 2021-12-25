@@ -2,6 +2,7 @@ package com.se.DebateApp.Controller.FinalVote;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.DeputySelection.DTOs.DeputyCandidateDTO;
+import com.se.DebateApp.Controller.FinalVote.DTOs.FinalVoteStatusDTO;
 import com.se.DebateApp.Controller.OngoingDebateRequestResponse;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
@@ -62,6 +63,14 @@ public class FinalVoteController {
         }
         debateSessionPlayerRepository.save(player);
         return new OngoingDebateRequestResponse(true, false,"");
+    }
+
+    @PostMapping(SupportedMappings.GET_FINAL_VOTE_STATUS)
+    @ResponseBody
+    FinalVoteStatusDTO getFinalVotestatus() {
+        User user = getCurrentUser();
+        DebateSession debateSession = getOngoingDebate(user).get();
+        return new FinalVoteStatusDTO(debateSession);
     }
 
     private User getCurrentUser() {
