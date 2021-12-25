@@ -84,7 +84,7 @@
                 <tbody>
                 <tr>
                     <td id="proDeputy2NameCell" th:text="${votingStatus.proDeputy2Name}">0</td>
-                    <td id="conDeputy2NameCell" th:text="${votingStatus.proDeputy2Name}">0</td>
+                    <td id="conDeputy2NameCell" th:text="${votingStatus.conDeputy2Name}">0</td>
                 </tr>
                 </tbody>
             </table>
@@ -92,6 +92,39 @@
             <hr class="my-4">
 
             <h4>Votes for the role of <span th:text="${roleName}">the deputy</span></h4>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col" class="proTextClass" >Affirmative Team</th>
+                    <th scope="col" class="conTextClass">Negative Team</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="proVotesTd">
+                        <ul class="list-group" id="proVotesList"
+                            th:each="votedPlayer : *{votingStatus.getCurrentVotingPhaseVotesPro()}">
+                            <li
+                                    class="list-group-item d-flex justify-content-between align-items-center" th:text="${votedPlayer.getName()}">
+                                <span class="badge badge-primary badge-pill"
+                                      th:text="${votedPlayer.getNoVotes()}">0</span>
+                            </li>
+                        </ul>
+                    </td>
+                    <td id="conVotesTd">
+                        <ul class="list-group" id="conVotesList"
+                            th:each="votedPlayer : *{votingStatus.getCurrentVotingPhaseVotesCon()}">
+                            <li
+                                    class="list-group-item d-flex justify-content-between align-items-center" th:text="${votedPlayer.getName()}">
+                                <span class="badge badge-primary badge-pill"
+                                      th:text="${votedPlayer.getNoVotes()}">0</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
         </div>
         </div>

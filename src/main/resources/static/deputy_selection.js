@@ -47,8 +47,45 @@ async function subscribeToDebateVotingStatusSocket() {
 
     stompClient.connect({}, function (frame) {
         stompClient.subscribe("/user/queue/debate-voting-status",
-            function (votingStatus) {
-                console.log(votingStatus)
+            function (votingStatusJSON) {
+                const votingStatus = JSON.parse(votingStatusJSON.body);
+                updateUIBasedOnVotingStatus(votingStatus);
+                console.log(votingStatus);
             });
     });
+}
+
+function updateUIBasedOnVotingStatus(votingStatus) {
+    document.getElementById("proDeputy1NameCell").innerText = votingStatus.proDeputy1Name;
+    document.getElementById("proDeputy2NameCell").innerText = votingStatus.proDeputy2Name;
+    document.getElementById("conDeputy1NameCell").innerText = votingStatus.conDeputy1Name;
+    document.getElementById("conDeputy2NameCell").innerText = votingStatus.conDeputy2Name;
+
+    document.getElementById("proVotesTd").innerHTML="";
+    document.getElementById("conVotesTd").innerHTML="";
+
+    proVotesList = document.createElement("ul")
+    document.getElementById("proVotesTd").appendChild(proVotesList)
+
+    conVotesList = document.createElement("ul")
+    document.getElementById("conVotesTd").appendChild(conVotesList)
+
+    votingStatus.currentVotingPhaseVotesPro
+        .forEach(votedPlayer => addBadgeListItem(proVotesList, votedPlayer.name, votedPlayer.noVotes));
+    votingStatus.currentVotingPhaseVotesCon
+        .forEach(votedPlayer => addBadgeListItem(conVotesList, votedPlayer.name, votedPlayer.noVotes));
+}
+
+function addBadgeListItem(list, itemText, badgeText) {
+    item = document.createElement("li");
+    item.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+    item.innerText = itemText;
+
+    itemSpan = document.createElement("span")
+    itemSpan.classList.add("badge", "badge-primary", "badge-pill")
+    itemSpan.innerText = badgeText;
+
+    item.appendChild(itemSpan);
+
+    list.appendChild(item);
 }
