@@ -8,10 +8,10 @@ import com.se.DebateApp.Model.Constants.MeetingType;
 
 import java.io.IOException;
 
-public class DebateMeetingAttributesDeserializer extends JsonDeserializer<DebateMeetingAttributes> {
+public class DebateMeetingAttributesDeserializer extends JsonDeserializer<DebateMeetingAttributesDTO> {
     @Override
-    public DebateMeetingAttributes deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) {
-        DebateMeetingAttributes debateMeetingAttributes = new DebateMeetingAttributes();
+    public DebateMeetingAttributesDTO deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) {
+        DebateMeetingAttributesDTO debateMeetingAttributes = new DebateMeetingAttributesDTO();
 
         try {
             JsonNode node = jsonParser.getCodec().readTree(jsonParser);

@@ -123,8 +123,8 @@ public class StartDebateController {
         if (waitingToJoinDebates.isEmpty()) {
             return SupportedMappings.ERROR_PAGE;
         }
-        DebateSessionTeamChoiceInformation teamChoiceInformation =
-                new DebateSessionTeamChoiceInformation(
+        DebateSessionTeamChoiceInformationDTO teamChoiceInformation =
+                new DebateSessionTeamChoiceInformationDTO(
                         waitingToJoinDebates.get(0).getDebateTemplate());
         model.addAttribute("team_choice_information", teamChoiceInformation);
         return SupportedMappings.PLAYER_CHOOSE_TEAM_PAGE;
@@ -194,7 +194,7 @@ public class StartDebateController {
         }
         DebateSession session = waitingToActivateDebates.get(0);
         model.addAttribute("debateInformation",
-                new DebateLobbyInformation(session.getDebateTemplate()));
+                new DebateLobbyInformationDTO(session.getDebateTemplate()));
         return SupportedMappings.PLAYER_DEBATE_LOBBY_PAGE;
     }
 

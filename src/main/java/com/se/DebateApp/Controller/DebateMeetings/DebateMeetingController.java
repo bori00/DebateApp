@@ -2,7 +2,7 @@ package com.se.DebateApp.Controller.DebateMeetings;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.DebateMeetings.DTOs.DebateMeetingDTO;
-import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributes;
+import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributesDTO;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.DebateMeeting;
 import com.se.DebateApp.Model.DebateSession;
@@ -34,7 +34,7 @@ public class DebateMeetingController {
 
     @PostMapping(value = SupportedMappings.CREATE_MEETING, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void processCreateMeeting(@RequestBody DebateMeetingAttributes debateMeetingAttributes) {
+    public void processCreateMeeting(@RequestBody DebateMeetingAttributesDTO debateMeetingAttributes) {
         DebateSession debateSession = debateSessionRepository.getById(debateMeetingAttributes.getDebateSessionId());
 
         DebateMeeting debateMeeting = createDebateMeeting(debateMeetingAttributes);
@@ -56,7 +56,7 @@ public class DebateMeetingController {
                 .collect(Collectors.toList());
     }
 
-    private DebateMeeting createDebateMeeting(DebateMeetingAttributes debateMeetingAttributes) {
+    private DebateMeeting createDebateMeeting(DebateMeetingAttributesDTO debateMeetingAttributes) {
         DebateMeeting debateMeeting = new DebateMeeting();
 
         debateMeeting.setMeetingType(debateMeetingAttributes.getMeetingType());

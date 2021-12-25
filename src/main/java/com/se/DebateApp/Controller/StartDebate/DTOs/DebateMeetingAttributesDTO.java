@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonDeserialize(using = DebateMeetingAttributesDeserializer.class)
-public class DebateMeetingAttributes {
+public class DebateMeetingAttributesDTO {
     private Long debateSessionId;
     private String meetingName;
     private String meetingUrl;

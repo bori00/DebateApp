@@ -4,13 +4,13 @@ import com.se.DebateApp.Model.DebateTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
-public class DebateSessionTeamChoiceInformation {
+@AllArgsConstructor
+public class DebateLobbyInformationDTO {
     private final String title;
     private final String statement;
 
-    public DebateSessionTeamChoiceInformation(DebateTemplate debateTemplate) {
+    public DebateLobbyInformationDTO(DebateTemplate debateTemplate) {
         this.title = debateTemplate.getTitle();
         this.statement = debateTemplate.getStatement();
     }
