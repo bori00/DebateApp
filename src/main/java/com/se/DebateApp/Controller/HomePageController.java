@@ -52,29 +52,19 @@ public class HomePageController {
     @GetMapping(SupportedMappings.GO_TO_REGISTER_PAGE)
     public String showSignUpForm(Model model) {
         model.addAttribute("user", new User());
-        return "register";
+        return SupportedMappings.REGISTRATION_PAGE;
     }
 
     @GetMapping(SupportedMappings.GO_TO_JOIN_DEBATE_PAGE)
     public String goToJoinDebatePage() {
-        return "join_debate";
+        return SupportedMappings.JOIN_DEBATE_PAGE;
     }
 
     @GetMapping(SupportedMappings.GO_TO_CONFIGURE_DEBATES_PAGE)
     public String goToConfigureDebatesPage(Model model) {
         model.addAttribute("myDebateTemplates",
                 debateTemplateRepository.findAllDebateTemplatesOfUser(getCurrentUser()));
-        return "configure_debates";
-    }
-
-    @PostMapping("/has_user_ongoing_debate")
-    @ResponseBody
-    public boolean hasUserOngoingDebate() {
-        User user = getCurrentUser();
-        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
-                DebateSessionPhase.FINISHED).size() > 0 ||
-                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
-                        DebateSessionPhase.FINISHED).size() > 0;
+        return SupportedMappings.CONFIGURE_DEBATES_PAGE;
     }
 
     private User getCurrentUser() {

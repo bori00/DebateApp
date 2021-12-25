@@ -58,7 +58,7 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
 }
 
 async function getDebateSessionPlayer() {
-    let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId=" + debateSessionId;
+    let debateSessionPlayerDestination = "/get_debate_session_player?debateSessionId=" + debateSessionId;
 
     return await getRequestToServer(debateSessionPlayerDestination);
 }
@@ -102,7 +102,7 @@ async function getAllMeetingsOfDebateSession(debateSessionId) {
 }
 
 async function getUserNameOfCurrentUser() {
-    let destEndpoint = "/process_get_username_of_current_user";
+    let destEndpoint = "/get_username_of_current_user";
 
     return await getRequestToServer(destEndpoint);
 }

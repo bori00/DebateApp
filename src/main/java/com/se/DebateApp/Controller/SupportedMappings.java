@@ -19,6 +19,9 @@ public class SupportedMappings {
     // --- pages
     public static final String AUTHENTICATED_HOME_PAGE = "home";
     public static final String UNAUTHENTICATED_INDEX_PAGE = "index";
+    public static final String REGISTRATION_PAGE = "register";
+    public static final String CONFIGURE_DEBATES_PAGE = "configure_debates";
+    public static final String JOIN_DEBATE_PAGE = "join_debate";
 
 
     // ----- registration
@@ -82,6 +85,36 @@ public class SupportedMappings {
     public static final String IS_DEBATE_SESSION_FINISHED = "/is_debate_finished";
     public static final String PROCESS_END_OF_TIMED_PHASE = "/process_end_of_timed_phase";
     public static final String CLOSE_DEBATE = "/close_debate";
+
+
+    // ----- ongoing debate controller
+    // --- request mappings
+    // responding requests
+    public static final String GET_USERNAME_OF_CURRENT_USER = "/get_username_of_current_user";
+    public static final String GET_DEBATE_SESSION_PLAYER = "/get_debate_session_player";
+    public static final String HAS_USER_ONGOING_DEBATE = "/has_user_ongoing_debate";
+
+
+    // ----- debate templates CRUD controller
+    // --- request mappings
+    public static final String CREATE_DEBATE_TEMPLATE_REQUEST = "/create_debate_template";
+    public static final String PROCESS_DEBATE_TEMPLATE_CREATION_REQUEST =
+            "/process_debate_template_creation";
+    public static final String PROCESS_DEBATE_TEMPLATE_DELETION_REQUEST =
+            "/process_debate_template_deletion";
+    public static final String PROCESS_DEBATE_TEMPLATE_VIEWING_REQUEST =
+        "/process_debate_template_viewing_request";
+    public static final String PROCESS_DEBATE_TEMPLATE_EDITING_REQUEST =
+            "/process_debate_template_editing_request";
+    public static final String PROCESS_DEBATE_TEMPLATE_EDITING = "/process_debate_template_editing";
+    public static final String PROCESS_DEBATE_TEMPLATE_RESOURCE_LINK_DELETION_REQUEST =
+            "/process_debate_template_resource_link_deletion";
+    public static final String PROCESS_DEBATE_TEMPLATE_RESOURCE_LINK_ADDITION_REQUEST =
+            "/process_debate_template_resource_link_addition";
+    // --- pages
+    public static final String VIEW_DEBATE_TEMPLATE_PAGE = "view_debate_template";
+    public static final String CREATE_DEBATE_TEMPLATE_PAGE = "create_debate_template";
+    public static final String EDIT_DEBATE_TEMPLATE_PAGE = "edit_debate_template";
 
     // error
     public static final String ERROR_PAGE = "error";
