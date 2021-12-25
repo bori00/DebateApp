@@ -1,7 +1,7 @@
 package com.se.DebateApp.Model.Constants;
 
-import com.se.DebateApp.Controller.StateTransitions.ConcreteStates.*;
-import com.se.DebateApp.Controller.StateTransitions.DebateState;
+import com.se.DebateApp.Service.StateTransitions.*;
+import com.se.DebateApp.Service.StateTransitions.ConcreteStates.*;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

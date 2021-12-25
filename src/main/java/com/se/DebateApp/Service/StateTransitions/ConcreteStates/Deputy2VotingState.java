@@ -1,21 +1,18 @@
-package com.se.DebateApp.Controller.StateTransitions.ConcreteStates;
+package com.se.DebateApp.Service.StateTransitions.ConcreteStates;
 
-import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
 import com.se.DebateApp.Model.Constants.TeamType;
-import com.se.DebateApp.Model.DebateRoleVote;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Service.NotificationService;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Deputy2VotingState implements DebateState {
     private static Deputy2VotingState instance = null;

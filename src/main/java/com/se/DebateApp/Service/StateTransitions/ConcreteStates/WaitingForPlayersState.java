@@ -1,6 +1,5 @@
-package com.se.DebateApp.Controller.StateTransitions.ConcreteStates;
+package com.se.DebateApp.Service.StateTransitions.ConcreteStates;
 
-import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerState;
@@ -10,14 +9,11 @@ import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class WaitingForPlayersState implements DebateState {

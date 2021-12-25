@@ -1,14 +1,12 @@
-package com.se.DebateApp.Controller.StateTransitions.ConcreteStates;
+package com.se.DebateApp.Service.StateTransitions.ConcreteStates;
 
-import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
-import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Service.NotificationService;
-import org.springframework.security.core.parameters.P;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 public class PreparationState implements DebateState {
     private static PreparationState instance = null;

@@ -1,9 +1,9 @@
-package com.se.DebateApp.Controller.StateTransitions.ConcreteStates;
+package com.se.DebateApp.Service.StateTransitions.ConcreteStates;
 
-import com.se.DebateApp.Controller.StateTransitions.DebateState;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 /*
 TODO: this should be deleted by the end of the development process, when all States are

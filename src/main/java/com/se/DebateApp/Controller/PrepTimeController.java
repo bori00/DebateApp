@@ -2,7 +2,7 @@ package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.DeputySelection.DeputySelectionController;
-import com.se.DebateApp.Controller.StateTransitions.DebateState;
+import com.se.DebateApp.Service.StateTransitions.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
