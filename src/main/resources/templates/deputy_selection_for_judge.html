@@ -106,7 +106,8 @@
                         <ul class="list-group" id="proVotesList"
                             th:each="votedPlayer : *{votingStatus.getCurrentVotingPhaseVotesPro()}">
                             <li
-                                    class="list-group-item d-flex justify-content-between align-items-center" th:text="${votedPlayer.getName()}">
+                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                <p th:text="${votedPlayer.getName()}">name</p>
                                 <span class="badge badge-primary badge-pill"
                                       th:text="${votedPlayer.getNoVotes()}">0</span>
                             </li>
@@ -116,7 +117,8 @@
                         <ul class="list-group" id="conVotesList"
                             th:each="votedPlayer : *{votingStatus.getCurrentVotingPhaseVotesCon()}">
                             <li
-                                    class="list-group-item d-flex justify-content-between align-items-center" th:text="${votedPlayer.getName()}">
+                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                <p th:text="${votedPlayer.getName()}">name</p>
                                 <span class="badge badge-primary badge-pill"
                                       th:text="${votedPlayer.getNoVotes()}">0</span>
                             </li>
