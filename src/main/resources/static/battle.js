@@ -66,9 +66,9 @@ function updateView(battleInformation) {
 }
 
 function highlightCurrentSpeakers(currentSpeakers, speaker, isProTeam, elemId) {
-    document.getElementById(elemId).classList.remove((isProTeam)? 'pro-team-speaker': 'contra-team-speaker');
-    if(currentSpeakers.includes(speaker)) {
-        document.getElementById(elemId).classList.add((isProTeam)? 'pro-team-speaker': 'contra-team-speaker');
+    document.getElementById(elemId).classList.remove((isProTeam) ? 'pro-team-member' : 'contra-team-member');
+    if (currentSpeakers.includes(speaker)) {
+        document.getElementById(elemId).classList.add((isProTeam) ? 'pro-team-member' : 'contra-team-member');
     }
 }
 
@@ -88,17 +88,18 @@ async function handleLeftMeeting() {
 async function updateTeamMembersList() {
     let battleInformation = await getBattleInformation(debateSessionId);
 
-    updateList('pro-team-members-list', battleInformation.proTeamMembers);
-    updateList('contra-team-members-list', battleInformation.conTeamMembers);
+    updateList('pro-team-members-list', battleInformation.proTeamMembers, true);
+    updateList('contra-team-members-list', battleInformation.conTeamMembers, false);
 }
 
-function updateList(listId, elements) {
+function updateList(listId, elements, isProTeam) {
     let list = document.getElementById(listId);
     list.innerHTML = ''; //remove all previous elements of the list
 
-    for(let elem of elements) {
+    for (let elem of elements) {
         let listElem = document.createElement("li");
         listElem.classList.add("list-group-item");
+        listElem.classList.add((isProTeam) ? "pro-team-member" : "contra-team-member");
         listElem.innerText = elem;
         list.appendChild(listElem);
     }

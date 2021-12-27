@@ -24,7 +24,7 @@ public enum DebateSessionPhase {
     CROSS_EXAMINATION_4("CX4", -1, CrossExamination4SpeechState.getInstance()),
     NEGATIVE_REBUTTAL_1("NR1", -1, NegativeRebuttal1SpeechState.getInstance()),
     AFFIRMATIVE_REBUTTAL_1("AR1", -1, AffirmativeRebuttal1SpeechState.getInstance()),
-    NEGATIVE_REBUTTAL_2("NR2", -1, NegativeRebuttal1SpeechState.getInstance()),
+    NEGATIVE_REBUTTAL_2("NR2", -1, NegativeRebuttal2SpeechState.getInstance()),
     AFFIRMATIVE_REBUTTAL_2("AR2", -1, AffirmativeRebuttal2SpeechState.getInstance()),
     FINAL_VOTE("FV", -1, GeneralState.getInstance()),
     FINAL_DISCUSSION("FD", -1, FinalDiscussionsState.getInstance()),
