@@ -31,11 +31,7 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         }
     }
 
-    let meetingToken;
-
-    if (isJudge) {
-        await displayCountDownTimerForJudge(debateSessionId, onPreparationTimesUp);
-    } else {
+    if (!isJudge) {
         let debateSessionPlayer = await getDebateSessionPlayer();
         let teamPreparationMeeting;
 
@@ -46,18 +42,18 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
             callWrapper.classList.add('contra-team');
             teamPreparationMeeting = preparationMeetingTeamContra;
         }
-        meetingToken = await createMeetingToken(getParticipantPrivileges(teamPreparationMeeting.meetingName, userName, isJudge));
-        await joinMeetingWithToken(isJudge, teamPreparationMeeting.meetingUrl, meetingToken.token);
-
-        await displayCountDownTimerForPlayers(debateSessionId);
-        await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
+        let meetingToken = await createMeetingToken(getParticipantPrivileges(teamPreparationMeeting.meetingName, isJudge));
+        await joinMeetingWithToken(isJudge, teamPreparationMeeting.meetingUrl, meetingToken.token, userName);
     }
 }
 
-async function getDebateSessionPlayer() {
-    let debateSessionPlayerDestination = "/get_debate_session_player?debateSessionId=" + debateSessionId;
-
-    return await getRequestToServer(debateSessionPlayerDestination);
+async function subscribeToTimerNotificationForPreparationPhase(isJudge, debateSessionId) {
+    if (isJudge) {
+        await displayCountDownTimerForJudge(debateSessionId, onPreparationTimesUp);
+    }else{
+        await displayCountDownTimerForPlayers(debateSessionId);
+        await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
+    }
 }
 
 async function onPreparationTimesUp(timesUp) {
@@ -77,8 +73,8 @@ async function joinPreparationMeetingOfTeamPro() {
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('pro-team');
 
-    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, userName, isJudge));
-    await joinMeetingWithToken(isJudge, preparationMeetingTeamPro.meetingUrl, meetingToken.token);
+    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, isJudge));
+    await joinMeetingWithToken(isJudge, preparationMeetingTeamPro.meetingUrl, meetingToken.token, userName);
 }
 
 async function joinPreparationMeetingOfTeamContra() {
@@ -88,20 +84,8 @@ async function joinPreparationMeetingOfTeamContra() {
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('contra-team');
 
-    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, userName, isJudge));
-    await joinMeetingWithToken(isJudge, preparationMeetingTeamContra.meetingUrl, meetingToken.token);
-}
-
-async function getAllMeetingsOfDebateSession(debateSessionId) {
-    const allDebateMeetingsDestEndpoint = "/get_all_meetings?debateSessionId=" + debateSessionId;
-
-    return await getRequestToServer(allDebateMeetingsDestEndpoint);
-}
-
-async function getUserNameOfCurrentUser() {
-    let destEndpoint = "/get_username_of_current_user";
-
-    return await getRequestToServer(destEndpoint);
+    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, isJudge));
+    await joinMeetingWithToken(isJudge, preparationMeetingTeamContra.meetingUrl, meetingToken.token, userName);
 }
 
 function handleLeftMeeting() {

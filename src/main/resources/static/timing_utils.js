@@ -22,8 +22,12 @@ async function subscribeToTimerNotificationSocket(phase, onTimesUp) {
     console.log("Subscribed")
 
     stompClient.connect({}, function (frame) {
-        stompClient.subscribe("/user/queue/debate-" + phase + "-times-up", onTimesUp);
+        stompClient.subscribe("/user/queue/debate-" + getPhaseForTimerDestinationUrl(phase) + "-times-up", onTimesUp);
     });
+}
+
+function getPhaseForTimerDestinationUrl(phase) {
+    return phase.toLowerCase().replaceAll( "_", "-");
 }
 
 async function displayCountDownTimerForPlayers(debateSessionId) {

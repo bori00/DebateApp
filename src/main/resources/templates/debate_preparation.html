@@ -11,6 +11,7 @@
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
     <script type="text/javascript" th:src="@{/timing_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/debate_meeting.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
     <script type="text/javascript" th:src="@{/debate_preparation.js}"></script>
     <script type="text/javascript" th:src="@{/close_debate.js}"></script>
@@ -21,27 +22,12 @@
     <script th:src="@{/menu_controller.js}"></script>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <style>
-        .hide {
-            display: none;
-        }
-
-        .pro-team {
-            border-width: 5px;
-            border-style: solid;
-            border-radius: 15px;
-            color: green;
-        }
-
-        .contra-team {
-            border-width: 5px;
-            border-style: solid;
-            border-radius: 15px;
-            color: #c62424;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/teams_stylesheet.css}"/>
 </head>
-<body th:onload="'joinDebateMeeting(' + ${isJudge} + ',' + ${debateSessionId} +');loadMenu(); subscribeToClosedDebateNotificationSocket();'">
+<body th:onload="'loadMenu();'+
+                 'joinDebateMeeting(' + ${isJudge} + ',' + ${debateSessionId} + ');' +
+                 'subscribeToTimerNotificationForPreparationPhase(' + ${isJudge} + ',' + ${debateSessionId} + ');'+
+                 'subscribeToClosedDebateNotificationSocket();'">
 <div class="container text-center">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01"
@@ -62,6 +48,9 @@
         <div class="card-body">
             <div class="card p-3 bg-light m-auto">
                 <div class="card-body" id="card-body">
+                    <blockquote class="blockquote text-center">
+                        <p th:text="'&quot' + ${debateTemplate.getStatement()} + '&quot'"></p>
+                    </blockquote>
                     <p>Debate Preparation phase</p>
                     <h3 id="timer-clock">00:00:00</h3>
                 </div>
@@ -114,12 +103,6 @@
                                  data-parent="#accordion">
                                 <div class="card-body">
                                     <ul class="text-justify">
-                                        <li>Prepare arguments for the statement:
-                                            <blockquote class="blockquote text-center">
-                                                <p th:text="'&quot' + ${debateTemplate.getStatement()} + '&quot'">
-                                                    Statement</p>
-                                            </blockquote>
-                                        </li>
                                         <li>This is the time for discussions and brainstorming. You are invited and
                                             encouraged to share your opinion!
                                         </li>

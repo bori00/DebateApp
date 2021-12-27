@@ -7,3 +7,29 @@
     color: red;
     font-weight: bold;
 }
+
+.hide {
+    display: none;
+}
+
+.pro-team {
+    border-width: 5px;
+    border-style: solid;
+    border-radius: 15px;
+    color: limegreen;
+}
+
+.contra-team {
+    border-width: 5px;
+    border-style: solid;
+    border-radius: 15px;
+    color: #c62424;
+}
+
+.pro-team-speaker {
+    color: limegreen;
+}
+
+.contra-team-speaker {
+    color: #c62424;
+}

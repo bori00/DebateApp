@@ -12,9 +12,6 @@ async function createDebateCallFrame(callWrapper) {
 
 async function createMeetingRoom() {
     const newRoomEndpoint = DAILY_REST_DOMAIN + "/rooms";
-    // room expires in 24 hours
-    // todo: set back
-    const exp = Math.round(Date.now() / 1000) + 30 * 60;
 
     const options = {
         properties: {
@@ -23,7 +20,6 @@ async function createMeetingRoom() {
             enable_chat: true,
             start_video_off: true,
             start_audio_off: true,
-            exp: exp,
             eject_at_room_exp: true,
         },
     };
@@ -61,10 +57,11 @@ async function createMeetingToken(options) {
         .catch(error => console.log('failed to parse response to json: ' + error));
 }
 
-async function joinMeetingWithToken(isJudge, meetingUrl, meetingToken) {
+async function joinMeetingWithToken(isJudge, meetingUrl, meetingToken, userName) {
     callFrame.join({
         url: meetingUrl,
         token: meetingToken,
+        userName: userName,
         showLeaveButton: !isJudge,
         showFullscreenButton: true,
         showParticipantsBar: true,
@@ -72,12 +69,11 @@ async function joinMeetingWithToken(isJudge, meetingUrl, meetingToken) {
         .catch(console.log('failed to join meeting, invalid token'));
 }
 
-function getParticipantPrivileges(roomName, userName, isJudge) {
+function getParticipantPrivileges(roomName, isJudge) {
     return {
         properties: {
             room_name: roomName,
             is_owner: isJudge,
-            user_name: userName,
             enable_screenshare: false,
             start_video_off: true,
             start_audio_off: true,

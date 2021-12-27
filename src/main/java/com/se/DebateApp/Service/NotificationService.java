@@ -23,6 +23,7 @@ public class NotificationService {
             "-%s-times-up";
     public static final String DEBATE_DEPUTY_VOTING_STATUS_SOCKET_DEST = "/queue/debate-voting" +
             "-status";
+    public static final String DEBATE_PARTICIPANT_LEFT_SOCKET_DEST = "/queue/debate-participant-left";
 
     public void notifyUser(
             User user,
