@@ -44,4 +44,7 @@ public class DebateSessionPlayer {
 
     @OneToMany(cascade = {CascadeType.ALL}, mappedBy="byPlayer")
     private Set<DebateRoleVote> castedVotes = new HashSet<>();
+
+    @Column
+    private TeamType finalVoteTeam = null;
 }
