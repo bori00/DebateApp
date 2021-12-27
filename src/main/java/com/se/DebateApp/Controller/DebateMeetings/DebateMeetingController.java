@@ -1,19 +1,15 @@
 package com.se.DebateApp.Controller.DebateMeetings;
 
-import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.DebateMeetings.DTOs.DebateMeetingDTO;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributesDTO;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.DebateMeeting;
 import com.se.DebateApp.Model.DebateSession;
-import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateMeetingRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +24,6 @@ public class DebateMeetingController {
 
     @Autowired
     private DebateMeetingRepository debateMeetingRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @PostMapping(value = SupportedMappings.CREATE_MEETING, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -64,10 +57,5 @@ public class DebateMeetingController {
         debateMeeting.setUrl(debateMeetingAttributes.getMeetingUrl());
 
         return debateMeeting;
-    }
-
-    private User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
     }
 }

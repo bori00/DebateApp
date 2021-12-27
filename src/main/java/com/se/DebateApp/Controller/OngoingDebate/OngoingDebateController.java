@@ -32,7 +32,7 @@ public class OngoingDebateController {
     @Autowired
     private DebateSessionRepository debateSessionRepository;
 
-    @GetMapping(value = SupportedMappings.GET_USERNAME_OF_CURRENT_USER)
+    @GetMapping(value = SupportedMappings.GET_USERNAME_OF_CURRENT_USER, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getUserNameOfCurrentUser() {
         return getCurrentUser().getUserName();

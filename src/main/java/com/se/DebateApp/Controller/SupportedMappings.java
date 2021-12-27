@@ -68,6 +68,16 @@ public class SupportedMappings {
     public static final String DEPUTY_SELECTION_FOR_JUDGE_PAGE = "deputy_selection_for_judge";
     public static final String DEPUTY_SELECTION_FOR_PLAYER_PAGE = "deputy_selection_for_players";
 
+    // ------ battle
+    // --- request mappings
+    // redirecting requests
+    public static final String GO_TO_BATTLE = "/go_to_battle";
+    // responding requests
+    public static final String GET_BATTLE_INFORMATION = "/get_battle_information";
+    public static final String PROCESS_LEFT_DEBATE = "/process_left_debate";
+    // pages
+    public static final String BATTLE_PAGE = "battle";
+
     // ----- meetings
     // --- request mappings
     // responding requests
@@ -82,6 +92,8 @@ public class SupportedMappings {
             "/get_current_phases_time_interval";
     public static final String GET_CURRENT_PHASE_STARTING_TIME =
             "/get_current_phase_starting_time";
+    public static final String GET_CURRENT_PHASE =
+            "/get_current_phase";
     public static final String IS_DEBATE_SESSION_FINISHED = "/is_debate_finished";
     public static final String PROCESS_END_OF_TIMED_PHASE = "/process_end_of_timed_phase";
     public static final String CLOSE_DEBATE = "/close_debate";
