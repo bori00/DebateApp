@@ -1,4 +1,4 @@
-async function closeDebate(debateSessionId) {
+async function closeDebate() {
     callFrame.leave();
     const url = new URL("/close_debate", document.URL);
 
