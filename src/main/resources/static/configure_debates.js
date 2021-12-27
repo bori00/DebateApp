@@ -25,5 +25,14 @@ function onDeleteDebateTemplateResourceLinkButtonPushed(resourceLinkId) {
 }
 
 function onStartDebateButtonPushed(debateTemplateId) {
-    window.location.href = "/process_start_debate?debateTemplateId=" + debateTemplateId
+    destEndpoint = "/start_debate";
+    body = debateTemplateId
+    postRequestToServer(destEndpoint, body)
+        .then(response => {
+            return response.json();
+        })
+        .catch(error => console.log('failed to parse response: ' + error))
+        .then(response => {
+            handleOngoingDebateRequestResponse(response);
+        });
 }

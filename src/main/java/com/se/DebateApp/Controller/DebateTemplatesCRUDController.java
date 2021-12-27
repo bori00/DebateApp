@@ -22,6 +22,7 @@ import java.util.Optional;
 public class DebateTemplatesCRUDController {
 
     // TODO: handle illegal arguments
+    // TODO: doesn't respect responding vs redirecting requests pattern
 
     @Autowired
     private DebateTemplateRepository debateTemplateRepository;
@@ -32,27 +33,27 @@ public class DebateTemplatesCRUDController {
     @Autowired
     private LinkToResourceRepository linkToResourceRepository;
 
-    @GetMapping("/create_debate_template")
+    @GetMapping(SupportedMappings.CREATE_DEBATE_TEMPLATE_REQUEST)
     public String goToCreateDebateTemplatePage(Model model) {
         model.addAttribute("debate_template", new DebateTemplate());
-        return "create_debate_template";
+        return SupportedMappings.CREATE_DEBATE_TEMPLATE_PAGE;
     }
 
-    @PostMapping("/process_debate_template_creation")
+    @PostMapping(SupportedMappings.PROCESS_DEBATE_TEMPLATE_CREATION_REQUEST)
     public String processDebateTemplateCreation(DebateTemplate debateTemplate) {
         User currentUser = getCurrentUser();
         currentUser.addNewDebateTemplate(debateTemplate);
         debateTemplateRepository.save(debateTemplate);
-        return "redirect:/configure_debates";
+        return SupportedMappings.REDIRECT_PREFIX + SupportedMappings.GO_TO_CONFIGURE_DEBATES_PAGE;
     }
 
-    @GetMapping(value = "/process_debate_template_deletion")
+    @GetMapping(value = SupportedMappings.PROCESS_DEBATE_TEMPLATE_DELETION_REQUEST)
     public String processDebateTemplateDeletion(@RequestParam Long debateTemplateId) {
         debateTemplateRepository.deleteById(debateTemplateId);
-        return "redirect:/configure_debates";
+        return SupportedMappings.REDIRECT_PREFIX + SupportedMappings.GO_TO_CONFIGURE_DEBATES_PAGE;
     }
 
-    @GetMapping("/process_debate_template_viewing_request")
+    @GetMapping(SupportedMappings.PROCESS_DEBATE_TEMPLATE_VIEWING_REQUEST)
     public String processDebateTemplateViewingRequest(@RequestParam Long debateTemplateId,
                                                       Model model) {
         Optional<DebateTemplate> optDebateTemplate =
@@ -62,10 +63,10 @@ public class DebateTemplatesCRUDController {
         }
         DebateTemplate debateTemplate = optDebateTemplate.get();
         model.addAttribute("debate_template", debateTemplate);
-        return "view_debate_template";
+        return SupportedMappings.VIEW_DEBATE_TEMPLATE_PAGE;
     }
 
-    @GetMapping(value = "/process_debate_template_editing_request")
+    @GetMapping(value = SupportedMappings.PROCESS_DEBATE_TEMPLATE_EDITING_REQUEST)
     public String processDebateTemplateEditingRequest(@RequestParam Long debateTemplateId,
                                                       Model model) {
         Optional<DebateTemplate> optDebateTemplate =
@@ -80,20 +81,21 @@ public class DebateTemplatesCRUDController {
         newLinkToResource.setDebateTemplate(debateTemplate);
         model.addAttribute("new_resource_link", newLinkToResource);
 
-        return "edit_debate_template";
+        return SupportedMappings.EDIT_DEBATE_TEMPLATE_PAGE;
     }
 
-    @PostMapping("/process_debate_template_editing")
+    @PostMapping(SupportedMappings.PROCESS_DEBATE_TEMPLATE_EDITING)
     public String processDebateTemplateEditing(DebateTemplate debateTemplate) {
         debateTemplate.computeSecondsBasedOnMinsAndSecs();
         User currentUser = getCurrentUser();
         debateTemplate.setOwner(currentUser);
         debateTemplateRepository.save(debateTemplate);
-        return "redirect:/process_debate_template_editing_request?debateTemplateId=" +
+        return SupportedMappings.REDIRECT_PREFIX + SupportedMappings.PROCESS_DEBATE_TEMPLATE_EDITING_REQUEST +
+                "?debateTemplateId=" +
                 debateTemplate.getId();
     }
 
-    @GetMapping("/process_debate_template_resource_link_deletion")
+    @GetMapping(SupportedMappings.PROCESS_DEBATE_TEMPLATE_RESOURCE_LINK_DELETION_REQUEST)
     public String processDebateTemplateResourceLinkDeletion(@RequestParam Long resourceLinkId,
                                                             Model model) {
         Optional<LinkToResource> optLinkToResource =
@@ -104,16 +106,20 @@ public class DebateTemplatesCRUDController {
         LinkToResource linkToResource = optLinkToResource.get();
         linkToResourceRepository.delete(linkToResource);
 
-        return "redirect:/process_debate_template_editing_request?debateTemplateId=" +
+        return SupportedMappings.REDIRECT_PREFIX +
+                SupportedMappings.PROCESS_DEBATE_TEMPLATE_EDITING_REQUEST +
+                "?debateTemplateId=" +
                 linkToResource.getDebateTemplate().getId();
     }
 
-    @PostMapping("/process_debate_template_resource_link_addition")
+    @PostMapping(SupportedMappings.PROCESS_DEBATE_TEMPLATE_RESOURCE_LINK_ADDITION_REQUEST)
     public String processDebateTemplateResourceLinkAddition(LinkToResource linkToResource,
                                                             Model model) {
         linkToResource.getDebateTemplate().addNewDLinkToResource(linkToResource);
         linkToResourceRepository.save(linkToResource);
-        return "redirect:/process_debate_template_editing_request?debateTemplateId=" +
+        return SupportedMappings.REDIRECT_PREFIX +
+                SupportedMappings.PROCESS_DEBATE_TEMPLATE_EDITING_REQUEST +
+                "?debateTemplateId=" +
                 linkToResource.getDebateTemplate().getId();
     }
 

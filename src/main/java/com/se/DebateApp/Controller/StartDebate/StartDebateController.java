@@ -1,16 +1,18 @@
 package com.se.DebateApp.Controller.StartDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
+import com.se.DebateApp.Controller.OngoingDebateRequestResponse;
 import com.se.DebateApp.Controller.StartDebate.DTOs.*;
+import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerState;
 import com.se.DebateApp.Model.Constants.TeamType;
-import com.se.DebateApp.Model.DTOs.DebateParticipantsStatus;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
+import com.se.DebateApp.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -41,21 +43,21 @@ public class StartDebateController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    private static final String errorMessageName = "errorMessage";
-    private static final String hasOtherOngoingDebateErrorMsg = "You can't start a new debate, " +
-            "when you " +
-            "are a player/judge in an other ongoing debate. Please retry later!";
+    @Autowired
+    private NotificationService notificationService;
 
-    @GetMapping("/process_start_debate")
-    public String processStartDebateSession(@RequestParam Long debateTemplateId, Model model) {
+    @PostMapping(SupportedMappings.JUDGE_START_DEBATE_REQUEST)
+    @ResponseBody
+    public OngoingDebateRequestResponse processStartDebateSession(@RequestBody Long debateTemplateId, Model model) {
         if (hasOngoingDebate(getCurrentUser())) {
-            model.addAttribute(errorMessageName, hasOtherOngoingDebateErrorMsg);
-            return "start_debate";
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
         }
         Optional<DebateTemplate> optDebateTemplate =
                 debateTemplateRepository.findById(debateTemplateId);
         if (optDebateTemplate.isEmpty()) {
-            throw new IllegalArgumentException();
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateTemplate debateTemplate = optDebateTemplate.get();
         DebateSession debateSession = new DebateSession();
@@ -63,14 +65,10 @@ public class StartDebateController {
         debateSession.setCurrentPhaseStartingTime(currentTime);
         debateTemplate.addNewSession(debateSession);
         DebateSession savedSession = debateSessionRepository.save(debateSession);
-        model.addAttribute("debateCode", savedSession.getId());
-        model.addAttribute("waitingParticipants", 0);
-        model.addAttribute("proPlayers", 0);
-        model.addAttribute("conPlayers", 0);
-        return "start_debate";
+        return new OngoingDebateRequestResponse(true, true,"");
     }
 
-    @GetMapping("/reenter_start_debate")
+    @GetMapping(SupportedMappings.JUDGE_GO_TO_STARTING_DEBATE_REQUEST)
     public String reenterStartDebateSession(Model model) {
         User user = getCurrentUser();
         List<DebateSession> ongoingsSessionsAsJudge =
@@ -81,41 +79,41 @@ public class StartDebateController {
         }
         DebateSession session = ongoingsSessionsAsJudge.get(0);
         model.addAttribute("debateCode", session.getId());
-        DebateParticipantsStatus participantsStatus = session.computeParticipantsStatus();
+        DebateParticipantsStatusDTO participantsStatus = session.computeParticipantsStatus();
         model.addAttribute("waitingParticipants", participantsStatus.getNoWaitingToJoinParticipants());
         model.addAttribute("proPlayers", participantsStatus.getNoProParticipants());
         model.addAttribute("conPlayers", participantsStatus.getNoConParticipants());
         return "start_debate";
     }
 
-    @PostMapping(value = "/process_join_debate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = SupportedMappings.PLAYER_JOIN_DEBATE_REQUEST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JoinDebateRequestResponse processJoinDebateSession(@RequestBody Long debateCode) {
+    public OngoingDebateRequestResponse processJoinDebateSession(@RequestBody Long debateCode) {
         User currentUser = getCurrentUser();
         if (hasOngoingDebate(getCurrentUser())) {
-            return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.HAS_OTHER_ONGOING_DEBATE_ERROR_MSG);
         }
         Optional<DebateSession> optDebateSession =
                 debateSessionRepository.findById(debateCode);
         if (optDebateSession.isEmpty()) {
-            return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.DEBATE_NOT_FOUND_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.DEBATE_NOT_FOUND_ERROR_MSG);
         }
         DebateSession debateSession = optDebateSession.get();
         if (debateSession.getDebateSessionPhase() != DebateSessionPhase.WAITING_FOR_PLAYERS) {
-            return new JoinDebateRequestResponse(false,
-                    JoinDebateRequestResponse.DEBATE_NO_LONGER_ACCEPTING_PLAYERS_ERROR_MSG);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.DEBATE_NO_LONGER_ACCEPTING_PLAYERS_ERROR_MSG);
         }
         DebateSessionPlayer debateSessionPlayer = new DebateSessionPlayer();
         debateSessionPlayer.setUser(currentUser);
         debateSession.addNewPlayer(debateSessionPlayer);
         debateSessionPlayerRepository.save(debateSessionPlayer);
         announceJudgeAboutDebateSessionParticipantsState(debateSession.getDebateTemplate().getOwner(), debateSession.computeParticipantsStatus());
-        return new JoinDebateRequestResponse(true, null);
+        return new OngoingDebateRequestResponse(true, true,null);
     }
 
-    @GetMapping("/choose_team")
+    @GetMapping(SupportedMappings.PLAYER_GO_TO_CHOOSE_TEAM_REQUEST)
     public String processGoToChooseTeamPageRequest(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToJoinDebates =
@@ -123,23 +121,18 @@ public class StartDebateController {
                         user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToJoinDebates.isEmpty()) {
-            return "error";
+            return SupportedMappings.ERROR_PAGE;
         }
-        DebateSessionTeamChoiceInformation teamChoiceInformation =
-                new DebateSessionTeamChoiceInformation(
+        DebateSessionTeamChoiceInformationDTO teamChoiceInformation =
+                new DebateSessionTeamChoiceInformationDTO(
                         waitingToJoinDebates.get(0).getDebateTemplate());
         model.addAttribute("team_choice_information", teamChoiceInformation);
-        return "choose_team";
+        return SupportedMappings.PLAYER_CHOOSE_TEAM_PAGE;
     }
 
-    @GetMapping("/reenter_choose_team")
-    public String reenterChooseTeamPageRequest(Model model) {
-        return processGoToChooseTeamPageRequest(model);
-    }
-
-    @PostMapping(value = "/process_join_team", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = SupportedMappings.PLAYER_JOIN_TEAM_REQUEST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public JoinTeamRequestResponse processJoinDebateSession(@RequestBody Boolean joinsProTeam) {
+    public OngoingDebateRequestResponse processJoinDebateSession(@RequestBody Boolean joinsProTeam) {
         User user = getCurrentUser();
         List<DebateSession> waitingToJoinDebates =
                 debateSessionRepository.findDebateSessionOfPlayerWithGivenState(
@@ -150,14 +143,16 @@ public class StartDebateController {
                     debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user
                             , DebateSessionPhase.FINISHED);
             if (nonFinishedDebates.isEmpty()) {
-                return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+                return new OngoingDebateRequestResponse(false, 
+                        false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
             } else {
-                return new JoinTeamRequestResponse(false,
-                        JoinTeamRequestResponse.TOO_LATE_TO_JOIN_TEAM);
+                return new OngoingDebateRequestResponse(false, false,
+                        OngoingDebateRequestResponse.TOO_LATE_TO_JOIN_TEAM_MSG);
             }
         }
         if (waitingToJoinDebates.size() > 1) {
-            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSession session = waitingToJoinDebates.get(0);
         List<DebateSessionPlayer> usersPlayers =
@@ -166,11 +161,13 @@ public class StartDebateController {
                         .filter(player -> player.getUser().getId().equals(user.getId()))
                         .collect(Collectors.toList());
         if (usersPlayers.size() != 1) {
-            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.UNEXPECTED_ERROR);
+            return new OngoingDebateRequestResponse(false, false,
+                    OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSessionPlayer usersPlayer = usersPlayers.get(0);
         if (usersPlayer.getPlayerState().equals(PlayerState.JOINED_A_TEAM)) {
-            return new JoinTeamRequestResponse(false, JoinTeamRequestResponse.ALREADY_JOINED_TEAM);
+            return new OngoingDebateRequestResponse(false,
+                    false, OngoingDebateRequestResponse.ALREADY_JOINED_TEAM_MSG);
         }
         usersPlayer.setPlayerState(PlayerState.JOINED_A_TEAM);
         if (joinsProTeam) {
@@ -182,10 +179,10 @@ public class StartDebateController {
         announceJudgeAboutDebateSessionParticipantsState(
                 session.getDebateTemplate().getOwner(),
                 session.computeParticipantsStatus());
-        return new JoinTeamRequestResponse(true, "");
+        return new OngoingDebateRequestResponse(true, true, "");
     }
 
-    @GetMapping("/go_to_debate_lobby")
+    @GetMapping(SupportedMappings.PLAYER_GO_TO_DEBATE_LOBBY_REQUEST)
     public String processGoToDebateLobbyPage(Model model) {
         User user = getCurrentUser();
         List<DebateSession> waitingToActivateDebates =
@@ -193,17 +190,12 @@ public class StartDebateController {
                         user,
                         DebateSessionPhase.WAITING_FOR_PLAYERS);
         if (waitingToActivateDebates.size() != 1) {
-            return "error";
+            return SupportedMappings.ERROR_PAGE;
         }
         DebateSession session = waitingToActivateDebates.get(0);
         model.addAttribute("debateInformation",
-                new DebateLobbyInformation(session.getDebateTemplate()));
-        return "debate_lobby";
-    }
-
-    @GetMapping("/reenter_debate_lobby")
-    public String reenterDebateLobbyPage(Model model) {
-        return processGoToDebateLobbyPage(model);
+                new DebateLobbyInformationDTO(session.getDebateTemplate()));
+        return SupportedMappings.PLAYER_DEBATE_LOBBY_PAGE;
     }
 
     @GetMapping("/go_to_active_debate")
@@ -214,12 +206,8 @@ public class StartDebateController {
 
     private void announceJudgeAboutDebateSessionParticipantsState(
             User judge,
-            DebateParticipantsStatus debateParticipantsStatus) {
-        simpMessagingTemplate.convertAndSendToUser(
-                judge.getUserName(),
-                "/queue/debate-session-participants-status",
-                debateParticipantsStatus);
-
+            DebateParticipantsStatusDTO debateParticipantsStatus) {
+        notificationService.notifyUser(judge, debateParticipantsStatus, NotificationService.DEBATE_SESSION_PARTICIPANTS_STATUS_SOCKET_DEST);
     }
 
     private boolean hasOngoingDebate(User user) {

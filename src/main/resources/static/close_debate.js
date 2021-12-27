@@ -1,6 +1,15 @@
 async function closeDebate(debateSessionId) {
     callFrame.leave();
-    document.defaultView.location.href = "/process_close_debate";
+    const url = new URL("/close_debate", document.URL);
+
+    postRequestToServer(url, {})
+        .then(response => {
+            return response.json();
+        })
+        .catch(error => console.log('failed to parse response: ' + error))
+        .then (response => {
+            handleOngoingDebateRequestResponse(response);
+        });
 }
 
 async function subscribeToClosedDebateNotificationSocket() {
@@ -19,7 +28,7 @@ async function subscribeToClosedDebateNotificationSocket() {
 
 function onDebateClosed() {
     document.defaultView.alert('This debate has been closed by the judge.')
-    document.defaultView.location.href = "/home";
+    document.defaultView.location.href = "/go_to_home";
 }
 
 

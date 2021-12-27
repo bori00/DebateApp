@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
     <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
     <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/join_debate.js}"></script>
@@ -25,7 +26,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-            <a class="navbar-brand" th:href="@{/home}">Debate App</a>
+            <a class="navbar-brand" th:href="@{/go_to_home}">Debate App</a>
             <ul id="menu_items" class="navbar-nav mr-auto mt-2 mt-lg-0">
             </ul>
             <form th:action="@{/logout}" method="post">

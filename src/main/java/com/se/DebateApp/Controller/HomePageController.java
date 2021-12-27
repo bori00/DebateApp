@@ -36,96 +36,35 @@ public class HomePageController {
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping("")
+    @GetMapping(SupportedMappings.GO_TO_STARTING_PAGE)
     public String viewUserDependentHomePage() {
         if (userIsAuthenticated()) {
-            return "home";
+            return SupportedMappings.AUTHENTICATED_HOME_PAGE;
         }
-        return "index";
+        return SupportedMappings.UNAUTHENTICATED_INDEX_PAGE;
     }
 
-    @GetMapping("/home")
+    @GetMapping(SupportedMappings.GO_TO_AUTHENTICATED_HOME_PAGE)
     public String viewHomePage() {
-        return "home";
+        return SupportedMappings.AUTHENTICATED_HOME_PAGE;
     }
 
-    @GetMapping("/register")
+    @GetMapping(SupportedMappings.GO_TO_REGISTER_PAGE)
     public String showSignUpForm(Model model) {
         model.addAttribute("user", new User());
-        return "register";
+        return SupportedMappings.REGISTRATION_PAGE;
     }
 
-    @GetMapping("/join_debate")
+    @GetMapping(SupportedMappings.GO_TO_JOIN_DEBATE_PAGE)
     public String goToJoinDebatePage() {
-        return "join_debate";
+        return SupportedMappings.JOIN_DEBATE_PAGE;
     }
 
-    @GetMapping("/start_debate")
-    public String goToStartDebatePage(Model model) {
-        model.addAttribute("user", getCurrentUser());
-        return "start_debate";
-    }
-
-    @GetMapping("/configure_debates")
+    @GetMapping(SupportedMappings.GO_TO_CONFIGURE_DEBATES_PAGE)
     public String goToConfigureDebatesPage(Model model) {
         model.addAttribute("myDebateTemplates",
                 debateTemplateRepository.findAllDebateTemplatesOfUser(getCurrentUser()));
-        return "configure_debates";
-    }
-
-    @PostMapping("/has_user_ongoing_debate")
-    @ResponseBody
-    public boolean hasUserOngoingDebate() {
-        User user = getCurrentUser();
-        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
-                DebateSessionPhase.FINISHED).size() > 0 ||
-                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
-                        DebateSessionPhase.FINISHED).size() > 0;
-    }
-
-    @PostMapping("/get_ongoing_debate_href")
-    @ResponseBody
-    public StringWrapper getOngoingDebateLink() {
-        User user = getCurrentUser();
-        List<DebateSession> ongoingDebatesAsJudge =
-                debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
-                DebateSessionPhase.FINISHED);
-        List<DebateSession> ongoingDebatesAsPlayer =
-                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
-                        DebateSessionPhase.FINISHED);
-        if (ongoingDebatesAsJudge.isEmpty() && ongoingDebatesAsPlayer.isEmpty()) {
-            return new StringWrapper("error");
-        }
-        if (ongoingDebatesAsJudge.size() > 0) {
-            if (ongoingDebatesAsJudge.size() > 1) {
-                return new StringWrapper("error");
-            }
-            DebateSession session = ongoingDebatesAsJudge.get(0);
-            if (session.getDebateSessionPhase() == DebateSessionPhase.WAITING_FOR_PLAYERS) {
-                return new StringWrapper("/reenter_start_debate");
-            }
-            return new StringWrapper("/reenter_debate_preparation");
-            // TODO: possibly extend
-        } else {
-            if (ongoingDebatesAsPlayer.size() > 1) {
-                return new StringWrapper("error");
-            }
-            DebateSession session = ongoingDebatesAsPlayer.get(0);
-            if (session.getDebateSessionPhase() == DebateSessionPhase.WAITING_FOR_PLAYERS) {
-                DebateSessionPlayer player =
-                        session.getPlayers()
-                                .stream()
-                                .filter(p -> p.getUser().equals(user))
-                                .collect(Collectors.toList()).get(0);
-                if (player.getPlayerState().equals(PlayerState.WAITING_TO_JOIN_TEAM)) {
-                    return new StringWrapper("/reenter_choose_team");
-                } else {
-                    return new StringWrapper("/reenter_debate_lobby");
-                }
-            }
-            return new StringWrapper("/reenter_debate_preparation");
-            // TODO: possibly extend
-        }
+        return SupportedMappings.CONFIGURE_DEBATES_PAGE;
     }
 
     private User getCurrentUser() {

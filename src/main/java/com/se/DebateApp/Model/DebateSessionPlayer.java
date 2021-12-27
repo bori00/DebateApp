@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "debate_session_players")
@@ -26,7 +28,6 @@ public class DebateSessionPlayer {
     private DebateSession debateSession;
 
     @ManyToOne(optional = false)
-    @ToString.Exclude
     private User user;
 
     @Column(nullable = false)
@@ -37,4 +38,10 @@ public class DebateSessionPlayer {
 
     @Column(nullable = true)
     private TeamType team = null;
+
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="forPlayer")
+    private Set<DebateRoleVote> roleVotes = new HashSet<>();
+
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy="byPlayer")
+    private Set<DebateRoleVote> castedVotes = new HashSet<>();
 }

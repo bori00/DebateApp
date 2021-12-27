@@ -40,7 +40,15 @@ function updateUIWithNewParticipantsStatus(participantsStatus) {
 }
 
 function activateDebateSession() {
-    window.location.href="/process_start_debate_preparation";
+    const url = "/activate_debate";
+    postRequestToServer(url, "")
+        .then(response => {
+            return response.json();
+        })
+        .catch(error => console.log('failed to parse response: ' + error))
+        .then (response => {
+            handleOngoingDebateRequestResponse(response);
+        });
 }
 
 async function createDebateMeetings(debateSessionId) {
@@ -52,7 +60,7 @@ async function createDebateMeetings(debateSessionId) {
 async function createDebateMeetingRoom(debateSessionId, meetingType) {
     let room = await createMeetingRoom();
 
-    const destEndpoint = "/process_create_meeting";
+    const destEndpoint = "/create_meeting";
     const token = $("meta[name='_csrf']").attr("content");
     const header = $("meta[name='_csrf_header']").attr("content");
 

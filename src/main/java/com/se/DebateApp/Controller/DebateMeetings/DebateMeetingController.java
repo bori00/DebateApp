@@ -1,30 +1,24 @@
-package com.se.DebateApp.Controller;
+package com.se.DebateApp.Controller.DebateMeetings;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributes;
-import com.se.DebateApp.Model.Constants.DebateSessionPhase;
-import com.se.DebateApp.Model.DTOs.DebateMeetingDTO;
-import com.se.DebateApp.Model.DTOs.DebateSessionPlayerDTO;
-import com.se.DebateApp.Model.*;
+import com.se.DebateApp.Controller.DebateMeetings.DTOs.DebateMeetingDTO;
+import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributesDTO;
+import com.se.DebateApp.Controller.SupportedMappings;
+import com.se.DebateApp.Model.DebateMeeting;
+import com.se.DebateApp.Model.DebateSession;
+import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateMeetingRepository;
-import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.webjars.NotFoundException;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINISHED;
 
 @Controller
 public class DebateMeetingController {
@@ -38,9 +32,9 @@ public class DebateMeetingController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping(value = "/process_create_meeting", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = SupportedMappings.CREATE_MEETING, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void processCreateMeeting(@RequestBody DebateMeetingAttributes debateMeetingAttributes) {
+    public void processCreateMeeting(@RequestBody DebateMeetingAttributesDTO debateMeetingAttributes) {
         DebateSession debateSession = debateSessionRepository.getById(debateMeetingAttributes.getDebateSessionId());
 
         DebateMeeting debateMeeting = createDebateMeeting(debateMeetingAttributes);
@@ -51,7 +45,7 @@ public class DebateMeetingController {
         debateSessionRepository.save(debateSession);
     }
 
-    @GetMapping(value = "/process_get_all_meetings", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = SupportedMappings.GET_ALL_MEETINGS, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DebateMeetingDTO> processGetAllMeetings(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
@@ -62,7 +56,7 @@ public class DebateMeetingController {
                 .collect(Collectors.toList());
     }
 
-    private DebateMeeting createDebateMeeting(DebateMeetingAttributes debateMeetingAttributes) {
+    private DebateMeeting createDebateMeeting(DebateMeetingAttributesDTO debateMeetingAttributes) {
         DebateMeeting debateMeeting = new DebateMeeting();
 
         debateMeeting.setMeetingType(debateMeetingAttributes.getMeetingType());

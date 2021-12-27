@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DebateApp | Active Debate</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
+          type="text/css"/>
+    <link rel="stylesheet" th:href="@{/teams_stylesheet.css}"/>
+    <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+    <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/timing_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/local.config.js}"></script>
+    <script type="text/javascript" th:src="@{/close_debate.js}"></script>
+    <script type="text/javascript" th:src="@{/deputy_selection.js}"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+
+
+    <script th:src="@{/menu_controller.js}"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body th:onload="'loadMenu();' +
+                'subscribeToClosedDebateNotificationSocket();' +
+                'displayCountDownTimerForJudge(' + ${debateSessionId} + ', onDeputyVotingTimesUp_Judge); ' +
+                'subscribeToDebateVotingStatusSocket();'">
+<div class="container text-center">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <a class="navbar-brand" th:href="@{/go_to_home}">Debate App</a>
+            <ul id="menu_items" class="navbar-nav mr-auto mt-2 mt-lg-0">
+            </ul>
+            <form th:action="@{/logout}" method="post">
+                <input type="submit" value = "Sign Out">
+            </form>
+        </div>
+    </nav>
+
+    <div class="card p-3 bg-light m-5">
+        <div class="card-body" id="card-body">
+            <h2>Deputy Selection</h2>
+
+            <h3 id="timer-clock">00:00:00</h3>
+
+            <p>Players of both teams are now selecting the participant to represent their team in
+                the role of the
+                <span th:text="${roleName}">
+                the deputy
+                </span>
+            </p>
+
+            <hr class="my-4">
+
+            <h4>Assigned Roles</h4>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col" class="proTextClass" >Affirmative Team, Deputy 1</th>
+                    <th scope="col" class="conTextClass">Negative Team, Deputy 1</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="proDeputy1NameCell" th:text="${votingStatus.proDeputy1Name}">0</td>
+                    <td id="conDeputy1NameCell" th:text="${votingStatus.conDeputy1Name}">0</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-bordered" th:obect="${votingStatus}">
+                <thead>
+                <tr>
+                    <th scope="col" class="proTextClass" >Affirmative Team, Deputy 2</th>
+                    <th scope="col" class="conTextClass">Negative Team, Deputy 2</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="proDeputy2NameCell" th:text="${votingStatus.proDeputy2Name}">0</td>
+                    <td id="conDeputy2NameCell" th:text="${votingStatus.conDeputy2Name}">0</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <hr class="my-4">
+
+            <h4>Votes for the role of <span th:text="${roleName}">the deputy</span></h4>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col" class="proTextClass" >Affirmative Team</th>
+                    <th scope="col" class="conTextClass">Negative Team</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="proVotesTd">
+                        <ul class="list-group" id="proVotesList"
+                            th:each="votedPlayer : *{votingStatus.getCurrentVotingPhaseVotesPro()}">
+                            <li
+                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                <p th:text="${votedPlayer.getName()}">name</p>
+                                <span class="badge badge-primary badge-pill"
+                                      th:text="${votedPlayer.getNoVotes()}">0</span>
+                            </li>
+                        </ul>
+                    </td>
+                    <td id="conVotesTd">
+                        <ul class="list-group" id="conVotesList"
+                            th:each="votedPlayer : *{votingStatus.getCurrentVotingPhaseVotesCon()}">
+                            <li
+                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                <p th:text="${votedPlayer.getName()}">name</p>
+                                <span class="badge badge-primary badge-pill"
+                                      th:text="${votedPlayer.getNoVotes()}">0</span>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

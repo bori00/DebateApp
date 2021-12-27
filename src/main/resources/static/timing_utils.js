@@ -2,13 +2,13 @@ let countDownTime, remainingTime;
 const refreshPeriod = 1000; // update the clock every second
 
 async function getCurrentPhaseTimeInterval(debateSessionId) {
-    let destinationEndpoint = "/process_get_time_interval?debateSessionId="+debateSessionId;
+    let destinationEndpoint = "/get_current_phases_time_interval?debateSessionId="+debateSessionId;
 
     return await getRequestToServer(destinationEndpoint);
 }
 
 async function getCurrentPhaseStartingTime(debateSessionId) {
-    let destEndpoint = "/process_get_current_phase_starting_time?debateSessionId=" + debateSessionId;
+    let destEndpoint = "get_current_phase_starting_time?debateSessionId=" + debateSessionId;
 
     return await getRequestToServer(destEndpoint);
 }
@@ -18,6 +18,8 @@ async function subscribeToTimerNotificationSocket(phase, onTimesUp) {
     const stompClient = Stomp.over(socket);
 
     console.log("Socket initialized");
+
+    console.log("Subscribed")
 
     stompClient.connect({}, function (frame) {
         stompClient.subscribe("/user/queue/debate-" + phase + "-times-up", onTimesUp);
@@ -41,7 +43,7 @@ async function displayCountDownTimerForPlayers(debateSessionId) {
 }
 
 async function isDebateClosed(debateSessionId) {
-    let destEndpoint = "/process_is_debate_finished?debateSessionId=" + debateSessionId;
+    let destEndpoint = "/is_debate_finished?debateSessionId=" + debateSessionId;
 
     return await getRequestToServer(destEndpoint);
 }
@@ -62,9 +64,9 @@ async function displayCountDownTimerForJudge(debateSessionId, onTimesUp) {
 }
 
 async function handleEndOfDebateSessionPhaseByJudge(debateSessionId, onTimesUp) {
-    let timerEndNotificationDestination = "/process_end_of_current_phase?debateSessionId="+debateSessionId;
+    let timerEndNotificationDestination = "/process_end_of_timed_phase?debateSessionId="+debateSessionId;
     await postRequestToServer(timerEndNotificationDestination);
-    await onTimesUp(true);
+    await onTimesUp();
 }
 
 async function getCountDownTime(debateSessionId) {

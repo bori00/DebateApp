@@ -58,7 +58,7 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
 }
 
 async function getDebateSessionPlayer() {
-    let debateSessionPlayerDestination = "/process_get_debate_session_player?debateSessionId=" + debateSessionId;
+    let debateSessionPlayerDestination = "/get_debate_session_player?debateSessionId=" + debateSessionId;
 
     return await getRequestToServer(debateSessionPlayerDestination);
 }
@@ -70,7 +70,7 @@ async function onPreparationTimesUp(timesUp) {
 
 function handleEndOfPreparationForParticipant() {
     window.alert("Times up! The preparation for the debate has ended!");
-    window.location.href = "/go_to_deputy_selection";
+    window.location.href = "/go_to_ongoing_debates_current_phase";
 }
 
 async function joinPreparationMeetingOfTeamPro() {
@@ -96,13 +96,13 @@ async function joinPreparationMeetingOfTeamContra() {
 }
 
 async function getAllMeetingsOfDebateSession(debateSessionId) {
-    const allDebateMeetingsDestEndpoint = "/process_get_all_meetings?debateSessionId=" + debateSessionId;
+    const allDebateMeetingsDestEndpoint = "/get_all_meetings?debateSessionId=" + debateSessionId;
 
     return await getRequestToServer(allDebateMeetingsDestEndpoint);
 }
 
 async function getUserNameOfCurrentUser() {
-    let destEndpoint = "/process_get_username_of_current_user";
+    let destEndpoint = "/get_username_of_current_user";
 
     return await getRequestToServer(destEndpoint);
 }
@@ -135,13 +135,4 @@ async function leaveMeeting() {
 
 async function handleJoinedMeeting() {
     await updateParticipantsView();
-}
-
-function setElementVisibility(id, visible) {
-    const element = document.getElementById(id);
-    if (visible) {
-        element.classList.remove('hide');
-    } else {
-        element.classList.add('hide');
-    }
 }

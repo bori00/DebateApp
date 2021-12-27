@@ -1,7 +1,9 @@
-package com.se.DebateApp.Controller;
+package com.se.DebateApp.Controller.OngoingDebate;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Model.DTOs.DebateSessionPlayerDTO;
+import com.se.DebateApp.Controller.OngoingDebate.DTOs.DebateSessionPlayerDTO;
+import com.se.DebateApp.Controller.SupportedMappings;
+import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
@@ -13,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.webjars.NotFoundException;
@@ -29,15 +32,15 @@ public class OngoingDebateController {
     @Autowired
     private DebateSessionRepository debateSessionRepository;
 
-    @GetMapping(value = "/process_get_username_of_current_user")
+    @GetMapping(value = SupportedMappings.GET_USERNAME_OF_CURRENT_USER)
     @ResponseBody
-    public String processGetUserNameOfCurrentUser() {
+    public String getUserNameOfCurrentUser() {
         return getCurrentUser().getUserName();
     }
 
-    @GetMapping(value = "/process_get_debate_session_player", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = SupportedMappings.GET_DEBATE_SESSION_PLAYER, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DebateSessionPlayerDTO processGetDebateSessionPlayer(@RequestParam(value = "debateSessionId") Long debateSessionId) {
+    public DebateSessionPlayerDTO getDebateSessionPlayer(@RequestParam(value = "debateSessionId") Long debateSessionId) {
         DebateSessionPlayer debateSessionPlayer = debateSessionPlayerRepository
                 .findDebateSessionPlayerByUserAndDebateSession(
                         getCurrentUser(), debateSessionRepository.getById(debateSessionId))
@@ -52,6 +55,16 @@ public class OngoingDebateController {
         debateSessionPlayerDTO.setTeam(debateSessionPlayer.getTeam().getCode());
 
         return debateSessionPlayerDTO;
+    }
+
+    @PostMapping(SupportedMappings.HAS_USER_ONGOING_DEBATE)
+    @ResponseBody
+    public boolean hasUserOngoingDebate() {
+        User user = getCurrentUser();
+        return debateSessionRepository.findDebateSessionsOfJudgeWithStateDifferentFrom(user,
+                DebateSessionPhase.FINISHED).size() > 0 ||
+                debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
+                        DebateSessionPhase.FINISHED).size() > 0;
     }
 
     private User getCurrentUser() {

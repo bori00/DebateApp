@@ -1,35 +1,12 @@
 function joinDebate() {
-    let url = new URL("/process_join_debate", document.URL);
+    let url = new URL("/join_debate", document.URL);
     let debateCode = document.getElementById("code-input").value;
-    let token = $("meta[name='_csrf']").attr("content");
-    let header = $("meta[name='_csrf_header']").attr("content");
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            [header]: token,
-            "charset": "UTF-8",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(debateCode)
-    })
-        .catch(error => console.log('failed to send request to server '+ error))
+    postRequestToServer(url, debateCode)
         .then(response => {
             return response.json();
         })
         .catch(error => console.log('failed to parse response: ' + error))
         .then (joinDebateStatus => {
-            handleJoinDebateStatus(joinDebateStatus)
+            handleOngoingDebateRequestResponse(joinDebateStatus);
         });
-}
-
-function handleJoinDebateStatus(joinDebateStatus) {
-    if (joinDebateStatus.success) {
-        window.location.href = "/choose_team"
-    } else {
-        showErrorAlert(joinDebateStatus.errorMessage)
-    }
-}
-
-function showErrorAlert(message) {
-    window.alert(message)
 }

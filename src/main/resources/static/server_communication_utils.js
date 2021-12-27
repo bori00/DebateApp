@@ -34,3 +34,13 @@ async function postRequestToServer(destEndpoint, body) {
     })
         .catch(error => console.log('failed to fetch meeting: ' + error))
 }
+
+function handleOngoingDebateRequestResponse(response) {
+    if (response.success) {
+        if (response.debatePhaseRedirectNeeded) {
+            window.location.href = "/go_to_ongoing_debates_current_phase"
+        }
+    } else {
+        window.alert(response.errorMsg)
+    }
+}
