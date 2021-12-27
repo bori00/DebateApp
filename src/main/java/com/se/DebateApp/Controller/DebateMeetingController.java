@@ -1,19 +1,30 @@
 package com.se.DebateApp.Controller;
 
+import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.StartDebate.DTOs.DebateMeetingAttributes;
+import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DTOs.DebateMeetingDTO;
-import com.se.DebateApp.Model.DebateMeeting;
-import com.se.DebateApp.Model.DebateSession;
+import com.se.DebateApp.Model.DTOs.DebateSessionPlayerDTO;
+import com.se.DebateApp.Model.*;
 import com.se.DebateApp.Repository.DebateMeetingRepository;
+import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINISHED;
 
 @Controller
 public class DebateMeetingController {
@@ -23,6 +34,9 @@ public class DebateMeetingController {
 
     @Autowired
     private DebateMeetingRepository debateMeetingRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping(value = "/process_create_meeting", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -56,5 +70,10 @@ public class DebateMeetingController {
         debateMeeting.setUrl(debateMeetingAttributes.getMeetingUrl());
 
         return debateMeeting;
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
     }
 }

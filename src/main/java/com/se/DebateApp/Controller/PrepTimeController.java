@@ -6,7 +6,9 @@ import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Model.User;
+import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
+import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -27,6 +29,12 @@ public class PrepTimeController {
     private DebateSessionRepository debateSessionRepository;
 
     @Autowired
+    private DebateTemplateRepository debateTemplateRepository;
+
+    @Autowired
+    private DebateSessionPlayerRepository debateSessionPlayerRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -45,14 +53,14 @@ public class PrepTimeController {
         DebateTemplate debateTemplate = session.getDebateTemplate();
         boolean skipPhase = debateTemplate.getPrepTimeSeconds() == 0;
 
-        session.setDebateSessionPhase((skipPhase) ? DebateSessionPhase.DEPUTY1_VOTING_TIME : DebateSessionPhase.PREP_TIME);
+        session.setDebateSessionPhase((skipPhase)? DebateSessionPhase.DEPUTY1_VOTING_TIME: DebateSessionPhase.PREP_TIME);
         session.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         Set<DebateSessionPlayer> joinedPlayers = new HashSet<>(session.getPlayers());
         session.removePlayersWhoDidntJoinATeam();
 
         debateSessionRepository.save(session);
         announceAllDebatePlayersAboutDebateActivation(joinedPlayers);
-        return (skipPhase) ? goToDeputySelectionPage(model) : goToDebatePreparationPage(model);
+        return (skipPhase)? goToDeputySelectionPage(model) : goToDebatePreparationPage(model);
     }
 
     @GetMapping("/go_to_debate_preparation")
@@ -61,17 +69,13 @@ public class PrepTimeController {
         DebateSession debateSession;
 
         List<DebateSession> debateSessionsOfJudgeInPreparationState = debateSessionRepository.findDebateSessionOfJudgeWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
-        if (debateSessionsOfJudgeInPreparationState.size() == 1) {
+        if(debateSessionsOfJudgeInPreparationState.size() == 1) {
             debateSession = debateSessionsOfJudgeInPreparationState.get(0);
-        } else {
+        }else{
             List<DebateSession> debateSessionsOfPlayerInPreparationState = debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.PREP_TIME);
-            if (debateSessionsOfPlayerInPreparationState.size() == 1) {
+            if(debateSessionsOfPlayerInPreparationState.size() == 1) {
                 debateSession = debateSessionsOfPlayerInPreparationState.get(0);
-            } else {
-                if(debateSessionRepository.findDebateSessionOfPlayerWithGivenState(currentUser, DebateSessionPhase.DEPUTY1_VOTING_TIME).size() == 1) {
-                    // skip debate preparation phase
-                    return "deputy_selection";
-                }
+            }else{
                 return "error";
             }
         }
