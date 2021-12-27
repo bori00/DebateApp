@@ -1,4 +1,4 @@
-async function closeDebate(debateSessionId) {
+async function closeDebate() {
     callFrame.leave();
     document.defaultView.location.href = "/process_close_debate";
 }
