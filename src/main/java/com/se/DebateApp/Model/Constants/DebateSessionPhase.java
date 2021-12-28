@@ -26,7 +26,7 @@ public enum DebateSessionPhase {
     AFFIRMATIVE_REBUTTAL_1("AR1", -1, AffirmativeRebuttal1SpeechState.getInstance()),
     NEGATIVE_REBUTTAL_2("NR2", -1, NegativeRebuttal2SpeechState.getInstance()),
     AFFIRMATIVE_REBUTTAL_2("AR2", -1, AffirmativeRebuttal2SpeechState.getInstance()),
-    FINAL_VOTE("FV", -1, GeneralState.getInstance()),
+    FINAL_VOTE("FV", 60, FinalVoteState.getInstance()),
     FINAL_DISCUSSION("FD", -1, FinalDiscussionsState.getInstance()),
     FINISHED("-", -1, FinishedState.getInstance());
 

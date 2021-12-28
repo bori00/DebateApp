@@ -2,6 +2,7 @@ package com.se.DebateApp.Service.StateTransitions.ConcreteStates.battleStates;
 
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 public class AffirmativeRebuttal2SpeechState extends BattleSpeechState{
     private static AffirmativeRebuttal2SpeechState instance;
@@ -9,15 +10,16 @@ public class AffirmativeRebuttal2SpeechState extends BattleSpeechState{
     private AffirmativeRebuttal2SpeechState() {
     }
 
-    public static AffirmativeRebuttal2SpeechState getInstance() {
+    public static DebateState getInstance() {
         if (instance == null) {
             instance = new AffirmativeRebuttal2SpeechState();
         }
         return instance;
     }
+
     @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        return DebateSessionPhase.FINAL_VOTE;
+        return getNextPhaseOrNextOneIfIntervalIsZero(debateSession, DebateSessionPhase.FINAL_VOTE);
     }
 
     @Override

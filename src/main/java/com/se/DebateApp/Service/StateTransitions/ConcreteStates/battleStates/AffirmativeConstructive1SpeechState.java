@@ -2,8 +2,10 @@ package com.se.DebateApp.Service.StateTransitions.ConcreteStates.battleStates;
 
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
+import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Service.NotificationService;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 import java.util.Date;
 
@@ -13,7 +15,7 @@ public class AffirmativeConstructive1SpeechState extends BattleSpeechState {
     private AffirmativeConstructive1SpeechState() {
     }
 
-    public static AffirmativeConstructive1SpeechState getInstance() {
+    public static DebateState getInstance() {
         if (instance == null) {
             instance = new AffirmativeConstructive1SpeechState();
         }
@@ -27,6 +29,7 @@ public class AffirmativeConstructive1SpeechState extends BattleSpeechState {
 
     @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        return DebateSessionPhase.CROSS_EXAMINATION_1;
+        return getNextPhaseOrNextOneIfIntervalIsZero(debateSession, DebateSessionPhase.CROSS_EXAMINATION_1);
     }
 }
+

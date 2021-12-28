@@ -12,7 +12,7 @@ public class FinalDiscussionsState implements DebateState {
 
     private FinalDiscussionsState() {}
 
-    public static FinalDiscussionsState getInstance() {
+    public static DebateState getInstance() {
         if(instance == null) {
             instance = new FinalDiscussionsState();
         }
@@ -31,7 +31,7 @@ public class FinalDiscussionsState implements DebateState {
 
     @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        return DebateSessionPhase.FINAL_DISCUSSION;
+        return DebateSessionPhase.FINISHED;
     }
 
     @Override

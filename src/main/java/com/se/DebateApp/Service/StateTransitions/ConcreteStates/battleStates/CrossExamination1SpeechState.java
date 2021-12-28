@@ -2,6 +2,7 @@ package com.se.DebateApp.Service.StateTransitions.ConcreteStates.battleStates;
 
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 public class CrossExamination1SpeechState extends BattleSpeechState{
     private static CrossExamination1SpeechState instance;
@@ -9,7 +10,7 @@ public class CrossExamination1SpeechState extends BattleSpeechState{
     private CrossExamination1SpeechState() {
     }
 
-    public static CrossExamination1SpeechState getInstance() {
+    public static DebateState getInstance() {
         if (instance == null) {
             instance = new CrossExamination1SpeechState();
         }
@@ -18,7 +19,7 @@ public class CrossExamination1SpeechState extends BattleSpeechState{
 
     @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        return DebateSessionPhase.NEGATIVE_CONSTRUCTIVE_SPEECH_1;
+        return getNextPhaseOrNextOneIfIntervalIsZero(debateSession, DebateSessionPhase.NEGATIVE_CONSTRUCTIVE_SPEECH_1);
     }
 
     @Override

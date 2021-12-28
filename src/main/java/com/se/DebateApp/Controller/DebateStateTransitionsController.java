@@ -1,9 +1,7 @@
 package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Service.StateTransitions.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
-import com.se.DebateApp.Model.Constants.PlayerState;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Model.DebateTemplate;
@@ -11,9 +9,9 @@ import com.se.DebateApp.Model.User;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import com.se.DebateApp.Service.NotificationService;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -23,10 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.persistence.Column;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINISHED;
@@ -39,9 +35,6 @@ public class DebateStateTransitionsController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
 
     @Autowired
     private NotificationService notificationService;
@@ -92,23 +85,13 @@ public class DebateStateTransitionsController {
         if (debateSession.getDebateSessionPhase().getDefaultLengthInSeconds().isPresent()) {
             return debateSession.getDebateSessionPhase().getDefaultLengthInSeconds().get();
         } else {
-            switch (debateSession.getDebateSessionPhase()) {
-                case PREP_TIME -> {
-                    return debateTemplate.getPrepTimeSeconds();
-                }
-                case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1, AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2, NEGATIVE_CONSTRUCTIVE_SPEECH_1, NEGATIVE_CONSTRUCTIVE_SPEECH_2 -> {
-                    return debateTemplate.getConstSpeechSeconds();
-                }
-                case CROSS_EXAMINATION_1, CROSS_EXAMINATION_2, CROSS_EXAMINATION_3, CROSS_EXAMINATION_4 -> {
-                    return debateTemplate.getCrossExaminationSeconds();
-                }
-                case AFFIRMATIVE_REBUTTAL_1, AFFIRMATIVE_REBUTTAL_2, NEGATIVE_REBUTTAL_1, NEGATIVE_REBUTTAL_2 -> {
-                    return debateTemplate.getRebuttalSpeechSeconds();
-                }
-                default -> {
-                    return 24 * 60 * 60; // 24 hours
-                }
-            }
+            return switch (debateSession.getDebateSessionPhase()) {
+                case PREP_TIME -> debateTemplate.getPrepTimeSeconds();
+                case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1, AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2, NEGATIVE_CONSTRUCTIVE_SPEECH_1, NEGATIVE_CONSTRUCTIVE_SPEECH_2 -> debateTemplate.getConstSpeechSeconds();
+                case CROSS_EXAMINATION_1, CROSS_EXAMINATION_2, CROSS_EXAMINATION_3, CROSS_EXAMINATION_4 -> debateTemplate.getCrossExaminationSeconds();
+                case AFFIRMATIVE_REBUTTAL_1, AFFIRMATIVE_REBUTTAL_2, NEGATIVE_REBUTTAL_1, NEGATIVE_REBUTTAL_2 -> debateTemplate.getRebuttalSpeechSeconds();
+                default -> debateSession.getDebateSessionPhase().getDefaultLengthInSeconds().orElse(0);
+            };
         }
     }
 
@@ -133,7 +116,7 @@ public class DebateStateTransitionsController {
     public void processEndOfTimedPhase(@RequestParam Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
-        if(currentPhase.equals(FINISHED)) {
+        if (currentPhase.equals(FINISHED)) {
             return;
         }
         DebateState currentState = currentPhase.getCorrespondingState();
@@ -147,7 +130,7 @@ public class DebateStateTransitionsController {
     public OngoingDebateRequestResponse processCloseDebate() {
         List<DebateSession> ongoingDebateSessions = debateSessionRepository
                 .findDebateSessionsOfJudgeWithStateDifferentFrom(getCurrentUser(), FINISHED);
-        if(ongoingDebateSessions.size() != 1) {
+        if (ongoingDebateSessions.size() != 1) {
             return new OngoingDebateRequestResponse(false, false, OngoingDebateRequestResponse.UNEXPECTED_ERROR_MSG);
         }
         DebateSession debateSession = ongoingDebateSessions.get(0);

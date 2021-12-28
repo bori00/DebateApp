@@ -17,12 +17,12 @@ public class BattleInformationDTO {
     private String currentPhase;
     private String nextPhase;
     private String instructions;
-    private List<String> currentSpeakers;
-    private List<String> nextSpeakers;
-    private List<String> proTeamMembers;
-    private List<String> conTeamMembers;
     private String deputy1Pro;
     private String deputy2Pro;
     private String deputy1Con;
     private String deputy2Con;
+    private List<String> currentSpeakers;
+    private List<String> nextSpeakers;
+    private List<String> proTeamMembers;
+    private List<String> conTeamMembers;
 }

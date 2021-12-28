@@ -65,6 +65,7 @@ async function displayCountDownTimerForJudge(debateSessionId, onTimesUp) {
             clearInterval(countDownTimer);
             await handleEndOfDebateSessionPhaseByJudge(debateSessionId, onTimesUp);
         }}, refreshPeriod);
+
     return countDownTimer;
 }
 

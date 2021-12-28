@@ -2,11 +2,14 @@ let callFrame, activeMeeting;
 let isJudge, debateSessionId;
 let battleInformation;
 let countDownTimer;
+let hasVoted;
 
 const FINAL_DISCUSSIONS_PHASE = "FINAL_DISCUSSION";
+const FINAL_VOTE_PHASE = "FINAL_VOTE";
 
-async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionId) {
+async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionId, hasParticipantVoted) {
     isJudge = isParticipantJudge;
+    hasVoted = hasParticipantVoted;
     debateSessionId = currentDebateSessionId;
     const callWrapper = document.getElementById('wrapper');
     callFrame = await createDebateCallFrame(callWrapper);
@@ -25,8 +28,15 @@ async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionI
     battleInformation = await getBattleInformation(debateSessionId);
     await updateUI();
 
-    await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
+    if(battleInformation.currentPhase !== FINAL_DISCUSSIONS_PHASE) {
+        await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
+    }
+
     await subscribeToSkippedSpeechNotificationSocket();
+}
+
+function isSpeechPhase() {
+    return !(battleInformation.currentPhase === FINAL_VOTE_PHASE || battleInformation.currentPhase === FINAL_DISCUSSIONS_PHASE);
 }
 
 async function subscribeToTimerNotificationForNextBattlePhase(debateSessionId) {
@@ -52,10 +62,12 @@ async function subscribeToSkippedSpeechNotificationSocket() {
 
 async function onBattleSpeechTimesUp() {
     window.alert("Times up! The " + battleInformation.currentPhase + " has ended!");
-    await beforeGoToNextSpeech();
+    await onNextPhaseTransition();
 }
 
 async function onSkip() {
+    clearInterval(countDownTimer);
+
     let participantStatusNotification = document.getElementById('participants-notification');
     participantStatusNotification.classList.remove('hide');
     participantStatusNotification.innerText = "Skipped phase " + battleInformation.currentPhase + " because all the deputies who should speak are missing.";
@@ -64,16 +76,14 @@ async function onSkip() {
         participantStatusNotification.classList.add('hide');
     }, 10000);
 
-    await beforeGoToNextSpeech();
+    await onNextPhaseTransition();
 }
 
-async function beforeGoToNextSpeech() {
-    if (battleInformation.nextPhase === FINAL_DISCUSSIONS_PHASE) {
-        setElementVisibility('timer-clock', false);
-        return;
-    }
+async function onNextPhaseTransition() {
     battleInformation = await getBattleInformation(debateSessionId);
-    await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
+    if(battleInformation.currentPhase !== FINAL_DISCUSSIONS_PHASE) {
+        await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
+    }
     await updateUI();
 }
 
@@ -82,8 +92,7 @@ async function skipCurrentSpeech() {
     let destEndpoint = "/process_skip_speech?debateSessionId=" + debateSessionId;
     await postRequestToServer(destEndpoint, null);
 
-    setElementVisibility('judge-notification', false);
-    await beforeGoToNextSpeech();
+    await onNextPhaseTransition();
 }
 
 async function areAnySpeakersPresent() {
@@ -91,7 +100,7 @@ async function areAnySpeakersPresent() {
     return battleInformation.currentSpeakers.some((speaker) => presentParticipants.includes(speaker));
 }
 
-function updateView(battleInformation) {
+async function updateView(battleInformation) {
     document.getElementById('current-phase').innerHTML = battleInformation.currentPhase;
     document.getElementById('instructions-item').innerText = battleInformation.instructions;
     document.getElementById('next-phase-item').innerText = battleInformation.nextPhase;
@@ -120,6 +129,11 @@ function updateView(battleInformation) {
     highlightCurrentSpeakers(battleInformation.currentSpeakers, battleInformation.deputy2Pro, true, 'deputy2-pro');
     highlightCurrentSpeakers(battleInformation.currentSpeakers, battleInformation.deputy1Con, false, 'deputy1-con');
     highlightCurrentSpeakers(battleInformation.currentSpeakers, battleInformation.deputy2Con, false, 'deputy2-con');
+
+    if(battleInformation.currentPhase === FINAL_DISCUSSIONS_PHASE) {
+        setElementVisibility('timer-clock', false);
+        await showFinalVotesStatistics();
+    }
 }
 
 function highlightCurrentSpeakers(currentSpeakers, speaker, isProTeam, elemId) {
@@ -143,21 +157,29 @@ async function updateUI() {
     }else {
         await updateParticipants();
     }
-    updateView(battleInformation);
+    await updateView(battleInformation);
 }
 
 async function updateJudgeView() {
     let allSpeakersPresent = await areAnySpeakersPresent();
 
     if (!allSpeakersPresent) {
-        setElementVisibility('judge-notification', true);
         document.getElementById('judge-notification-message').innerText = "All the deputies who should speak in the " + battleInformation.currentPhase + " phase are missing. Would you like to skip this speech and go to the next one?";
-    }else{
-        setElementVisibility('judge-notification', false);
     }
+    setElementVisibility('judge-notification', isSpeechPhase() && !allSpeakersPresent);
+    setElementVisibility('voting-lobby-judge', isJudge && (battleInformation.currentPhase === FINAL_VOTE_PHASE));
 }
 
 async function updateParticipants() {
+    if(battleInformation.currentPhase === FINAL_VOTE_PHASE) {
+        setElementVisibility('voting-panel', !hasVoted);
+        setElementVisibility('voting-lobby', hasVoted);
+        return;
+    }else if(battleInformation.currentPhase === FINAL_DISCUSSIONS_PHASE) {
+        setElementVisibility('voting-panel', false);
+        setElementVisibility('voting-lobby', false);
+        return;
+    }
     // if current user is a speaker turn on its microphone, otherwise mute them and turn off their camera
     let userName = await getUserNameOfCurrentUser();
     if(battleInformation.currentSpeakers.includes(userName)) {
@@ -167,4 +189,6 @@ async function updateParticipants() {
         callFrame.setLocalVideo(false);
     }
 }
+
+
 

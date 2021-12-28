@@ -28,7 +28,7 @@ public class FinalVoteStatusDTO {
     private long getNoPlayersWithVotes(TeamType initVote, TeamType finalVote, DebateSession debateSession) {
         return debateSession.getPlayers().stream()
                 .filter(p -> p.getTeam().equals(initVote))
-                .filter(p -> p.getFinalVoteTeam().equals(finalVote))
+                .filter(p -> p.getFinalVoteTeam() != null && p.getFinalVoteTeam().equals(finalVote))
                 .count();
     }
 }

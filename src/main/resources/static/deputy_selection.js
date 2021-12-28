@@ -3,7 +3,7 @@ const DEPUTY2_SELECTION_PHASE = "deputy2-voting-time";
 
 function onDeputyVotingTimesUp_Judge() {
     window.alert("This deputy voting phase has ended!");
-    window.location.href="/go_to_deputy_selection";
+    window.location.href="/go_to_ongoing_debates_current_phase";
 }
 
 function onDeputy1VotingTimesUp_Player() {

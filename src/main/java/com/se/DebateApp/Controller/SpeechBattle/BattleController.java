@@ -29,8 +29,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINAL_VOTE;
 import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINISHED;
 import static com.se.DebateApp.Model.Constants.PlayerRole.DEPUTY1;
 import static com.se.DebateApp.Model.Constants.PlayerRole.DEPUTY2;
@@ -86,6 +88,12 @@ public class BattleController {
         model.addAttribute("debateStatement", debateSession.getDebateTemplate().getStatement());
         model.addAttribute("battleInformation", createBattleInformationDTO(debateSession));
 
+        Optional<DebateSessionPlayer> debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUserAndDebateSession(getCurrentUser(), debateSession);
+        model.addAttribute("hasVoted", !isJudge &&
+                debateSession.getDebateSessionPhase().equals(FINAL_VOTE) &&
+                debateSessionPlayer.isPresent() &&
+                debateSessionPlayer.get().getFinalVoteTeam() != null);
+
         return SupportedMappings.BATTLE_PAGE;
     }
 
@@ -109,6 +117,8 @@ public class BattleController {
     private static final String CONSTRUCTIVE_SPEECH_INSTRUCTIONS = "Present and bring new arguments supporting your opinion.";
     private static final String CROSS_EXAMINATION_SPEECH_INSTRUCTIONS = "Discuss the previously presented ideas and ask related questions.";
     private static final String REBUTTAL_SPEECH_INSTRUCTIONS = "Defend your previously presented arguments with the gathered evidence. At this point you cannot bring new arguments supporting your idea.";
+    private static final String FINAL_VOTE_INSTRUCTIONS = "Vote again pro or contra the given statement! We are curious if you have changed your initial opinion after listening to the arguments of the other team.";
+    private static final String FINAL_DISCUSSIONS_INSTRUCTIONS = "After listening to the arguments of both sides, you can now draw conclusions and add your final considerations.";
 
     private BattleInformationDTO createBattleInformationDTO(DebateSession debateSession) {
         BattleInformationDTO battleInformationDTO = new BattleInformationDTO();
@@ -156,6 +166,8 @@ public class BattleController {
             case AFFIRMATIVE_CONSTRUCTIVE_SPEECH_1, AFFIRMATIVE_CONSTRUCTIVE_SPEECH_2, NEGATIVE_CONSTRUCTIVE_SPEECH_1, NEGATIVE_CONSTRUCTIVE_SPEECH_2 -> CONSTRUCTIVE_SPEECH_INSTRUCTIONS;
             case CROSS_EXAMINATION_1, CROSS_EXAMINATION_2, CROSS_EXAMINATION_3, CROSS_EXAMINATION_4 -> CROSS_EXAMINATION_SPEECH_INSTRUCTIONS;
             case AFFIRMATIVE_REBUTTAL_1, AFFIRMATIVE_REBUTTAL_2, NEGATIVE_REBUTTAL_1, NEGATIVE_REBUTTAL_2 -> REBUTTAL_SPEECH_INSTRUCTIONS;
+            case FINAL_VOTE -> FINAL_VOTE_INSTRUCTIONS;
+            case FINAL_DISCUSSION -> FINAL_DISCUSSIONS_INSTRUCTIONS;
             default -> "";
         };
     }
