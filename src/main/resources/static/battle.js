@@ -15,8 +15,8 @@ async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionI
     callFrame = await createDebateCallFrame(callWrapper);
 
     callFrame
-        .on('joined-meeting', handleJoinedMeeting)
-        .on('left-meeting', handleLeftMeeting);
+        .on('participant-joined', handleParticipantJoined)
+        .on('participant-left', handleParticipantLeft);
 
     let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
     activeMeeting = meetings.filter(meeting => meeting.meetingType === "ACTIVE")[0];
@@ -143,12 +143,24 @@ function highlightCurrentSpeakers(currentSpeakers, speaker, isProTeam, elemId) {
     }
 }
 
-async function handleJoinedMeeting() {
+async function handleParticipantJoined(event) {
     await updateUI();
+    if(isJudge) {
+        let participantWhoLeft = event.participant.user_name;
+        let presentParticipants = await getPresentParticipantsOfMeeting(activeMeeting.meetingName);
+        let anySpeakerPresent = battleInformation.currentSpeakers.some(speaker => speaker === participantWhoLeft || presentParticipants.includes(speaker));
+        updateJudgeNotificationView(anySpeakerPresent);
+    }
 }
 
-async function handleLeftMeeting() {
+async function handleParticipantLeft(event) {
     await updateUI();
+    if(isJudge) {
+        let participantWhoLeft = event.participant.user_name;
+        let presentParticipants = await getPresentParticipantsOfMeeting(activeMeeting.meetingName);
+        let anySpeakerPresent = battleInformation.currentSpeakers.some(speaker => speaker !== participantWhoLeft && presentParticipants.includes(speaker));
+        updateJudgeNotificationView(anySpeakerPresent);
+    }
 }
 
 async function updateUI() {
@@ -161,13 +173,20 @@ async function updateUI() {
 }
 
 async function updateJudgeView() {
-    let allSpeakersPresent = await areAnySpeakersPresent();
+    let anySpeakerPresent = await areAnySpeakersPresent();
 
-    if (!allSpeakersPresent) {
-        document.getElementById('judge-notification-message').innerText = "All the deputies who should speak in the " + battleInformation.currentPhase + " phase are missing. Would you like to skip this speech and go to the next one?";
-    }
-    setElementVisibility('judge-notification', isSpeechPhase() && !allSpeakersPresent);
+    updateJudgeNotificationView(anySpeakerPresent);
+
     setElementVisibility('voting-lobby-judge', isJudge && (battleInformation.currentPhase === FINAL_VOTE_PHASE));
+}
+
+function updateJudgeNotificationView(anySpeakerPresent) {
+    if (isSpeechPhase() && !anySpeakerPresent) {
+        setElementVisibility('judge-notification', true);
+        document.getElementById('judge-notification-message').innerText = "All the deputies who should speak in the " + battleInformation.currentPhase + " phase are missing. Would you like to skip this speech and go to the next one?";
+    }else{
+        setElementVisibility('judge-notification', false);
+    }
 }
 
 async function updateParticipants() {
