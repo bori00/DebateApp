@@ -56,7 +56,8 @@ public class DebateStateTransitionsController {
                 debateSessionRepository.findDebateSessionsOfPlayerWithStateDifferentFrom(user,
                         DebateSessionPhase.FINISHED);
         if (ongoingDebatesAsJudge.isEmpty() && ongoingDebatesAsPlayer.isEmpty()) {
-            return SupportedMappings.ERROR_PAGE;
+            // no ongoing debate --> redirect to the home page
+            return SupportedMappings.REDIRECT_PREFIX + SupportedMappings.GO_TO_STARTING_PAGE;
         }
         if (ongoingDebatesAsJudge.size() > 0) {
             if (ongoingDebatesAsJudge.size() > 1) {

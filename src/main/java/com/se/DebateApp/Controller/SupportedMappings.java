@@ -107,6 +107,12 @@ public class SupportedMappings {
     public static final String HAS_USER_ONGOING_DEBATE = "/has_user_ongoing_debate";
 
 
+    // ----- final vote
+    // --- request mappings
+    // responding requests
+    public static final String CAST_FINAL_VOTE = "/cast_final_vote";
+    public static final String GET_FINAL_VOTE_STATUS = "/get_final_vote_status";
+
     // ----- debate templates CRUD controller
     // --- request mappings
     public static final String CREATE_DEBATE_TEMPLATE_REQUEST = "/create_debate_template";
