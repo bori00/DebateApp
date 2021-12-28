@@ -80,3 +80,21 @@ function getParticipantPrivileges(roomName, isJudge) {
         }
     };
 }
+
+async function getPresentParticipantsOfMeeting(roomName) {
+    const participantsEndpoint = DAILY_REST_DOMAIN + "/presence";
+
+    return fetch(participantsEndpoint, {
+        method: 'GET',
+        mode: 'cors',
+        body: '',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${DAILY_API_KEY}`,
+        }
+    })
+        .catch(error => console.log('failed to fetch participants present in the meeting: ' + error))
+        .then(response => response.json())
+        .then(rooms => rooms[roomName]);
+}

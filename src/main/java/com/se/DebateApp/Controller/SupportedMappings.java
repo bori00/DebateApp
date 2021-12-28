@@ -74,7 +74,7 @@ public class SupportedMappings {
     public static final String GO_TO_BATTLE = "/go_to_battle";
     // responding requests
     public static final String GET_BATTLE_INFORMATION = "/get_battle_information";
-    public static final String PROCESS_LEFT_DEBATE = "/process_left_debate";
+    public static final String PROCESS_SKIP_SPEECH = "/process_skip_speech";
     // pages
     public static final String BATTLE_PAGE = "battle";
 

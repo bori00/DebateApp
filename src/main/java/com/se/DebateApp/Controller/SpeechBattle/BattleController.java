@@ -13,6 +13,8 @@ import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import com.se.DebateApp.Service.NotificationService;
+import com.se.DebateApp.Service.StateTransitions.ConcreteStates.battleStates.BattleSpeechState;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -29,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.se.DebateApp.Model.Constants.DebateSessionPhase.FINISHED;
 import static com.se.DebateApp.Model.Constants.PlayerRole.DEPUTY1;
 import static com.se.DebateApp.Model.Constants.PlayerRole.DEPUTY2;
 import static com.se.DebateApp.Model.Constants.TeamType.CON;
@@ -86,19 +89,20 @@ public class BattleController {
         return SupportedMappings.BATTLE_PAGE;
     }
 
-    @PostMapping(value = SupportedMappings.PROCESS_LEFT_DEBATE)
-    public void participantLeftDebate(@RequestParam Long debateSessionId) {
+    @PostMapping(value = SupportedMappings.PROCESS_SKIP_SPEECH)
+    public void processSkipSpeech(@RequestParam Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
-        User participantWhoLeft = getCurrentUser();
-        User judge = debateSession.getDebateTemplate().getOwner();
-        List<User> players = debateSession.getPlayers()
-                .stream()
-                .map(DebateSessionPlayer::getUser)
-                .filter(user -> user.equals(participantWhoLeft))
-                .collect(Collectors.toList());
-
-        notificationService.notifyUser(judge, true, NotificationService.DEBATE_PARTICIPANT_LEFT_SOCKET_DEST);
-        notificationService.notifyUsers(players, true, NotificationService.DEBATE_PARTICIPANT_LEFT_SOCKET_DEST);
+        DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
+        if(currentPhase.equals(FINISHED)) {
+            return;
+        }
+        DebateState currentState = currentPhase.getCorrespondingState();
+        if(currentState.getClass().getSuperclass().equals(BattleSpeechState.class)) {
+            BattleSpeechState battleSpeechState = (BattleSpeechState)currentState;
+            battleSpeechState.onSkipSpeech(debateSession, notificationService, debateSessionRepository);
+            debateSession.getDebateSessionPhase().getCorrespondingState().onBeginningOfState(debateSession,
+                    notificationService);
+        }
     }
 
     private static final String CONSTRUCTIVE_SPEECH_INSTRUCTIONS = "Present and bring new arguments supporting your opinion.";
