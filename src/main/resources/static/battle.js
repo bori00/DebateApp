@@ -1,6 +1,7 @@
 let callFrame, activeMeeting;
 let isJudge, debateSessionId;
 let battleInformation;
+let countDownTimer;
 
 const FINAL_DISCUSSIONS_PHASE = "FINAL_DISCUSSION";
 
@@ -12,7 +13,7 @@ async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionI
 
     callFrame
         .on('joined-meeting', handleJoinedMeeting)
-        .on('eft-meeting', handleLeftMeeting);
+        .on('left-meeting', handleLeftMeeting);
 
     let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
     activeMeeting = meetings.filter(meeting => meeting.meetingType === "ACTIVE")[0];
@@ -22,20 +23,15 @@ async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionI
     await joinMeetingWithToken(isJudge, activeMeeting.meetingUrl, meetingToken.token, userName);
 
     battleInformation = await getBattleInformation(debateSessionId);
-    updateView(battleInformation);
-    await updateJudgeView();
+    await updateUI();
 
     await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
     await subscribeToSkippedSpeechNotificationSocket();
 }
 
 async function subscribeToTimerNotificationForNextBattlePhase(debateSessionId) {
-    if (battleInformation.currentPhase === FINAL_DISCUSSIONS_PHASE) {
-        setElementVisibility('timer-clock', false);
-        return;
-    }
     if (isJudge) {
-        await displayCountDownTimerForJudge(debateSessionId, onBattleSpeechTimesUp);
+        countDownTimer = await displayCountDownTimerForJudge(debateSessionId, onBattleSpeechTimesUp);
     } else {
         await displayCountDownTimerForPlayers(debateSessionId);
         await subscribeToTimerNotificationSocket(battleInformation.currentPhase, onBattleSpeechTimesUp);
@@ -72,17 +68,17 @@ async function onSkip() {
 }
 
 async function beforeGoToNextSpeech() {
-    battleInformation = await getBattleInformation(debateSessionId);
-    if(battleInformation.currentPhase === FINAL_DISCUSSIONS_PHASE) {
-        updateView(battleInformation);
+    if (battleInformation.nextPhase === FINAL_DISCUSSIONS_PHASE) {
+        setElementVisibility('timer-clock', false);
         return;
     }
-    await updateJudgeView();
-    updateView(battleInformation);
+    battleInformation = await getBattleInformation(debateSessionId);
     await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
+    await updateUI();
 }
 
 async function skipCurrentSpeech() {
+    clearInterval(countDownTimer);
     let destEndpoint = "/process_skip_speech?debateSessionId=" + debateSessionId;
     await postRequestToServer(destEndpoint, null);
 
@@ -134,23 +130,41 @@ function highlightCurrentSpeakers(currentSpeakers, speaker, isProTeam, elemId) {
 }
 
 async function handleJoinedMeeting() {
-    await updateJudgeView();
+    await updateUI();
 }
 
 async function handleLeftMeeting() {
-    await updateJudgeView();
+    await updateUI();
+}
+
+async function updateUI() {
+    if(isJudge) {
+        await updateJudgeView();
+    }else {
+        await updateParticipants();
+    }
+    updateView(battleInformation);
 }
 
 async function updateJudgeView() {
-    if(isJudge) {
-        let allSpeakersPresent = await areAnySpeakersPresent();
+    let allSpeakersPresent = await areAnySpeakersPresent();
 
-        if (!allSpeakersPresent) {
-            setElementVisibility('judge-notification', true);
-            document.getElementById('judge-notification-message').innerText = "All the deputies who should speak in the " + battleInformation.currentPhase + " phase are missing. Would you like to skip this speech and go to the next one?";
-        }else{
-            setElementVisibility('judge-notification', false);
-        }
+    if (!allSpeakersPresent) {
+        setElementVisibility('judge-notification', true);
+        document.getElementById('judge-notification-message').innerText = "All the deputies who should speak in the " + battleInformation.currentPhase + " phase are missing. Would you like to skip this speech and go to the next one?";
+    }else{
+        setElementVisibility('judge-notification', false);
+    }
+}
+
+async function updateParticipants() {
+    // if current user is a speaker turn on its microphone, otherwise mute them and turn off their camera
+    let userName = await getUserNameOfCurrentUser();
+    if(battleInformation.currentSpeakers.includes(userName)) {
+        callFrame.setLocalAudio(true);
+    }else{
+        callFrame.setLocalAudio(false);
+        callFrame.setLocalVideo(false);
     }
 }
 

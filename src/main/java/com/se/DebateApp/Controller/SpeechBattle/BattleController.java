@@ -2,7 +2,6 @@ package com.se.DebateApp.Controller.SpeechBattle;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.SpeechBattle.DTOs.BattleInformationDTO;
-import com.se.DebateApp.Controller.SpeechBattle.DTOs.SkipSpeechDTO;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
@@ -22,7 +21,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +83,7 @@ public class BattleController {
             }
         }
         model.addAttribute("debateSessionId", debateSession.getId());
-        model.addAttribute("debateStatement", debateSession.getDebateTemplate().getStatement());;
+        model.addAttribute("debateStatement", debateSession.getDebateTemplate().getStatement());
         model.addAttribute("battleInformation", createBattleInformationDTO(debateSession));
 
         return SupportedMappings.BATTLE_PAGE;
@@ -92,7 +94,7 @@ public class BattleController {
     public void processSkipSpeech(@RequestParam Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
-        if(currentPhase.equals(FINISHED)) {
+        if (currentPhase.equals(FINISHED)) {
             return;
         }
         DebateState currentState = currentPhase.getCorrespondingState();
@@ -107,6 +109,40 @@ public class BattleController {
     private static final String CONSTRUCTIVE_SPEECH_INSTRUCTIONS = "Present and bring new arguments supporting your opinion.";
     private static final String CROSS_EXAMINATION_SPEECH_INSTRUCTIONS = "Discuss the previously presented ideas and ask related questions.";
     private static final String REBUTTAL_SPEECH_INSTRUCTIONS = "Defend your previously presented arguments with the gathered evidence. At this point you cannot bring new arguments supporting your idea.";
+
+    private BattleInformationDTO createBattleInformationDTO(DebateSession debateSession) {
+        BattleInformationDTO battleInformationDTO = new BattleInformationDTO();
+
+        DebateSessionPlayer deputy1Pro = getDeputyForTeam(debateSession, PRO, DEPUTY1);
+        DebateSessionPlayer deputy2Pro = getDeputyForTeam(debateSession, PRO, DEPUTY2);
+        DebateSessionPlayer deputy1Con = getDeputyForTeam(debateSession, CON, DEPUTY1);
+        DebateSessionPlayer deputy2Con = getDeputyForTeam(debateSession, CON, DEPUTY2);
+
+        battleInformationDTO.setDeputy1Pro(deputy1Pro.getUser().getUserName());
+        battleInformationDTO.setDeputy2Pro(deputy2Pro.getUser().getUserName());
+        battleInformationDTO.setDeputy1Con(deputy1Con.getUser().getUserName());
+        battleInformationDTO.setDeputy2Con(deputy2Con.getUser().getUserName());
+
+        DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
+
+        battleInformationDTO.setCurrentPhase(currentPhase.name());
+        battleInformationDTO.setNextPhase(currentPhase.getCorrespondingState().getNextDebateSessionPhaseAfterStateEnded(debateSession).name());
+
+        List<DebateSessionPlayer> currentSpeakers = getSpeakersForGivenPhase(currentPhase, deputy1Pro, deputy2Pro, deputy1Con, deputy2Con);
+        List<DebateSessionPlayer> nextSpeakers = getSpeakersForGivenPhase(currentPhase.getCorrespondingState().getNextDebateSessionPhaseAfterStateEnded(debateSession), deputy1Pro, deputy2Pro, deputy1Con, deputy2Con);
+
+        battleInformationDTO.setInstructions(getInstructionsForPhase(currentPhase));
+        battleInformationDTO.setCurrentSpeakers(getNamesOfSpeakers(currentSpeakers));
+        battleInformationDTO.setNextSpeakers(getNamesOfSpeakers(nextSpeakers));
+
+        battleInformationDTO.setIsSpeaker(isSpeaker(currentSpeakers));
+        battleInformationDTO.setIsNextSpeaker(isSpeaker(nextSpeakers));
+
+        battleInformationDTO.setProTeamMembers(getTeamMembersName(debateSession, PRO));
+        battleInformationDTO.setConTeamMembers(getTeamMembersName(debateSession, CON));
+
+        return battleInformationDTO;
+    }
 
     private List<String> getNamesOfSpeakers(List<DebateSessionPlayer> speakers) {
         return speakers.stream()
@@ -163,39 +199,5 @@ public class BattleController {
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByUserName(((CustomUserDetails) auth.getPrincipal()).getUsername());
-    }
-
-    private BattleInformationDTO createBattleInformationDTO(DebateSession debateSession) {
-        BattleInformationDTO battleInformationDTO = new BattleInformationDTO();
-
-        DebateSessionPlayer deputy1Pro = getDeputyForTeam(debateSession, PRO, DEPUTY1);
-        DebateSessionPlayer deputy2Pro = getDeputyForTeam(debateSession, PRO, DEPUTY2);
-        DebateSessionPlayer deputy1Con = getDeputyForTeam(debateSession, CON, DEPUTY1);
-        DebateSessionPlayer deputy2Con = getDeputyForTeam(debateSession, CON, DEPUTY2);
-
-        battleInformationDTO.setDeputy1Pro(deputy1Pro.getUser().getUserName());
-        battleInformationDTO.setDeputy2Pro(deputy2Pro.getUser().getUserName());
-        battleInformationDTO.setDeputy1Con(deputy1Con.getUser().getUserName());
-        battleInformationDTO.setDeputy2Con(deputy2Con.getUser().getUserName());
-
-        DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
-
-        battleInformationDTO.setCurrentPhase(currentPhase.name());
-        battleInformationDTO.setNextPhase(currentPhase.getCorrespondingState().getNextDebateSessionPhaseAfterStateEnded(debateSession).name());
-
-        List<DebateSessionPlayer> currentSpeakers = getSpeakersForGivenPhase(currentPhase, deputy1Pro, deputy2Pro, deputy1Con, deputy2Con);
-        List<DebateSessionPlayer> nextSpeakers = getSpeakersForGivenPhase(currentPhase.getCorrespondingState().getNextDebateSessionPhaseAfterStateEnded(debateSession), deputy1Pro, deputy2Pro, deputy1Con, deputy2Con);
-
-        battleInformationDTO.setInstructions(getInstructionsForPhase(currentPhase));
-        battleInformationDTO.setCurrentSpeakers(getNamesOfSpeakers(currentSpeakers));
-        battleInformationDTO.setNextSpeakers(getNamesOfSpeakers(nextSpeakers));
-
-        battleInformationDTO.setIsSpeaker(isSpeaker(currentSpeakers));
-        battleInformationDTO.setIsNextSpeaker(isSpeaker(nextSpeakers));
-
-        battleInformationDTO.setProTeamMembers(getTeamMembersName(debateSession, PRO));
-        battleInformationDTO.setConTeamMembers(getTeamMembersName(debateSession, CON));
-
-        return battleInformationDTO;
     }
 }
