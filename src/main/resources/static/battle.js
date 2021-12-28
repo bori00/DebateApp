@@ -10,6 +10,10 @@ async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionI
     const callWrapper = document.getElementById('wrapper');
     callFrame = await createDebateCallFrame(callWrapper);
 
+    callFrame
+        .on('joined-meeting', handleJoinedMeeting)
+        .on('eft-meeting', handleLeftMeeting);
+
     let meetings = await getAllMeetingsOfDebateSession(debateSessionId);
     activeMeeting = meetings.filter(meeting => meeting.meetingType === "ACTIVE")[0];
     let userName = await getUserNameOfCurrentUser();
@@ -18,8 +22,11 @@ async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionI
     await joinMeetingWithToken(isJudge, activeMeeting.meetingUrl, meetingToken.token, userName);
 
     battleInformation = await getBattleInformation(debateSessionId);
+    updateView(battleInformation);
+    await updateJudgeView();
 
     await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
+    await subscribeToSkippedSpeechNotificationSocket();
 }
 
 async function subscribeToTimerNotificationForNextBattlePhase(debateSessionId) {
@@ -35,18 +42,6 @@ async function subscribeToTimerNotificationForNextBattlePhase(debateSessionId) {
     }
 }
 
-async function onBattleSpeechTimesUp() {
-    window.alert("Times up! The " + battleInformation.currentPhase + " has ended!");
-    battleInformation = await getBattleInformation(debateSessionId);
-    updateView(battleInformation);
-
-    if (!areAllSpeakersPresent() && isJudge) {
-        let destEndpoint = "/process_skip_speech?debateSessionId=" + debateSessionId;
-        await postRequestToServer(destEndpoint, null);
-    }
-    await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
-}
-
 async function subscribeToSkippedSpeechNotificationSocket() {
     const socket = new SockJS('/secured/debates');
     const stompClient = Stomp.over(socket);
@@ -59,15 +54,45 @@ async function subscribeToSkippedSpeechNotificationSocket() {
     });
 }
 
-async function onSkip() {
-    window.alert("Skipped phase" + battleInformation.currentPhase + " because the deputies who should speak are missing.");
-    battleInformation = await getBattleInformation(debateSessionId);
-    updateView(battleInformation);
+async function onBattleSpeechTimesUp() {
+    window.alert("Times up! The " + battleInformation.currentPhase + " has ended!");
+    await beforeGoToNextSpeech();
 }
 
-function areAllSpeakersPresent() {
-    let presentParticipants = getPresentParticipantsOfMeeting(activeMeeting.roomName);
-    return battleInformation.currentSpeakers.every((speaker) => presentParticipants.contains(speaker));
+async function onSkip() {
+    let participantStatusNotification = document.getElementById('participants-notification');
+    participantStatusNotification.classList.remove('hide');
+    participantStatusNotification.innerText = "Skipped phase " + battleInformation.currentPhase + " because all the deputies who should speak are missing.";
+
+    window.setTimeout(function() {
+        participantStatusNotification.classList.add('hide');
+    }, 10000);
+
+    await beforeGoToNextSpeech();
+}
+
+async function beforeGoToNextSpeech() {
+    battleInformation = await getBattleInformation(debateSessionId);
+    if(battleInformation.currentPhase === FINAL_DISCUSSIONS_PHASE) {
+        updateView(battleInformation);
+        return;
+    }
+    await updateJudgeView();
+    updateView(battleInformation);
+    await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
+}
+
+async function skipCurrentSpeech() {
+    let destEndpoint = "/process_skip_speech?debateSessionId=" + debateSessionId;
+    await postRequestToServer(destEndpoint, null);
+
+    setElementVisibility('judge-notification', false);
+    await beforeGoToNextSpeech();
+}
+
+async function areAnySpeakersPresent() {
+    let presentParticipants = await getPresentParticipantsOfMeeting(activeMeeting.meetingName);
+    return battleInformation.currentSpeakers.some((speaker) => presentParticipants.includes(speaker));
 }
 
 function updateView(battleInformation) {
@@ -78,6 +103,9 @@ function updateView(battleInformation) {
     document.getElementById('next-speakers-item').innerText = battleInformation.nextSpeakers.toString();
 
     let notificationPanel = document.getElementById('notification');
+    notificationPanel.classList.remove('alert-success');
+    notificationPanel.classList.remove('alert-info');
+
     if (battleInformation.isSpeaker) {
         notificationPanel.classList.remove('hide');
         notificationPanel.classList.add('alert-success');
@@ -89,8 +117,6 @@ function updateView(battleInformation) {
             notificationPanel.innerText = "You are up next! Good luck!";
         } else {
             notificationPanel.classList.add('hide');
-            notificationPanel.classList.remove('alert-success');
-            notificationPanel.classList.remove('alert-info');
         }
     }
 
@@ -107,5 +133,24 @@ function highlightCurrentSpeakers(currentSpeakers, speaker, isProTeam, elemId) {
     }
 }
 
+async function handleJoinedMeeting() {
+    await updateJudgeView();
+}
 
+async function handleLeftMeeting() {
+    await updateJudgeView();
+}
+
+async function updateJudgeView() {
+    if(isJudge) {
+        let allSpeakersPresent = await areAnySpeakersPresent();
+
+        if (!allSpeakersPresent) {
+            setElementVisibility('judge-notification', true);
+            document.getElementById('judge-notification-message').innerText = "All the deputies who should speak in the " + battleInformation.currentPhase + " phase are missing. Would you like to skip this speech and go to the next one?";
+        }else{
+            setElementVisibility('judge-notification', false);
+        }
+    }
+}
 

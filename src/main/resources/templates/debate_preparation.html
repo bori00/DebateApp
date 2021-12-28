@@ -132,7 +132,7 @@
                                 <div class="card-body" th:object="${debateTemplate}">
                                     <ul class="list-group text-justify" th:each="resourceLink : *{resourceLinks}">
                                         <li class="list-group-item">
-                                            <a th:href="${resourceLink.link}" th:text="${resourceLink.title}">
+                                            <a class="stretched-link" th:href="${resourceLink.link}" th:text="${resourceLink.title}">
                                                 Link
                                             </a>
                                         </li>

@@ -28,8 +28,22 @@
 
 .pro-team-member {
     color: limegreen;
+    text-decoration: none;
+}
+
+.pro-team-member:hover {
+    color: #1f881f;
+    font-size: 16px;
+    text-decoration: none;
 }
 
 .contra-team-member {
     color: #c62424;
+    text-decoration: none;
+}
+
+.contra-team-member:hover {
+    color: #801818;
+    font-size: 16px;
+    text-decoration: none;
 }

@@ -2,6 +2,7 @@ package com.se.DebateApp.Controller.SpeechBattle;
 
 import com.se.DebateApp.Config.CustomUserDetails;
 import com.se.DebateApp.Controller.SpeechBattle.DTOs.BattleInformationDTO;
+import com.se.DebateApp.Controller.SpeechBattle.DTOs.SkipSpeechDTO;
 import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.Constants.PlayerRole;
@@ -21,10 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,6 +88,7 @@ public class BattleController {
     }
 
     @PostMapping(value = SupportedMappings.PROCESS_SKIP_SPEECH)
+    @ResponseBody
     public void processSkipSpeech(@RequestParam Long debateSessionId) {
         DebateSession debateSession = debateSessionRepository.getById(debateSessionId);
         DebateSessionPhase currentPhase = debateSession.getDebateSessionPhase();
@@ -97,8 +96,8 @@ public class BattleController {
             return;
         }
         DebateState currentState = currentPhase.getCorrespondingState();
-        if(currentState.getClass().getSuperclass().equals(BattleSpeechState.class)) {
-            BattleSpeechState battleSpeechState = (BattleSpeechState)currentState;
+        if (currentState.getClass().getSuperclass().equals(BattleSpeechState.class)) {
+            BattleSpeechState battleSpeechState = (BattleSpeechState) currentState;
             battleSpeechState.onSkipSpeech(debateSession, notificationService, debateSessionRepository);
             debateSession.getDebateSessionPhase().getCorrespondingState().onBeginningOfState(debateSession,
                     notificationService);

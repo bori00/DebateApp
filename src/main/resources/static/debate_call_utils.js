@@ -87,7 +87,6 @@ async function getPresentParticipantsOfMeeting(roomName) {
     return fetch(participantsEndpoint, {
         method: 'GET',
         mode: 'cors',
-        body: '',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -96,5 +95,7 @@ async function getPresentParticipantsOfMeeting(roomName) {
     })
         .catch(error => console.log('failed to fetch participants present in the meeting: ' + error))
         .then(response => response.json())
-        .then(rooms => rooms[roomName]);
+        .then(rooms => rooms[roomName]
+            .map(roomInfo => roomInfo["userName"]))
+        .catch(() => [])
 }

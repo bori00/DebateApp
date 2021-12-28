@@ -12,6 +12,7 @@
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
     <script type="text/javascript" th:src="@{/debate_meeting.js}"></script>
+    <script type="text/javascript" th:src="@{/dom_utils.js}"></script>
     <script type="text/javascript" th:src="@{/battle.js}"></script>
     <script type="text/javascript" th:src="@{/close_debate.js}"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
@@ -25,7 +26,6 @@
 </head>
 <body th:onload="'loadMenu();'+
                  'joinActiveDebateMeeting(' + ${isJudge} + ',' + ${debateSessionId} +');' +
-                 'subscribeToSkippedSpeechNotificationSocket();' +
                  'subscribeToClosedDebateNotificationSocket();'">
 <div class="container text-center">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -47,7 +47,7 @@
         <div class="card-body">
 
             <div class="row card p-3 bg-light m-auto">
-                <div class="card-body" id="card-body">
+                <div class="card-body" id="header-card-body">
                     <blockquote class="blockquote text-center">
                         <p th:text="'&quot' + ${debateStatement} + '&quot'"></p>
                     </blockquote>
@@ -66,7 +66,26 @@
                 </div>
             </div>
 
-            <div id="notification" class="alert hide" role="alert">
+            <div class="row card p-3 bg-light m-auto">
+                <div class="card-body" id="notification-card-body">
+                    <div id="notification" class="alert alert-dismissible hide" role="alert">
+                    </div>
+
+                    <div id="participants-notification" class="alert alert-warning alert-dismissible hide" role="alert">
+                    </div>
+
+                    <div id="judge-notification" class="alert-danger alert-dismissible hide" role="alert">
+                        <p id="judge-notification-message"></p>
+                        <button
+                                type="button"
+                                id="skip-current-speech"
+                                class="btn btn-primary"
+                                onclick="skipCurrentSpeech()"
+                        >
+                            Skip current speech
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="row p-3 bg-light m-auto">
@@ -87,7 +106,7 @@
                     <tbody>
                     <tr>
                         <td th:text="${judge}"></td>
-                        <td id="deputy1-pro" class="pro-team-member" th:text="${battleInformation.deputy1Pro}"></td>
+                        <td id="deputy1-pro" th:text="${battleInformation.deputy1Pro}"></td>
                         <td id="deputy2-pro" th:text="${battleInformation.deputy2Pro}"></td>
                         <td id="deputy1-con" th:text="${battleInformation.deputy1Con}"></td>
                         <td id="deputy2-con" th:text="${battleInformation.deputy2Con}"></td>
@@ -147,9 +166,9 @@
                         </div>
 
                         <div class="card">
-                            <div class="card-header pro-team" id="pro-team-members">
+                            <div class="card-header pro-team-member" id="pro-team-members">
                                 <h5 class="mb-0">
-                                    <button class="btn btn-link collapsed" data-toggle="collapse"
+                                    <button class="btn btn-link collapsed pro-team-member" data-toggle="collapse"
                                             data-target="#collapseProTeamMembers" aria-expanded="false"
                                             aria-controls="collapseProTeamMembers">
                                         Pro team members
@@ -170,9 +189,9 @@
                         </div>
 
                         <div class="card">
-                            <div class="card-header contra-team" id="con-team-members">
+                            <div class="card-header contra-team-member" id="con-team-members">
                                 <h5 class="mb-0">
-                                    <button class="btn btn-link collapsed" data-toggle="collapse"
+                                    <button class="btn btn-link collapsed contra-team-member" data-toggle="collapse"
                                             data-target="#collapseConTeamMembers" aria-expanded="false"
                                             aria-controls="collapseConTeamMembers">
                                         Con team members
