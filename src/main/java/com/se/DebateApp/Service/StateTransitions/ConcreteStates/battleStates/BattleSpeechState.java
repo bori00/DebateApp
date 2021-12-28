@@ -55,7 +55,9 @@ public abstract class BattleSpeechState implements DebateState {
     }
 
     protected DebateSessionPhase getNextPhaseOrNextOneIfIntervalIsZero(DebateSession debateSession, DebateSessionPhase nextPhase) {
-        if (getIntervalLengthOfGivenPhase(nextPhase, debateSession.getDebateTemplate()) > 0) {
+        if (getIntervalLengthOfGivenPhase(nextPhase, debateSession.getDebateTemplate()) > 0 ||
+                (nextPhase.getDefaultLengthInSeconds().isPresent() && nextPhase.getDefaultLengthInSeconds().get() > 0) ||
+                nextPhase.equals(DebateSessionPhase.FINAL_DISCUSSION)) {
             return nextPhase;
         } else {
             return nextPhase

@@ -27,6 +27,7 @@ async function subscribeToClosedDebateNotificationSocket() {
 }
 
 function onDebateClosed() {
+    clearInterval(countDownTimer);
     document.defaultView.alert('This debate has been closed by the judge.')
     document.defaultView.location.href = "/go_to_home";
 }

@@ -46,20 +46,13 @@ async function displayCountDownTimerForPlayers(debateSessionId) {
     return countDownTimer;
 }
 
-async function isDebateClosed(debateSessionId) {
-    let destEndpoint = "/is_debate_finished?debateSessionId=" + debateSessionId;
-
-    return await getRequestToServer(destEndpoint);
-}
-
 async function displayCountDownTimerForJudge(debateSessionId, onTimesUp) {
     countDownTime = await getCountDownTime(debateSessionId);
 
     let countDownTimer = window.setInterval(async function() {
         let {hours, minutes, seconds} = getTimeUnits();
-        let isClosed = await isDebateClosed(debateSessionId);
 
-        if(remainingTime >= 0 && !isClosed) {
+        if(remainingTime >= 0) {
             displayTime(hours, minutes, seconds);
         }else{
             clearInterval(countDownTimer);

@@ -8,6 +8,8 @@ import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Service.NotificationService;
 import com.se.DebateApp.Service.StateTransitions.DebateState;
 
+import java.util.Date;
+
 public class PreparationState implements DebateState {
     private static PreparationState instance = null;
 
@@ -34,6 +36,7 @@ public class PreparationState implements DebateState {
     public void onEndOfState(DebateSession debateSession, NotificationService notificationService
             , DebateSessionRepository debateSessionRepository) {
         debateSession.setDebateSessionPhase(getNextDebateSessionPhaseAfterStateEnded(debateSession));
+        debateSession.setCurrentPhaseStartingTime(new Date(System.currentTimeMillis()));
         debateSessionRepository.save(debateSession);
         announceAllDebatePlayersAboutEndOfTimeInterval(debateSession, notificationService);
     }

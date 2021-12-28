@@ -58,11 +58,6 @@ async function subscribeToTimerNotificationForPreparationPhase(isJudge, debateSe
 
 async function onPreparationTimesUp(timesUp) {
     await leaveMeeting();
-    //window.setTimeout(handleEndOfPreparationPhase,1000);
-    handleEndOfPreparationPhase();
-}
-
-function handleEndOfPreparationPhase() {
     window.alert("Times up! The preparation for the debate has ended!");
     window.location.href = "/go_to_ongoing_debates_current_phase";
 }
