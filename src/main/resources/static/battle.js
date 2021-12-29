@@ -106,10 +106,10 @@ function isSpeechPhase() {
 async function handleParticipantJoined(event) {
     await updateBattleUI();
     if (isJudge) {
-        let participantWhoLeft = event.participant.user_name;
+        let participantWhoJoined = event.participant.user_name;
         let presentParticipants = await getPresentParticipantsOfMeeting(activeMeeting.meetingName);
-        let anySpeakerPresent = battleInformation.currentSpeakers.some(speaker => speaker === participantWhoLeft || presentParticipants.includes(speaker));
-        updateJudgeNotificationView(anySpeakerPresent);
+        let anySpeakerPresent = battleInformation.currentSpeakers.some(speaker => speaker === participantWhoJoined || presentParticipants.includes(speaker));
+        updateJudgeNotificationView(battleInformation, anySpeakerPresent);
     }
 }
 
@@ -119,14 +119,14 @@ async function handleParticipantLeft(event) {
         let participantWhoLeft = event.participant.user_name;
         let presentParticipants = await getPresentParticipantsOfMeeting(activeMeeting.meetingName);
         let anySpeakerPresent = battleInformation.currentSpeakers.some(speaker => speaker !== participantWhoLeft && presentParticipants.includes(speaker));
-        updateJudgeNotificationView(anySpeakerPresent);
+        updateJudgeNotificationView(battleInformation, anySpeakerPresent);
     }
 }
 
 /** update UI for judge and participants */
 
 async function updateBattleUI() {
-    let battleInformation = await getBattleInformation(debateSessionId);
+    battleInformation = await getBattleInformation(debateSessionId);
     if (isJudge) {
         await updateJudgeView(battleInformation);
     } else {
