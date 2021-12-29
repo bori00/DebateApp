@@ -22,8 +22,12 @@ async function subscribeToTimerNotificationSocket(phase, onTimesUp) {
     console.log("Subscribed")
 
     stompClient.connect({}, function (frame) {
-        stompClient.subscribe("/user/queue/debate-" + phase + "-times-up", onTimesUp);
+        stompClient.subscribe("/user/queue/debate-" + getPhaseForTimerDestinationUrl(phase) + "-times-up", onTimesUp);
     });
+}
+
+function getPhaseForTimerDestinationUrl(phase) {
+    return phase.toLowerCase().replaceAll( "_", "-");
 }
 
 async function displayCountDownTimerForPlayers(debateSessionId) {
@@ -42,25 +46,20 @@ async function displayCountDownTimerForPlayers(debateSessionId) {
     return countDownTimer;
 }
 
-async function isDebateClosed(debateSessionId) {
-    let destEndpoint = "/is_debate_finished?debateSessionId=" + debateSessionId;
-
-    return await getRequestToServer(destEndpoint);
-}
-
 async function displayCountDownTimerForJudge(debateSessionId, onTimesUp) {
     countDownTime = await getCountDownTime(debateSessionId);
 
     let countDownTimer = window.setInterval(async function() {
         let {hours, minutes, seconds} = getTimeUnits();
-        let isClosed = await isDebateClosed(debateSessionId);
 
-        if(remainingTime >= 0 && !isClosed) {
+        if(remainingTime >= 0) {
             displayTime(hours, minutes, seconds);
         }else{
             clearInterval(countDownTimer);
             await handleEndOfDebateSessionPhaseByJudge(debateSessionId, onTimesUp);
         }}, refreshPeriod);
+
+    return countDownTimer;
 }
 
 async function handleEndOfDebateSessionPhaseByJudge(debateSessionId, onTimesUp) {

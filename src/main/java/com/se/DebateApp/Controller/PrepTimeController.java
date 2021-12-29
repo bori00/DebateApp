@@ -1,20 +1,14 @@
 package com.se.DebateApp.Controller;
 
 import com.se.DebateApp.Config.CustomUserDetails;
-import com.se.DebateApp.Controller.DeputySelection.DeputySelectionController;
-import com.se.DebateApp.Service.StateTransitions.*;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
-import com.se.DebateApp.Model.DebateSessionPlayer;
-import com.se.DebateApp.Model.DebateTemplate;
 import com.se.DebateApp.Model.User;
-import com.se.DebateApp.Repository.DebateSessionPlayerRepository;
 import com.se.DebateApp.Repository.DebateSessionRepository;
-import com.se.DebateApp.Repository.DebateTemplateRepository;
 import com.se.DebateApp.Repository.UserRepository;
 import com.se.DebateApp.Service.NotificationService;
+import com.se.DebateApp.Service.StateTransitions.DebateState;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -23,21 +17,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Controller
 public class PrepTimeController {
     @Autowired
     private DebateSessionRepository debateSessionRepository;
-
-    @Autowired
-    private DebateTemplateRepository debateTemplateRepository;
-
-    @Autowired
-    private DebateSessionPlayerRepository debateSessionPlayerRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -77,16 +62,16 @@ public class PrepTimeController {
                         .findDebateSessionOfJudgeWithGivenState(
                                 currentUser,
                                 DebateSessionPhase.PREP_TIME);
-        if(debateSessionsOfJudgeInPreparationState.size() == 1) {
+        if (debateSessionsOfJudgeInPreparationState.size() == 1) {
             debateSession = debateSessionsOfJudgeInPreparationState.get(0);
-        }else{
+        } else {
             List<DebateSession> debateSessionsOfPlayerInPreparationState =
                     debateSessionRepository.findDebateSessionOfPlayerWithGivenState(
                             currentUser,
                             DebateSessionPhase.PREP_TIME);
-            if(debateSessionsOfPlayerInPreparationState.size() == 1) {
+            if (debateSessionsOfPlayerInPreparationState.size() == 1) {
                 debateSession = debateSessionsOfPlayerInPreparationState.get(0);
-            }else{
+            } else {
                 return SupportedMappings.ERROR_PAGE;
             }
         }

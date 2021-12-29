@@ -31,14 +31,7 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
         }
     }
 
-    let meetingToken;
-
-    if (isJudge) {
-        setElementVisibility("join-preparation-team-pro", true);
-        setElementVisibility("join-preparation-team-contra", true);
-
-        await displayCountDownTimerForJudge(debateSessionId, onPreparationTimesUp);
-    } else {
+    if (!isJudge) {
         let debateSessionPlayer = await getDebateSessionPlayer();
         let teamPreparationMeeting;
 
@@ -49,26 +42,22 @@ async function joinDebateMeeting(isParticipantJudge, currentDebateSessionId) {
             callWrapper.classList.add('contra-team');
             teamPreparationMeeting = preparationMeetingTeamContra;
         }
-        meetingToken = await createMeetingToken(getParticipantPrivileges(teamPreparationMeeting.meetingName, userName, isJudge));
-        await joinMeetingWithToken(isJudge, teamPreparationMeeting.meetingUrl, meetingToken.token);
+        let meetingToken = await createMeetingToken(getParticipantPrivileges(teamPreparationMeeting.meetingName, isJudge));
+        await joinMeetingWithToken(isJudge, teamPreparationMeeting.meetingUrl, meetingToken.token, userName);
+    }
+}
 
+async function subscribeToTimerNotificationForPreparationPhase(isJudge, debateSessionId) {
+    if (isJudge) {
+        await displayCountDownTimerForJudge(debateSessionId, onPreparationTimesUp);
+    }else{
         await displayCountDownTimerForPlayers(debateSessionId);
         await subscribeToTimerNotificationSocket(PREP_TIME_PHASE, onPreparationTimesUp);
     }
 }
 
-async function getDebateSessionPlayer() {
-    let debateSessionPlayerDestination = "/get_debate_session_player?debateSessionId=" + debateSessionId;
-
-    return await getRequestToServer(debateSessionPlayerDestination);
-}
-
 async function onPreparationTimesUp(timesUp) {
     await leaveMeeting();
-    window.setTimeout(handleEndOfPreparationForParticipant,1000);
-}
-
-function handleEndOfPreparationForParticipant() {
     window.alert("Times up! The preparation for the debate has ended!");
     window.location.href = "/go_to_ongoing_debates_current_phase";
 }
@@ -76,35 +65,45 @@ function handleEndOfPreparationForParticipant() {
 async function joinPreparationMeetingOfTeamPro() {
     await leaveMeeting();
 
-    setElementVisibility("join-preparation-team-pro", false);
+    toggleElementVisibility("join-preparation-team-pro");
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('pro-team');
 
-    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, userName, isJudge));
-    await joinMeetingWithToken(isJudge, preparationMeetingTeamPro.meetingUrl, meetingToken.token);
+    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, isJudge));
+    await joinMeetingWithToken(isJudge, preparationMeetingTeamPro.meetingUrl, meetingToken.token, userName);
 }
 
 async function joinPreparationMeetingOfTeamContra() {
     await leaveMeeting();
 
-    setElementVisibility("join-preparation-team-contra", false);
+    toggleElementVisibility("join-preparation-team-contra");
     const callWrapper = document.getElementById('wrapper');
     callWrapper.classList.add('contra-team');
 
-    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, userName, isJudge));
-    await joinMeetingWithToken(isJudge, preparationMeetingTeamContra.meetingUrl, meetingToken.token);
+    let meetingToken = await createMeetingToken(getParticipantPrivileges(preparationMeetingTeamPro.meetingName, isJudge));
+    await joinMeetingWithToken(isJudge, preparationMeetingTeamContra.meetingUrl, meetingToken.token, userName);
 }
 
-async function getAllMeetingsOfDebateSession(debateSessionId) {
-    const allDebateMeetingsDestEndpoint = "/get_all_meetings?debateSessionId=" + debateSessionId;
-
-    return await getRequestToServer(allDebateMeetingsDestEndpoint);
+function handleLeftMeeting() {
+    const callWrapper = document.getElementById('wrapper');
+    callWrapper.classList.remove('pro-team');
+    callWrapper.classList.remove('contra-team');
 }
 
-async function getUserNameOfCurrentUser() {
-    let destEndpoint = "/get_username_of_current_user";
+async function leaveMeeting() {
+    callFrame.leave();
+    if(isJudge) {
+        setElementVisibility("join-preparation-team-pro", true);
+        setElementVisibility("join-preparation-team-contra", true);
+    }
+}
 
-    return await getRequestToServer(destEndpoint);
+async function handleJoinedMeeting() {
+    await updateParticipantsView();
+}
+
+function toggleElementVisibility(id) {
+    document.getElementById(id).classList.toggle('hide');
 }
 
 async function updateParticipantsView() {
@@ -118,21 +117,4 @@ async function updateParticipantsView() {
             callWrapper.classList.add('contra-team');
         }
     }
-}
-
-function handleLeftMeeting() {
-    setElementVisibility("join-preparation-team-pro", isJudge);
-    setElementVisibility("join-preparation-team-contra", isJudge);
-
-    const callWrapper = document.getElementById('wrapper');
-    callWrapper.classList.remove('pro-team');
-    callWrapper.classList.remove('contra-team');
-}
-
-async function leaveMeeting() {
-    callFrame.leave();
-}
-
-async function handleJoinedMeeting() {
-    await updateParticipantsView();
 }

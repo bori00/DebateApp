@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DebateApp | Active Debate</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" type="text/css"/>
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/4.7.0/css/font-awesome.min.css}"
+          type="text/css"/>
+    <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
+    <script type="text/javascript" th:src="@{/server_communication_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/timing_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/local.config.js}"></script>
+    <script type="text/javascript" th:src="@{/debate_meeting.js}"></script>
+    <script type="text/javascript" th:src="@{/dom_utils.js}"></script>
+    <script type="text/javascript" th:src="@{/battle.js}"></script>
+    <script type="text/javascript" th:src="@{/final_vote.js}"></script>
+    <script type="text/javascript" th:src="@{/close_debate.js}"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/menu_controller.js}"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/teams_stylesheet.css}"/>
+</head>
+<body th:onload="'loadMenu();'+
+                 'joinActiveDebateMeeting(' + ${isJudge} + ',' + ${debateSessionId} + ');' +
+                 'subscribeToClosedDebateNotificationSocket();'">
+<div class="container text-center">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01"
+                aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <a class="navbar-brand" th:href="@{/go_to_home}">Debate App</a>
+            <ul id="menu_items" class="navbar-nav mr-auto mt-2 mt-lg-0">
+            </ul>
+            <form th:action="@{/logout}" method="post">
+                <input type="submit" value="Sign Out">
+            </form>
+        </div>
+    </nav>
+
+    <div class="card p-3 bg-light m-lg-auto">
+        <div class="card-body">
+
+            <div class="row card p-3 bg-light m-auto">
+                <div class="card-body" id="header-card-body">
+                    <blockquote class="blockquote text-center">
+                        <p th:text="'&quot' + ${debateStatement} + '&quot'"></p>
+                    </blockquote>
+                    <p id="current-phase" th:text="${battleInformation.currentPhase}"></p>
+                    <h3 id="timer-clock">00:00:00</h3>
+                </div>
+                <div id="button-controls" th:if="${isJudge}">
+                    <button
+                            type="button"
+                            id="close-debate"
+                            class="btn btn-secondary"
+                            onclick="closeDebate()"
+                    >
+                        Close debate session
+                    </button>
+                </div>
+            </div>
+
+            <div id="speech-notification" class="alert alert-dismissible fade show hide" role="alert">
+                <p id="speech-notification-message"></p>
+            </div>
+
+            <div id="notification-skip-phase" class="alert alert-info alert-dismissible hide" role="alert">
+                <p id="notification-skip-phase-message"></p>
+            </div>
+
+            <div id="judge-control-skip-phase" class="alert alert-warning alert-dismissible hide" role="alert">
+                <p id="judge-control-skip-phase-message"></p>
+                <button
+                        type="button"
+                        id="skip-current-speech"
+                        class="btn btn-warning"
+                        onclick="skipCurrentSpeech()"
+                >
+                    Skip current speech
+                </button>
+            </div>
+
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th rowspan="2">Judge</th>
+                    <th colspan="2">Pro Team</th>
+                    <th colspan="2">Contra Team</th>
+                </tr>
+                <tr>
+                    <th scope="col">Pro Team - Deputy1</th>
+                    <th scope="col">Pro Team - Deputy2</th>
+                    <th scope="col">Con Team - Deputy1</th>
+                    <th scope="col">Con Team - Deputy2</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td th:text="${judge}"></td>
+                    <td id="deputy1-pro" th:text="${battleInformation.deputy1Pro}"></td>
+                    <td id="deputy2-pro" th:text="${battleInformation.deputy2Pro}"></td>
+                    <td id="deputy1-con" th:text="${battleInformation.deputy1Con}"></td>
+                    <td id="deputy2-con" th:text="${battleInformation.deputy2Con}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div id="voting-panel" class="card p-3 bg-light m-5 hide">
+                <div class="card-header">
+                    <h5>Vote again pro or contra the above statement! Have you changed your initial opinion?</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Pro</h5>
+                                    <p class="card-text">In favour of the statement.</p>
+                                    <button onClick="voteForPro()" class="btn btn-success">Vote in favour!</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Contra</h5>
+                                    <p class="card-text">Against the statement.</p>
+                                    <button onClick="voteForContra()" class="btn btn-danger">Vote against!</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="voting-lobby" class="hide">
+                <h5>You have successfully cast your vote!</h5>
+                <p>Wait for the others to vote as well before going to the next phase.</p>
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Waiting...</span>
+                </div>
+            </div>
+
+            <div id="voting-lobby-judge" class="hide">
+                <h5>The participants are currently casting their final votes.</h5>
+                <p>After the participants have voted, a statistics will be displayed of the initial and final votes.</p>
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Waiting...</span>
+                </div>
+            </div>
+
+            <div id="voting-statistics" class="hide">
+                <h5>Statistics of the votes from the beginning and end of the debate:</h5>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">Vote Pro Both Times</th>
+                        <th scope="col">Vote Contra Both Times</th>
+                        <th scope="col">Vote Pro then Contra</th>
+                        <th scope="col">Vote Contra then Pro</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="vote-pro-both-times"></td>
+                        <td id="vote-con-both-times"></td>
+                        <td id="vote-pro-then-con"></td>
+                        <td id="vote-con-then-pro"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+
+            <div class="row">
+                <div class="col-md-8 m-auto">
+                    <div id="wrapper">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id="accordion">
+                        <div class="card">
+                            <div class="card-header" id="instructions">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" data-toggle="collapse"
+                                            data-target="#collapseInstructions" aria-expanded="false"
+                                            aria-controls="collapseInstructions">
+                                        Instructions
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseInstructions" class="collapse" aria-labelledby="instructions"
+                                 data-parent="#accordion">
+                                <div class="card-body">
+                                    <ul class="list-group text-justify">
+                                        <li class="list-group-item">
+                                            <p>
+                                                <strong>Current speakers:</strong>
+                                                <p id="current-speakers-item" th:text="${battleInformation.currentSpeakers}"></p>
+                                            </p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <p>
+                                                <strong>Instructions:</strong>
+                                                <p id="instructions-item" th:text="${battleInformation.instructions}"></p>
+                                            </p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <p>
+                                                <strong>Next phase:</strong>
+                                                <p id="next-phase-item" th:text="${battleInformation.nextPhase}"></p>
+                                            </p>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <p>
+                                                <strong>Next speakers:</strong>
+                                                <p id="next-speakers-item" th:text="${battleInformation.nextSpeakers}"></p>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header pro-team-member" id="pro-team-members">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed pro-team-member" data-toggle="collapse"
+                                            data-target="#collapseProTeamMembers" aria-expanded="false"
+                                            aria-controls="collapseProTeamMembers">
+                                        Pro team members
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseProTeamMembers" class="collapse" aria-labelledby="pro-team-members"
+                                 data-parent="#accordion">
+                                <div class="card-body">
+                                    <ul id="pro-team-members-list" class="list-group text-justify" th:each="proTeamMember : ${battleInformation.proTeamMembers}">
+                                        <li class="list-group-item pro-team-member">
+                                            <p th:text="${proTeamMember}">
+                                            </p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header contra-team-member" id="con-team-members">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed contra-team-member" data-toggle="collapse"
+                                            data-target="#collapseConTeamMembers" aria-expanded="false"
+                                            aria-controls="collapseConTeamMembers">
+                                        Con team members
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapseConTeamMembers" class="collapse" aria-labelledby="con-team-members"
+                                 data-parent="#accordion">
+                                <div class="card-body">
+                                    <ul id="contra-team-members-list" class="list-group text-justify" th:each="conTeamMember : ${battleInformation.conTeamMembers}">
+                                        <li class="list-group-item contra-team-member">
+                                            <p th:text="${conTeamMember}">
+                                            </p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

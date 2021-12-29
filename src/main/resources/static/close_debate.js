@@ -1,4 +1,4 @@
-async function closeDebate(debateSessionId) {
+async function closeDebate() {
     callFrame.leave();
     const url = new URL("/close_debate", document.URL);
 
@@ -27,6 +27,7 @@ async function subscribeToClosedDebateNotificationSocket() {
 }
 
 function onDebateClosed() {
+    clearInterval(countDownTimer);
     document.defaultView.alert('This debate has been closed by the judge.')
     document.defaultView.location.href = "/go_to_home";
 }

@@ -1,11 +1,13 @@
 package com.se.DebateApp.Service.StateTransitions;
 
+import com.se.DebateApp.Controller.SpeechBattle.DTOs.BattleInformationDTO;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Repository.DebateSessionRepository;
 import com.se.DebateApp.Service.NotificationService;
 
+import java.util.Date;
 import java.util.stream.Collectors;
 
 public interface DebateState {
@@ -44,7 +46,7 @@ public interface DebateState {
                                 '-'));
         notificationService.notifyUsers(
                 debateSession.getPlayers().stream().map(DebateSessionPlayer::getUser).collect(Collectors.toList()),
-                "closed",
+                "timesUp",
                 destinationUrl);
     }
 }

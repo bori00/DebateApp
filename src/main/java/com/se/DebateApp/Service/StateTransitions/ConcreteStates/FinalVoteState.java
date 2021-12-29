@@ -10,26 +10,37 @@ import com.se.DebateApp.Service.StateTransitions.DebateState;
 
 import java.util.Date;
 
-public class PreparationState implements DebateState {
-    private static PreparationState instance = null;
+public class FinalVoteState implements DebateState {
+    private static FinalVoteState instance = null;
 
-    private PreparationState() {}
+    private FinalVoteState() {
+    }
 
     public static DebateState getInstance() {
         if (instance == null) {
-            instance = new PreparationState();
+            instance = new FinalVoteState();
         }
         return instance;
     }
 
     @Override
     public String getPlayersRedirectTargetOnStateEnter(DebateSessionPlayer player) {
-        return SupportedMappings.GO_TO_DEBATE_PREPARATION;
+        return SupportedMappings.GO_TO_BATTLE;
     }
 
     @Override
     public String getJudgesRedirectTargetOnStateEnter() {
-        return SupportedMappings.GO_TO_DEBATE_PREPARATION;
+        return SupportedMappings.GO_TO_BATTLE;
+    }
+
+    @Override
+    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
+        return DebateSessionPhase.FINAL_DISCUSSION;
+    }
+
+    @Override
+    public DebateSessionPhase getCorrespondingDebateSessionPhase() {
+        return DebateSessionPhase.FINAL_VOTE;
     }
 
     @Override
@@ -41,20 +52,4 @@ public class PreparationState implements DebateState {
         announceAllDebatePlayersAboutEndOfTimeInterval(debateSession, notificationService);
     }
 
-    @Override
-    public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        if (DebateSessionPhase.DEPUTY1_VOTING_TIME.getDefaultLengthInSeconds().isPresent() &&
-                DebateSessionPhase.DEPUTY1_VOTING_TIME.getDefaultLengthInSeconds().get() > 0) {
-            return DebateSessionPhase.DEPUTY1_VOTING_TIME;
-        } else {
-            return DebateSessionPhase.DEPUTY1_VOTING_TIME
-                    .getCorrespondingState()
-                    .getNextDebateSessionPhaseAfterStateEnded(debateSession);
-        }
-    }
-
-    @Override
-    public DebateSessionPhase getCorrespondingDebateSessionPhase() {
-        return DebateSessionPhase.PREP_TIME;
-    }
 }

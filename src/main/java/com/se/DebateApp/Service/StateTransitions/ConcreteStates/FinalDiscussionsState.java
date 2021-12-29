@@ -1,45 +1,41 @@
 package com.se.DebateApp.Service.StateTransitions.ConcreteStates;
 
+import com.se.DebateApp.Controller.SupportedMappings;
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Model.DebateSessionPlayer;
 import com.se.DebateApp.Service.StateTransitions.DebateState;
 
-/*
-TODO: this should be deleted by the end of the development process, when all States are
- implemented. I instroduced it for now just to provide a general DebateState implementation for
- the states that we didn't handle yet. Please, when you implement the handlers for a new state,
- create the corresponding classes, and add them into the DebateSessionPhase enum as well.
- */
-public class GeneralState implements DebateState {
-    private static GeneralState instance = null;
+public class FinalDiscussionsState implements DebateState {
 
-    private GeneralState() {}
+    private static FinalDiscussionsState instance;
+
+    private FinalDiscussionsState() {}
 
     public static DebateState getInstance() {
-        if (instance == null) {
-            instance = new GeneralState();
+        if(instance == null) {
+            instance = new FinalDiscussionsState();
         }
         return instance;
     }
 
     @Override
     public String getPlayersRedirectTargetOnStateEnter(DebateSessionPlayer player) {
-        return null;
+        return SupportedMappings.GO_TO_BATTLE;
     }
 
     @Override
     public String getJudgesRedirectTargetOnStateEnter() {
-        return null;
+        return SupportedMappings.GO_TO_BATTLE;
     }
 
     @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        return null;
+        return DebateSessionPhase.FINISHED;
     }
 
     @Override
     public DebateSessionPhase getCorrespondingDebateSessionPhase() {
-        return null;
+        return DebateSessionPhase.FINAL_DISCUSSION;
     }
 }

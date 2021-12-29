@@ -41,7 +41,7 @@ public class FinalVoteController {
 
     @PostMapping(SupportedMappings.CAST_FINAL_VOTE)
     @ResponseBody
-    OngoingDebateRequestResponse castDeputyVote(@RequestBody boolean votesForPro) {
+    OngoingDebateRequestResponse castFinalVote(@RequestBody boolean votesForPro) {
         User user = getCurrentUser();
         Optional<DebateSession> optDebateSession = getOngoingDebate(user);
         if (optDebateSession.isEmpty()) {
@@ -67,7 +67,7 @@ public class FinalVoteController {
 
     @PostMapping(SupportedMappings.GET_FINAL_VOTE_STATUS)
     @ResponseBody
-    FinalVoteStatusDTO getFinalVotestatus() {
+    FinalVoteStatusDTO getFinalVoteStatus() {
         User user = getCurrentUser();
         DebateSession debateSession = getOngoingDebate(user).get();
         return new FinalVoteStatusDTO(debateSession);

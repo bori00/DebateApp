@@ -13,9 +13,26 @@ async function getRequestToServer(destEndpoint) {
             [header]: token,
         },
     })
-        .catch(error => console.log('failed to fetch meeting: ' + error))
+        .catch(error => console.log('failed to fetch data from server: ' + error))
         .then(response => response.json())
         .catch(error => console.log('failed to parse json: ' + error))
+}
+
+async function getRequestToServerWithResponseAsText(destEndpoint) {
+    const token = $("meta[name='_csrf']").attr("content");
+    const header = $("meta[name='_csrf_header']").attr("content");
+
+    return fetch(destEndpoint, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            "charset": "UTF-8",
+            [header]: token,
+        },
+    })
+        .catch(error => console.log('failed to fetch data from server: ' + error))
+        .then(response => response.text());
 }
 
 async function postRequestToServer(destEndpoint, body) {
@@ -32,7 +49,7 @@ async function postRequestToServer(destEndpoint, body) {
         },
         body: JSON.stringify(body),
     })
-        .catch(error => console.log('failed to fetch meeting: ' + error))
+        .catch(error => console.log('failed to send data to server: ' + error))
 }
 
 function handleOngoingDebateRequestResponse(response) {

@@ -198,12 +198,6 @@ public class StartDebateController {
         return SupportedMappings.PLAYER_DEBATE_LOBBY_PAGE;
     }
 
-    @GetMapping("/go_to_active_debate")
-    public String goToActiveDebatePage(Model model) {
-        model.addAttribute("isJudge", isCurrentUserJudge());
-        return "active_debate";
-    }
-
     private void announceJudgeAboutDebateSessionParticipantsState(
             User judge,
             DebateParticipantsStatusDTO debateParticipantsStatus) {
