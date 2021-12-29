@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 public class FinishedState implements DebateState {
     private static FinishedState instance = null;
 
-    private FinishedState() {}
+    private FinishedState() {
+    }
 
     public static DebateState getInstance() {
         if (instance == null) {
@@ -38,7 +39,7 @@ public class FinishedState implements DebateState {
 
     @Override
     public DebateSessionPhase getNextDebateSessionPhaseAfterStateEnded(DebateSession debateSession) {
-        return null;
+        return DebateSessionPhase.FINISHED;
     }
 
     @Override
