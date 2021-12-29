@@ -59,7 +59,7 @@
                     <button
                             type="button"
                             id="close-debate"
-                            class="btn btn-warning"
+                            class="btn btn-secondary"
                             onclick="closeDebate()"
                     >
                         Close debate session
@@ -67,18 +67,20 @@
                 </div>
             </div>
 
-            <div id="notification" class="alert alert-dismissible hide" role="alert">
+            <div id="speech-notification" class="alert alert-dismissible fade show hide" role="alert">
+                <p id="speech-notification-message"></p>
             </div>
 
-            <div id="participants-notification" class="alert alert-warning alert-dismissible hide" role="alert">
+            <div id="notification-skip-phase" class="alert alert-info alert-dismissible hide" role="alert">
+                <p id="notification-skip-phase-message"></p>
             </div>
 
-            <div id="judge-notification" class="alert-danger alert-dismissible hide" role="alert">
-                <p id="judge-notification-message"></p>
+            <div id="judge-control-skip-phase" class="alert alert-warning alert-dismissible hide" role="alert">
+                <p id="judge-control-skip-phase-message"></p>
                 <button
                         type="button"
                         id="skip-current-speech"
-                        class="btn btn-primary"
+                        class="btn btn-warning"
                         onclick="skipCurrentSpeech()"
                 >
                     Skip current speech

@@ -43,7 +43,7 @@ public abstract class BattleSpeechState implements DebateState {
     }
 
     private void announceAllParticipantsAboutSkippedSpeech(DebateSession debateSession,
-                                                            NotificationService notificationService) {
+                                                           NotificationService notificationService) {
         User judge = debateSession.getDebateTemplate().getOwner();
         List<User> players = debateSession.getPlayers()
                 .stream()

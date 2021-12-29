@@ -2,12 +2,7 @@ package com.se.DebateApp.Service.StateTransitions.ConcreteStates.battleStates;
 
 import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
-import com.se.DebateApp.Model.DebateTemplate;
-import com.se.DebateApp.Repository.DebateSessionRepository;
-import com.se.DebateApp.Service.NotificationService;
 import com.se.DebateApp.Service.StateTransitions.DebateState;
-
-import java.util.Date;
 
 public class AffirmativeConstructive1SpeechState extends BattleSpeechState {
     private static AffirmativeConstructive1SpeechState instance;

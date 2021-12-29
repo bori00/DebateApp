@@ -4,7 +4,7 @@ import com.se.DebateApp.Model.Constants.DebateSessionPhase;
 import com.se.DebateApp.Model.DebateSession;
 import com.se.DebateApp.Service.StateTransitions.DebateState;
 
-public class NegativeRebuttal1SpeechState extends BattleSpeechState{
+public class NegativeRebuttal1SpeechState extends BattleSpeechState {
     private static NegativeRebuttal1SpeechState instance;
 
     private NegativeRebuttal1SpeechState() {
