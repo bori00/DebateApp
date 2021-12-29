@@ -203,7 +203,9 @@ public class BattleController {
     private DebateSessionPlayer getDeputyForTeam(DebateSession debateSession, TeamType teamType, PlayerRole playerRole) {
         return debateSessionPlayerRepository.findAll()
                 .stream()
-                .filter(debateSessionPlayer -> debateSessionPlayer.getTeam().equals(teamType) && debateSessionPlayer.getPlayerRole().equals(playerRole))
+                .filter(debateSessionPlayer -> debateSessionPlayer.getDebateSession().equals(debateSession) &&
+                        debateSessionPlayer.getTeam().equals(teamType) &&
+                        debateSessionPlayer.getPlayerRole().equals(playerRole))
                 .findFirst()
                 .get();
     }
