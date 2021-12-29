@@ -14,8 +14,7 @@ async function castVote(votesForPro) {
         .catch(error => console.log('failed to parse response: ' + error))
         .then (castVoteResponse => {
             if (castVoteResponse.success) {
-                setElementVisibility('voting-panel', false);
-                setElementVisibility('voting-lobby', true);
+                updateBattleUI();
             } else {
                 alert(castVoteResponse.errorMsg)
             }

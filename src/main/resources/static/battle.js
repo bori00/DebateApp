@@ -2,18 +2,15 @@ let callFrame, activeMeeting;
 let isJudge, debateSessionId;
 let battleInformation;
 let countDownTimer;
-let hasVoted;
 
 const FINAL_DISCUSSIONS_PHASE = "FINAL_DISCUSSION";
 const FINAL_VOTE_PHASE = "FINAL_VOTE";
 
-async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionId, hasParticipantVoted) {
+async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionId) {
     isJudge = isParticipantJudge;
-    hasVoted = hasParticipantVoted;
     debateSessionId = currentDebateSessionId;
     const callWrapper = document.getElementById('wrapper');
     callFrame = await createDebateCallFrame(callWrapper);
-
     callFrame
         .on('participant-joined', handleParticipantJoined)
         .on('participant-left', handleParticipantLeft);
@@ -22,19 +19,16 @@ async function joinActiveDebateMeeting(isParticipantJudge, currentDebateSessionI
     activeMeeting = meetings.filter(meeting => meeting.meetingType === "ACTIVE")[0];
     let userName = await getUserNameOfCurrentUser();
     let meetingToken = await createMeetingToken(getParticipantPrivileges(activeMeeting.meetingName, isJudge));
-
     await joinMeetingWithToken(isJudge, activeMeeting.meetingUrl, meetingToken.token, userName);
 
     battleInformation = await getBattleInformation(debateSessionId);
-    await updateUI();
-
     if (battleInformation.currentPhase !== FINAL_DISCUSSIONS_PHASE) {
         await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
     }
-
     if (!isJudge) {
         await subscribeToSkippedSpeechNotificationSocket();
     }
+    await updateBattleUI();
 }
 
 async function subscribeToTimerNotificationForNextBattlePhase(debateSessionId) {
@@ -90,7 +84,7 @@ async function onNextPhaseTransition() {
     if (battleInformation.currentPhase !== FINAL_DISCUSSIONS_PHASE) {
         await subscribeToTimerNotificationForNextBattlePhase(debateSessionId);
     }
-    await updateUI();
+    await updateBattleUI();
 }
 
 /** helper functions */
@@ -110,7 +104,7 @@ function isSpeechPhase() {
 /** meeting event handler callbacks */
 
 async function handleParticipantJoined(event) {
-    await updateUI();
+    await updateBattleUI();
     if (isJudge) {
         let participantWhoLeft = event.participant.user_name;
         let presentParticipants = await getPresentParticipantsOfMeeting(activeMeeting.meetingName);
@@ -120,7 +114,7 @@ async function handleParticipantJoined(event) {
 }
 
 async function handleParticipantLeft(event) {
-    await updateUI();
+    await updateBattleUI();
     if (isJudge) {
         let participantWhoLeft = event.participant.user_name;
         let presentParticipants = await getPresentParticipantsOfMeeting(activeMeeting.meetingName);
@@ -131,22 +125,23 @@ async function handleParticipantLeft(event) {
 
 /** update UI for judge and participants */
 
-async function updateUI() {
+async function updateBattleUI() {
+    let battleInformation = await getBattleInformation(debateSessionId);
     if (isJudge) {
-        await updateJudgeView();
+        await updateJudgeView(battleInformation);
     } else {
-        await updateParticipantsView();
+        await updateParticipantsView(battleInformation);
     }
     await updateView(battleInformation);
 }
 
-async function updateJudgeView() {
+async function updateJudgeView(battleInformation) {
     let anySpeakerPresent = await areAnySpeakersPresent();
-    updateJudgeNotificationView(anySpeakerPresent);
+    updateJudgeNotificationView(battleInformation, anySpeakerPresent);
     setElementVisibility('voting-lobby-judge', isJudge && (battleInformation.currentPhase === FINAL_VOTE_PHASE));
 }
 
-function updateJudgeNotificationView(anySpeakerPresent) {
+function updateJudgeNotificationView(battleInformation, anySpeakerPresent) {
     if (isSpeechPhase() && !anySpeakerPresent) {
         setElementVisibility('judge-control-skip-phase', true);
         document.getElementById('judge-control-skip-phase-message').innerText =
@@ -158,10 +153,10 @@ function updateJudgeNotificationView(anySpeakerPresent) {
     }
 }
 
-async function updateParticipantsView() {
+async function updateParticipantsView(battleInformation) {
     if (battleInformation.currentPhase === FINAL_VOTE_PHASE) {
-        setElementVisibility('voting-panel', !hasVoted);
-        setElementVisibility('voting-lobby', hasVoted);
+        setElementVisibility('voting-panel', !battleInformation.hasVoted);
+        setElementVisibility('voting-lobby', battleInformation.hasVoted);
         return;
     } else if (battleInformation.currentPhase === FINAL_DISCUSSIONS_PHASE) {
         setElementVisibility('voting-panel', false);

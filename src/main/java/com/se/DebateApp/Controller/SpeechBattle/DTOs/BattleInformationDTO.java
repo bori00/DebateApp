@@ -14,6 +14,7 @@ import java.util.List;
 public class BattleInformationDTO {
     private Boolean isSpeaker;
     private Boolean isNextSpeaker;
+    private Boolean hasVoted;
     private String currentPhase;
     private String nextPhase;
     private String instructions;

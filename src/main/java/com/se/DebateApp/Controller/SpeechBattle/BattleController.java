@@ -88,12 +88,6 @@ public class BattleController {
         model.addAttribute("debateStatement", debateSession.getDebateTemplate().getStatement());
         model.addAttribute("battleInformation", createBattleInformationDTO(debateSession));
 
-        Optional<DebateSessionPlayer> debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUserAndDebateSession(getCurrentUser(), debateSession);
-        model.addAttribute("hasVoted", !isJudge &&
-                debateSession.getDebateSessionPhase().equals(FINAL_VOTE) &&
-                debateSessionPlayer.isPresent() &&
-                debateSessionPlayer.get().getFinalVoteTeam() != null);
-
         return SupportedMappings.BATTLE_PAGE;
     }
 
@@ -147,11 +141,21 @@ public class BattleController {
 
         battleInformationDTO.setIsSpeaker(isSpeaker(currentSpeakers));
         battleInformationDTO.setIsNextSpeaker(isSpeaker(nextSpeakers));
+        battleInformationDTO.setHasVoted(hasCurrentPlayerAlreadyVoted(debateSession));
 
         battleInformationDTO.setProTeamMembers(getTeamMembersName(debateSession, PRO));
         battleInformationDTO.setConTeamMembers(getTeamMembersName(debateSession, CON));
 
         return battleInformationDTO;
+    }
+
+    private boolean hasCurrentPlayerAlreadyVoted(DebateSession debateSession) {
+        boolean isJudge = debateSession.getDebateTemplate().getOwner().equals(getCurrentUser());
+        Optional<DebateSessionPlayer> debateSessionPlayer = debateSessionPlayerRepository.findDebateSessionPlayerByUserAndDebateSession(getCurrentUser(), debateSession);
+        return !isJudge &&
+                debateSession.getDebateSessionPhase().equals(FINAL_VOTE) &&
+                debateSessionPlayer.isPresent() &&
+                debateSessionPlayer.get().getFinalVoteTeam() != null;
     }
 
     private List<String> getNamesOfSpeakers(List<DebateSessionPlayer> speakers) {
