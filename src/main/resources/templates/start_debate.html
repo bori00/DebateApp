@@ -11,6 +11,7 @@
     <script type="text/javascript" th:src="@{/debate_call_utils.js}"></script>
     <script type="text/javascript" th:src="@{/local.config.js}"></script>
     <script type="text/javascript" th:src="@{/start_debate.js}"></script>
+    <script type="text/javascript" th:src="@{/close_debate.js}"></script>
     <script th:src="@{/menu_controller.js}"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
@@ -97,12 +98,22 @@
             </tbody>
         </table>
 
-        <button id="activate-debate-session-button"
-                class="btn btn-primary"
-                disabled
-                onclick="activateDebateSession()">
-            Activate Debate
-        </button>
+        <div class="button-box col-lg-12">
+            <button id="activate-debate-session-button"
+                    class="btn btn-primary"
+                    disabled
+                    onclick="activateDebateSession()">
+                Activate Debate
+            </button>
+
+            <button
+                    type="button"
+                    id="close-debate"
+                    class="btn btn-secondary"
+                    onclick="closeDebate()">
+                Close Debate
+            </button>
+        </div>
     </div>
 </div>
 
