@@ -1,14 +1,17 @@
 async function closeDebate() {
-    const url = new URL("/close_debate", document.URL);
+    if (confirm("Are you sure that you want to close this debate session? This action cannot be" +
+        " undone!")) {
+        const url = new URL("/close_debate", document.URL);
 
-    postRequestToServer(url, {})
-        .then(response => {
-            return response.json();
-        })
-        .catch(error => console.log('failed to parse response: ' + error))
-        .then (response => {
-            handleOngoingDebateRequestResponse(response);
-        });
+        postRequestToServer(url, {})
+            .then(response => {
+                return response.json();
+            })
+            .catch(error => console.log('failed to parse response: ' + error))
+            .then(response => {
+                handleOngoingDebateRequestResponse(response);
+            });
+    }
 }
 
 async function subscribeToClosedDebateNotificationSocket() {
